@@ -52,7 +52,12 @@ function sanitize(raw: string): { text: string; warnings: string[] } {
     text = text.replace(EMAIL_REGEX, "").trim();
   }
 
-  text = text.replace(/[^\w\sáéíóúñÁÉÍÓÚÑüÜ.,#\/\\\-]/g, " ");
+  // Preserve apostrophes for O'Higgins
+  text = text.replace(/[^\w\sáéíóúñÁÉÍÓÚÑüÜ.,#\/\\\-']/g, " ");
+  
+  // Pre-clean redundant administrative terms that confuse street name parsing
+  text = text.replace(/,\s*(?:chile|santiago|rm|región metropolitana|region metropolitana)\b/gi, ",");
+
   text = text.replace(/\s+/g, " ").trim();
   text = text.replace(/[,]+/g, ",").replace(/,\s*,/g, ",").trim();
   if (text.endsWith(",")) text = text.slice(0, -1).trim();
@@ -215,21 +220,6 @@ function classifyAndExpand(
       continue;
     }
 
-    // Region detection (can appear anywhere)
-    const regionMatch = normalizeRegionName(token);
-    if (regionMatch && !region) {
-      region = regionMatch;
-      i++;
-      continue;
-    }
-
-    const regionAbbr = REGIONS_MAP[lowerToken];
-    if (regionAbbr && !region) {
-      region = regionAbbr;
-      i++;
-      continue;
-    }
-
     // Collect unmatched tokens for second pass
     rawParts.push(token);
     i++;
@@ -240,6 +230,30 @@ function classifyAndExpand(
   const nameTokens: string[] = [];
 
   for (let j = rawParts.length - 1; j >= 0; j--) {
+    // Try to extract region first if we don't have one
+    if (!region) {
+      let matchedRegion: string | null = null;
+      let tokensUsed = 1;
+      for (let k = 4; k >= 1; k--) {
+        if (j - k + 1 >= 0) {
+          const combined = rawParts.slice(j - k + 1, j + 1).join(" ");
+          const match = normalizeRegionName(combined);
+          const abbrMatch = !match ? REGIONS_MAP[combined.toLowerCase()] : undefined;
+          if (match || abbrMatch) {
+            matchedRegion = match || abbrMatch || null;
+            tokensUsed = k;
+            break;
+          }
+        }
+      }
+      if (matchedRegion) {
+        region = matchedRegion;
+        j -= (tokensUsed - 1);
+        continue;
+      }
+    }
+
+    // Try to extract comuna
     if (!comuna) {
       let matchedComuna: string | null = null;
       let tokensUsed = 1;
