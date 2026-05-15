@@ -16,7 +16,6 @@ import {
   normalizeComunaName,
   fuzzyMatchComuna,
 } from "@/data/comunas";
-import { REGIONS_MAP, normalizeRegionName } from "@/data/regiones";
 
 export interface NormalizedAddress {
   original: string;
