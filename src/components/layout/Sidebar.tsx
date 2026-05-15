@@ -84,7 +84,7 @@ export function Sidebar() {
             </a>
 
             <a 
-              href="https://buymeacoffee.com/TU_USUARIO" 
+              href="https://link.mercadopago.cl/jorgeulloaroa" 
               target="_blank" 
               rel="noreferrer"
               className="flex items-center justify-center gap-2 text-xs font-medium text-white bg-amber-500 hover:bg-amber-600 dark:bg-amber-600 dark:hover:bg-amber-700 py-1.5 px-3 rounded-lg transition-colors w-full shadow-sm"
