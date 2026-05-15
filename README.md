@@ -25,11 +25,7 @@
   <a href="#-tests">Tests</a>
 </p>
 
-<p align="center">
-  <a href="https://geoidegeoidal.github.io/azimut/">
-    <img src="assets/hero.png" width="100%" alt="Azimut Dashboard Preview" />
-  </a>
-</p>
+
 
 </div>
 
