@@ -240,32 +240,49 @@ function classifyAndExpand(
   const nameTokens: string[] = [];
 
   for (let j = rawParts.length - 1; j >= 0; j--) {
-    const token = rawParts[j];
-    const lowerToken = token.toLowerCase();
-
     if (!comuna) {
-      const comunaMatch = normalizeComunaName(token);
-      // Be conservative: only treat as comuna if it's clearly extra (rawParts > 1) or no via+numero pair
-      const likelyStreetName = via && numero && rawParts.length === 1;
-      if (comunaMatch && !likelyStreetName) {
-        comuna = comunaMatch;
-        continue;
+      let matchedComuna: string | null = null;
+      let tokensUsed = 1;
+
+      // Try matching up to 4 tokens backwards to catch multi-word comunas like "San Bernardo" or "La Florida"
+      for (let k = 4; k >= 1; k--) {
+        if (j - k + 1 >= 0) {
+          const combined = rawParts.slice(j - k + 1, j + 1).join(" ");
+          const match = normalizeComunaName(combined);
+          const abbrMatch = !match ? COMUNA_ABBREVIATIONS[combined.toLowerCase()] : undefined;
+          
+          if (match || abbrMatch) {
+            const likelyStreetName = via && numero && rawParts.length === k;
+            if (!likelyStreetName) {
+              matchedComuna = match || abbrMatch || null;
+              tokensUsed = k;
+              break;
+            }
+          }
+        }
       }
-      const comunaAbbr = COMUNA_ABBREVIATIONS[lowerToken];
-      if (comunaAbbr && !likelyStreetName) {
-        comuna = comunaAbbr;
+
+      if (matchedComuna) {
+        comuna = matchedComuna;
+        j -= (tokensUsed - 1); // skip the consumed tokens
         continue;
       }
     }
 
-    nameTokens.unshift(token);
+    nameTokens.unshift(rawParts[j]);
   }
 
   // If no comuna found yet, try fuzzy match as suggestion only
   if (!comuna && nameTokens.length > 0) {
-    const lastToken = nameTokens[nameTokens.length - 1];
-    const fuzzy = fuzzyMatchComuna(lastToken, 1);
-    if (fuzzy && fuzzy !== lastToken && nameTokens.length > 1) {
+    const last1 = nameTokens[nameTokens.length - 1];
+    let fuzzy = fuzzyMatchComuna(last1, 1);
+    
+    if (!fuzzy && nameTokens.length > 1) {
+      const last2 = nameTokens.slice(-2).join(" ");
+      fuzzy = fuzzyMatchComuna(last2, 1);
+    }
+
+    if (fuzzy && nameTokens.length > 1) {
       suggestions.push(`¿Quisiste decir ${fuzzy}?`);
     }
   }
