@@ -6,7 +6,7 @@
 
 ### Geocodificador & Normalizador de Direcciones Chilenas
 
-*Subí un CSV, normalizá, geocodificá y exportá — todo desde el navegador, sin API keys.*
+*Sube un CSV, normaliza, geocodifica y exporta — todo desde el navegador, sin API keys.*
 
 [![Deploy](https://img.shields.io/github/actions/workflow/status/geoidegeoidal/azimut/deploy.yml?branch=main&label=deploy&style=flat-square&color=3b5bff)](https://geoidegeoidal.github.io/azimut/)
 [![Tests](https://img.shields.io/badge/tests-54%20passed-10b981?style=flat-square)](https://github.com/geoidegeoidal/azimut)
@@ -14,7 +14,7 @@
 [![Chile](https://img.shields.io/badge/hecho%20en-chile-ef4444?style=flat-square)](https://github.com/geoidegeoidal/azimut)
 
 <p align="center">
-  <a href="https://geoidegeoidal.github.io/azimut/"><strong>🌎 Probalo acá</strong></a>
+  <a href="https://geoidegeoidal.github.io/azimut/"><strong>🌎 Pruébalo aquí</strong></a>
   ·
   <a href="#-flujo">Flujo</a>
   ·
@@ -33,7 +33,7 @@
 
 ```
 ┌──────────┐     ┌───────────────┐     ┌─────────────────────┐
-│  Subís   │     │  Normalizamos  │     │   Geocodificamos     │
+│  Subes   │     │  Normalizamos  │     │   Geocodificamos     │
 │ CSV/XLSX │ ──→ │  7 pasos       │ ──→ │  Nominatim → Photon  │
 │ con      │     │  (Chile)       │     │  1 dir/seg, sin key  │
 │ direcciones│   └───────────────┘     └─────────────────────┘
@@ -58,11 +58,11 @@
 
 | Paso | Acción | Qué pasa |
 |:----:|--------|----------|
-| 1 | 📂 **Subí tu archivo** | Arrastrá un CSV o XLSX — detectamos encoding, delimitador y columnas automáticamente |
-| 2 | 🔍 **Confirmá la columna** | Te sugerimos la columna con direcciones, ves un preview de 10 filas con la normalización |
-| 3 | ⚡ **Geocodificamos** | Procesamos 1 dirección por segundo con Nominatim (con fallback a Photon). Pausá, reanudá o cancelá cuando quieras |
-| 4 | 📊 **Explorá resultados** | Dashboard con scores, mapa interactivo con marcadores coloreados, tabla filtrable con detalle |
-| 5 | 📦 **Exportá** | 4 formatos: CSV, XLSX (celdas coloreadas), GeoJSON, Shapefile (.zip) |
+| 1 | 📂 **Sube tu archivo** | Arrastra un CSV o XLSX — detectamos encoding, delimitador y columnas automáticamente |
+| 2 | 🔍 **Confirma la columna** | Te sugerimos la columna con direcciones, ves un preview de 10 filas con la normalización |
+| 3 | ⚡ **Geocodificamos** | Procesamos 1 dirección por segundo con Nominatim (con fallback a Photon). Pausa, reanuda o cancela cuando quieras |
+| 4 | 📊 **Explora resultados** | Dashboard con scores, mapa interactivo con marcadores coloreados, tabla filtrable con detalle |
+| 5 | 📦 **Exporta** | 4 formatos: CSV, XLSX (celdas coloreadas), GeoJSON, Shapefile (.zip) |
 
 ---
 

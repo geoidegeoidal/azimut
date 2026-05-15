@@ -117,7 +117,7 @@ export function ColumnMapper() {
           <div>
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Geocodificando direcciones</h2>
             <p className="text-gray-500 dark:text-gray-400 mt-2">
-              {paused ? "Proceso pausado" : "Cada dirección se geocodifica con Nominatim (1 por segundo). Paciencia nomás."}
+              {paused ? "Proceso pausado" : "Cada dirección se geocodifica con Nominatim (1 por segundo). Paciencia, es 1 por segundo."}
             </p>
           </div>
 
@@ -167,7 +167,7 @@ export function ColumnMapper() {
         <div className="flex items-center gap-3 mb-6">
           <FileText className="w-6 h-6 text-azimut-500" />
           <div>
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white">Confirmá la columna de direcciones</h2>
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white">Confirma la columna de direcciones</h2>
             <p className="text-sm text-gray-500 dark:text-gray-400">{fileName} — {fileData.length} filas · {headers.length} columnas</p>
           </div>
         </div>
@@ -201,7 +201,7 @@ export function ColumnMapper() {
             <div className="p-4 border-b border-gray-200/50 dark:border-gray-800/50">
               <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Vista previa de normalización</p>
               <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
-                {selected ? `Columna "${selected}" — 10 de ${fileData.length} filas` : "Seleccioná una columna"}
+                {selected ? `Columna "${selected}" — 10 de ${fileData.length} filas` : "Selecciona una columna"}
               </p>
             </div>
             <div className="overflow-x-auto max-h-80 overflow-y-auto">
@@ -227,7 +227,7 @@ export function ColumnMapper() {
                         <td className="px-3 py-1.5">{(norm?.warnings.length ?? 0) > 0 && <span className="text-amber-500">⚠️</span>}</td>
                       </tr>
                     );
-                  }) : <tr><td colSpan={5} className="px-3 py-8 text-center text-gray-400">Seleccioná una columna para ver la normalización</td></tr>}
+                  }) : <tr><td colSpan={5} className="px-3 py-8 text-center text-gray-400">Selecciona una columna para ver la normalización</td></tr>}
                 </tbody>
               </table>
             </div>

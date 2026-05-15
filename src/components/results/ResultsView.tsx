@@ -15,7 +15,7 @@ export function ResultsView() {
         className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Resultados</h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400">Direcciones geocodificadas con Nominatim y Photon. Explorá en el mapa, revisá la tabla o mirá el dashboard.</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">Direcciones geocodificadas con Nominatim y Photon. Explora en el mapa, revisa la tabla o mira el dashboard.</p>
         </div>
         <ExportButtons />
       </motion.div>

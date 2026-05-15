@@ -205,7 +205,7 @@ export function validateFile(file: File): ParseError | null {
   if (!ext || !["csv", "xlsx", "xls"].includes(ext)) {
     return {
       type: "format",
-      message: "Formato no soportado. Usá un archivo CSV o XLSX.",
+      message: "Formato no soportado. Usa un archivo CSV o XLSX.",
     };
   }
   if (file.size === 0) {

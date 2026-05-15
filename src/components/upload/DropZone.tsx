@@ -68,10 +68,10 @@ export function DropZone() {
       >
         <div className="text-center mb-8">
           <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
-            Subí tus direcciones
+            Sube tus direcciones
           </h2>
           <p className="text-gray-500 dark:text-gray-400 mt-2">
-            Arrastrá un CSV o XLSX con direcciones chilenas y te las geocodificamos al toque.
+            Arrastra un CSV o XLSX con direcciones chilenas y te las geocodificamos al tiro.
           </p>
         </div>
 
@@ -114,8 +114,8 @@ export function DropZone() {
               {loading
                 ? "Leyendo archivo..."
                 : isDragging
-                  ? "Soltá el archivo acá"
-                  : "Arrastrá o hacé clic para subir"}
+                  ? "Suelta el archivo aquí"
+                  : "Arrastra o haz clic para subir"}
             </p>
             <p className="text-sm text-gray-400 dark:text-gray-500 mt-2">
               CSV (con coma, punto y coma o tabulación) · XLSX (primera hoja) — Máx 500 direcciones sugeridas
