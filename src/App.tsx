@@ -1,11 +1,11 @@
 export default function App() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-condor-50 via-white to-emerald-50 dark:from-gray-950 dark:via-gray-900 dark:to-condor-950">
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-azimut-50 via-white to-violet-50 dark:from-gray-950 dark:via-gray-900 dark:to-azimut-950">
       <div className="text-center space-y-6">
-        <div className="flex items-center justify-center gap-3">
-          <span className="text-5xl">🦅</span>
-          <h1 className="text-6xl font-bold bg-gradient-to-r from-condor-500 to-emerald-400 bg-clip-text text-transparent">
-            GeoCóndor
+        <div className="flex items-center justify-center gap-4">
+          <span className="text-5xl">🧭</span>
+          <h1 className="text-6xl font-bold bg-gradient-to-r from-sky-400 via-violet-500 to-fuchsia-500 bg-clip-text text-transparent">
+            Azimut
           </h1>
         </div>
         <p className="text-xl text-gray-600 dark:text-gray-400">

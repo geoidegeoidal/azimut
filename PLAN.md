@@ -1,4 +1,4 @@
-# PLAN.md — GeoNormalizador Chile
+# PLAN.md — Azimut
 
 Geocodificador + normalizador de direcciones chilenas. SPA 100% client-side alojada en GitHub Pages. Todo corre en el navegador (Web APIs + WASM).
 

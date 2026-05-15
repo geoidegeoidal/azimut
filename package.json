@@ -1,9 +1,9 @@
 {
-  "name": "geocondor",
+  "name": "azimut",
   "private": true,
   "version": "1.0.0",
   "type": "module",
-  "description": "GeoCóndor — Geocodificador y normalizador de direcciones chilenas",
+  "description": "Azimut — Geocodificador y normalizador de direcciones chilenas",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",

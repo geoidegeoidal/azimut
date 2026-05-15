@@ -5,7 +5,7 @@ import { resolve } from "path";
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
-  base: "/geocondor/",
+  base: "/azimut/",
   resolve: {
     alias: {
       "@": resolve(__dirname, "./src"),
