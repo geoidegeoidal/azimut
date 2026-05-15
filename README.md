@@ -155,6 +155,16 @@ npm run build      # Build producción
 
 ---
 
+## ☕ Apoya este proyecto
+
+Si este geocodificador te ha ahorrado horas de trabajo o simplemente te gusta la herramienta, puedes invitarme un café. ¡Toda ayuda es bienvenida para mantener y mejorar el proyecto!
+
+<a href="https://link.mercadopago.cl/jorgeulloaroa" target="_blank">
+  <img src="https://img.shields.io/badge/Regálame_un_café-%23009EE3?style=for-the-badge&logo=mercadopago&logoColor=white" alt="MercadoPago - Regálame un café" />
+</a>
+
+---
+
 ## 📄 Licencia
 
 MIT — hecho con 🧭 en Chile.
