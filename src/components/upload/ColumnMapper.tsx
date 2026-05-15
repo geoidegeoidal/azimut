@@ -1,9 +1,11 @@
-import { useState, useMemo, useCallback } from "react";
-import { FileText, ArrowRight, ArrowLeft, MapPin, FileQuestion, Loader2 } from "lucide-react";
+import { useState, useMemo, useCallback, useRef } from "react";
+import { FileText, ArrowRight, ArrowLeft, MapPin, FileQuestion, Pause, Play, X } from "lucide-react";
 import { motion } from "framer-motion";
 import { useStore } from "@/hooks/useStore";
 import { detectAddressColumn } from "@/engine/parser";
 import { normalizeBatch } from "@/engine/normalizer";
+import { geocodeBatch, pause, resume, cancel } from "@/engine/geocoder.worker";
+import type { NormalizedAddress } from "@/types";
 
 export function ColumnMapper() {
   const headers = useStore((s) => s.headers);
@@ -15,10 +17,12 @@ export function ColumnMapper() {
   const updateProcessing = useStore((s) => s.updateProcessing);
 
   const [selected, setSelected] = useState<string | null>(null);
-  const [normalizing, setNormalizing] = useState(false);
+  const [working, setWorking] = useState(false);
+  const [paused, setPaused] = useState(false);
+  const [progress, setProgress] = useState({ current: 0, total: 0, elapsed: 0 });
+  const abortRef = useRef<AbortController | null>(null);
 
   const suggested = useMemo(() => detectAddressColumn(headers), [headers]);
-
   const previewRows = useMemo(() => fileData.slice(0, 10), [fileData]);
 
   const normalizedPreview = useMemo(() => {
@@ -27,65 +31,144 @@ export function ColumnMapper() {
     return normalizeBatch(addresses);
   }, [selected, fileData]);
 
-  const handleConfirm = useCallback(() => {
+  const handleConfirm = useCallback(async () => {
     if (!selected) return;
 
     setAddressColumn(selected);
-    setNormalizing(true);
+    setWorking(true);
     setStep("processing");
 
     const addresses = fileData.map((row, i) => ({
       index: i,
-      address: row[selected] || "",
       original: { ...row },
+      address: row[selected] || "",
     }));
 
-    const total = addresses.length;
-    let current = 0;
-    const startTime = Date.now();
+    const normalized: NormalizedAddress[] = normalizeBatch(addresses.map((a) => a.address));
 
-    const normalized = normalizeBatch(addresses.map((a) => a.address));
+    const baseRows = addresses.map((a, i) => ({
+      id: i + 1,
+      original: a.original,
+      normalized: normalized[i],
+      selected: true,
+    }));
 
-    const interval = setInterval(() => {
-      current += Math.min(50, total - current);
-      if (current >= total) {
-        current = total;
-        clearInterval(interval);
+    setRows(baseRows);
 
-        const rows = addresses.map((a, i) => ({
-          id: i + 1,
-          original: a.original,
-          normalized: normalized[i],
-          selected: true,
-        }));
+    const abortController = new AbortController();
+    abortRef.current = abortController;
 
-        setRows(rows);
-        const elapsed = Math.round((Date.now() - startTime) / 1000);
-        updateProcessing({ current: total, total, elapsed });
-        setNormalizing(false);
-        setTimeout(() => setStep("results"), 500);
-      } else {
-        updateProcessing({ current, total, elapsed: Math.round((Date.now() - startTime) / 1000) });
-      }
-    }, 50);
+    try {
+      const geocodes = await geocodeBatch(
+        normalized,
+        (p) => {
+          setProgress(p);
+          updateProcessing({ current: p.current, total: addresses.length, elapsed: p.elapsed, paused: p.paused });
+        },
+        abortController.signal,
+      );
+
+      const finalRows = baseRows.map((row, i) => ({
+        ...row,
+        geocode: geocodes[i],
+      }));
+
+      setRows(finalRows);
+    } catch {
+      // Cancelled or errored
+    }
+
+    setWorking(false);
+    setPaused(false);
+    setStep("results");
   }, [selected, fileData, setAddressColumn, setStep, setRows, updateProcessing]);
+
+  const handlePause = useCallback(() => {
+    if (paused) {
+      resume();
+      setPaused(false);
+    } else {
+      pause();
+      setPaused(true);
+    }
+  }, [paused]);
+
+  const handleCancel = useCallback(() => {
+    cancel();
+    abortRef.current?.abort();
+    setWorking(false);
+    setPaused(false);
+    setStep("results");
+  }, [setStep]);
+
+  const pct = progress.total > 0 ? Math.round((progress.current / progress.total) * 100) : 0;
+  const remaining = progress.current > 0
+    ? Math.round(((progress.total - progress.current) / progress.current) * progress.elapsed)
+    : 0;
+  const remMins = Math.floor(remaining / 60);
+  const remSecs = remaining % 60;
+  const elapMins = Math.floor(progress.elapsed / 60);
+  const elapSecs = progress.elapsed % 60;
+
+  if (working) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full">
+        <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="text-center space-y-8 w-full max-w-lg">
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Geocodificando direcciones</h2>
+            <p className="text-gray-500 dark:text-gray-400 mt-2">
+              {paused ? "Proceso pausado" : "Cada dirección se geocodifica con Nominatim (1 por segundo). Paciencia nomás."}
+            </p>
+          </div>
+
+          <div className="relative w-44 h-44 mx-auto">
+            <svg className="w-44 h-44 -rotate-90" viewBox="0 0 120 120">
+              <circle cx="60" cy="60" r="54" fill="none" stroke="currentColor" className="text-gray-200 dark:text-gray-800" strokeWidth="8" />
+              <motion.circle
+                cx="60" cy="60" r="54" fill="none" stroke="url(#g)" strokeWidth="8" strokeLinecap="round"
+                strokeDasharray={2 * Math.PI * 54}
+                animate={{ strokeDashoffset: (2 * Math.PI * 54) * (1 - pct / 100) }}
+                transition={{ duration: 0.5 }}
+              />
+              <defs>
+                <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#3b5bff" />
+                  <stop offset="100%" stopColor="#a855f7" />
+                </linearGradient>
+              </defs>
+            </svg>
+            <div className="absolute inset-0 flex flex-col items-center justify-center">
+              <span className="text-3xl font-bold text-gray-900 dark:text-white">{pct}%</span>
+              <span className="text-xs text-gray-500 dark:text-gray-400">{progress.current}/{progress.total}</span>
+            </div>
+          </div>
+
+          <div className="space-y-1 text-sm text-gray-600 dark:text-gray-400">
+            <p>{elapMins}m {elapSecs}s transcurridos</p>
+            <p className="text-xs">~{remMins}m {remSecs}s restantes</p>
+          </div>
+
+          <div className="flex items-center justify-center gap-4">
+            <button onClick={handleCancel} className="flex items-center gap-2 px-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
+              <X className="w-4 h-4" /> Cancelar
+            </button>
+            <button onClick={handlePause} className="flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-medium bg-azimut-500 text-white hover:bg-azimut-600 shadow-lg shadow-azimut-500/25 transition-all">
+              {paused ? <><Play className="w-4 h-4" /> Reanudar</> : <><Pause className="w-4 h-4" /> Pausar</>}
+            </button>
+          </div>
+        </motion.div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col h-full">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="flex-1"
-      >
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex-1">
         <div className="flex items-center gap-3 mb-6">
           <FileText className="w-6 h-6 text-azimut-500" />
           <div>
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-              Confirmá la columna de direcciones
-            </h2>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              {fileName} — {fileData.length} filas · {headers.length} columnas encontradas
-            </p>
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white">Confirmá la columna de direcciones</h2>
+            <p className="text-sm text-gray-500 dark:text-gray-400">{fileName} — {fileData.length} filas · {headers.length} columnas</p>
           </div>
         </div>
 
@@ -94,46 +177,31 @@ export function ColumnMapper() {
             <div className="p-4 border-b border-gray-200/50 dark:border-gray-800/50">
               <div className="flex items-center gap-2">
                 <FileQuestion className="w-4 h-4 text-azimut-500" />
-                <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  ¿Cuál columna tiene las direcciones?
-                </p>
+                <p className="text-sm font-medium text-gray-700 dark:text-gray-300">¿Cuál columna tiene las direcciones?</p>
               </div>
               {suggested && (
                 <p className="text-xs text-azimut-600 dark:text-azimut-400 mt-1.5 ml-6">
-                  <MapPin className="w-3 h-3 inline mr-1" />
-                  Sugerimos "{suggested}" — parece tener direcciones
+                  <MapPin className="w-3 h-3 inline mr-1" />Sugerimos "{suggested}"
                 </p>
               )}
             </div>
-
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 p-4">
               {headers.map((h) => (
-                <button
-                  key={h}
-                  onClick={() => setSelected(h)}
-                  disabled={normalizing}
+                <button key={h} onClick={() => setSelected(h)}
                   className={`px-4 py-3 rounded-xl text-sm font-medium transition-all truncate ${
-                    selected === h
-                      ? "bg-azimut-500 text-white shadow-lg shadow-azimut-500/25"
-                      : h === suggested
-                        ? "bg-azimut-50 dark:bg-azimut-950/30 text-azimut-700 dark:text-azimut-300 border border-azimut-200 dark:border-azimut-800"
-                        : "bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
-                  }`}
-                  title={h}
-                >
-                  {h}
-                </button>
+                    selected === h ? "bg-azimut-500 text-white shadow-lg shadow-azimut-500/25"
+                    : h === suggested ? "bg-azimut-50 dark:bg-azimut-950/30 text-azimut-700 dark:text-azimut-300 border border-azimut-200 dark:border-azimut-800"
+                    : "bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+                  }`} title={h}>{h}</button>
               ))}
             </div>
           </div>
 
           <div className="bg-white/70 dark:bg-gray-900/70 backdrop-blur-xl rounded-2xl border border-gray-200/50 dark:border-gray-800/50 overflow-hidden">
             <div className="p-4 border-b border-gray-200/50 dark:border-gray-800/50">
-              <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                Vista previa de normalización
-              </p>
+              <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Vista previa de normalización</p>
               <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
-                {selected ? `Columna "${selected}" — primeras ${previewRows.length} filas` : "Seleccioná una columna"}
+                {selected ? `Columna "${selected}" — 10 de ${fileData.length} filas` : "Seleccioná una columna"}
               </p>
             </div>
             <div className="overflow-x-auto max-h-80 overflow-y-auto">
@@ -148,41 +216,18 @@ export function ColumnMapper() {
                   </tr>
                 </thead>
                 <tbody>
-                  {selected ? (
-                    previewRows.map((row, i) => {
-                      const norm = normalizedPreview[i];
-                      return (
-                        <tr
-                          key={i}
-                          className="border-b border-gray-100 dark:border-gray-800/30 hover:bg-gray-50 dark:hover:bg-gray-800/20"
-                        >
-                          <td className="px-3 py-1.5 font-mono text-gray-400">{i + 1}</td>
-                          <td className="px-3 py-1.5 truncate max-w-40 text-gray-600 dark:text-gray-400">
-                            {row[selected] || "—"}
-                          </td>
-                          <td className="px-3 py-1.5 truncate max-w-48 font-medium text-gray-900 dark:text-white">
-                            {norm?.normalized || "—"}
-                          </td>
-                          <td className="px-3 py-1.5 text-gray-600 dark:text-gray-400">
-                            {norm?.comuna || "—"}
-                          </td>
-                          <td className="px-3 py-1.5">
-                            {norm?.warnings.length > 0 && (
-                              <span className="text-amber-500" title={norm.warnings.join(", ")}>
-                                ⚠️
-                              </span>
-                            )}
-                          </td>
-                        </tr>
-                      );
-                    })
-                  ) : (
-                    <tr>
-                      <td colSpan={5} className="px-3 py-8 text-center text-gray-400 dark:text-gray-500">
-                        Seleccioná una columna para ver la normalización
-                      </td>
-                    </tr>
-                  )}
+                  {selected ? previewRows.map((row, i) => {
+                    const norm = normalizedPreview[i];
+                    return (
+                      <tr key={i} className="border-b border-gray-100 dark:border-gray-800/30 hover:bg-gray-50 dark:hover:bg-gray-800/20">
+                        <td className="px-3 py-1.5 font-mono text-gray-400">{i + 1}</td>
+                        <td className="px-3 py-1.5 truncate max-w-40 text-gray-600 dark:text-gray-400">{row[selected] || "—"}</td>
+                        <td className="px-3 py-1.5 truncate max-w-48 font-medium text-gray-900 dark:text-white">{norm?.normalized || "—"}</td>
+                        <td className="px-3 py-1.5 text-gray-600 dark:text-gray-400">{norm?.comuna || "—"}</td>
+                        <td className="px-3 py-1.5">{(norm?.warnings.length ?? 0) > 0 && <span className="text-amber-500">⚠️</span>}</td>
+                      </tr>
+                    );
+                  }) : <tr><td colSpan={5} className="px-3 py-8 text-center text-gray-400">Seleccioná una columna para ver la normalización</td></tr>}
                 </tbody>
               </table>
             </div>
@@ -191,34 +236,15 @@ export function ColumnMapper() {
       </motion.div>
 
       <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-200/50 dark:border-gray-800/50">
-        <button
-          onClick={() => setStep("upload")}
-          disabled={normalizing}
-          className="flex items-center gap-2 px-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors disabled:opacity-50"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          Volver
+        <button onClick={() => setStep("upload")} className="flex items-center gap-2 px-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
+          <ArrowLeft className="w-4 h-4" /> Volver
         </button>
-        <button
-          onClick={handleConfirm}
-          disabled={!selected || normalizing}
+        <button onClick={handleConfirm} disabled={!selected}
           className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-medium transition-all ${
-            selected && !normalizing
-              ? "bg-azimut-500 text-white hover:bg-azimut-600 shadow-lg shadow-azimut-500/25"
-              : "bg-gray-200 dark:bg-gray-800 text-gray-400 cursor-not-allowed"
-          }`}
-        >
-          {normalizing ? (
-            <>
-              <Loader2 className="w-4 h-4 animate-spin" />
-              Normalizando...
-            </>
-          ) : (
-            <>
-              Normalizar y geocodificar {fileData.length} direcciones
-              <ArrowRight className="w-4 h-4" />
-            </>
-          )}
+            selected ? "bg-azimut-500 text-white hover:bg-azimut-600 shadow-lg shadow-azimut-500/25"
+            : "bg-gray-200 dark:bg-gray-800 text-gray-400 cursor-not-allowed"
+          }`}>
+          Geocodificar {fileData.length} direcciones <ArrowRight className="w-4 h-4" />
         </button>
       </div>
     </div>

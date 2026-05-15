@@ -1,10 +1,11 @@
 import { create } from "zustand";
-import type { WizardStep, NormalizedAddress } from "@/types";
+import type { WizardStep, NormalizedAddress, GeocodeResult } from "@/types";
 
-interface AddressRow {
+export interface AddressRow {
   id: number;
   original: Record<string, string>;
   normalized: NormalizedAddress;
+  geocode?: GeocodeResult;
   selected: boolean;
 }
 
@@ -26,6 +27,7 @@ interface AppState {
   setFileData: (data: Record<string, string>[], fileName: string) => void;
   setAddressColumn: (col: string) => void;
   setRows: (rows: AddressRow[]) => void;
+  updateRowGeocode: (id: number, geocode: GeocodeResult) => void;
   toggleTheme: () => void;
   updateProcessing: (updates: Partial<AppState["processing"]>) => void;
   reset: () => void;
@@ -51,6 +53,11 @@ export const useStore = create<AppState>((set, get) => ({
   setAddressColumn: (col) => set({ addressColumn: col }),
 
   setRows: (rows) => set({ rows }),
+
+  updateRowGeocode: (id, geocode) =>
+    set((state) => ({
+      rows: state.rows.map((r) => (r.id === id ? { ...r, geocode } : r)),
+    })),
 
   toggleTheme: () =>
     set((state) => {

@@ -12,7 +12,9 @@
     "format": "prettier --write \"src/**/*.{ts,tsx,css}\""
   },
   "dependencies": {
+    "comlink": "^4.4.2",
     "framer-motion": "^12.38.0",
+    "idb": "^8.0.3",
     "lucide-react": "^1.16.0",
     "papaparse": "^5.5.3",
     "react": "^19.2.0",
@@ -22,6 +24,7 @@
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.1.0",
+    "@types/geojson": "^7946.0.16",
     "@types/node": "^25.8.0",
     "@types/papaparse": "^5.5.2",
     "@types/react": "^19.2.0",
