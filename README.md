@@ -25,32 +25,21 @@
   <a href="#-tests">Tests</a>
 </p>
 
+<p align="center">
+  <a href="https://geoidegeoidal.github.io/azimut/">
+    <img src="assets/hero.png" width="100%" alt="Azimut Dashboard Preview" />
+  </a>
+</p>
+
 </div>
 
 ---
 
 ## 🎯 ¿Qué hace?
 
-```
-┌──────────┐     ┌───────────────┐     ┌─────────────────────┐
-│  Subes   │     │  Normalizamos  │     │   Geocodificamos     │
-│ CSV/XLSX │ ──→ │  7 pasos       │ ──→ │  Nominatim → Photon  │
-│ con      │     │  (Chile)       │     │  1 dir/seg, sin key  │
-│ direcciones│   └───────────────┘     └─────────────────────┘
-└──────────┘                                     │
-     │                                           │
-     │          ┌────────────────────────────────┘
-     │          ▼
-     │  ┌──────────────────────────────────────────────────┐
-     │  │  🗺️  Mapa Leaflet  ·  📊  Dashboard  ·  📋  Tabla  │
-     │  │  Score 0-100  ● Exc  ● Bueno  ● Regular  ● Bajo  │
-     │  └──────────────────────────────────────────────────┘
-     │          │
-     ▼          ▼
-┌──────────────────────────────────────┐
-│  📦 CSV  ·  📊 XLSX  ·  🌐 GeoJSON  ·  🗺️ Shapefile  │
-└──────────────────────────────────────┘
-```
+<p align="center">
+  <img src="assets/flow.png" width="100%" alt="Pipeline de Geocodificación" />
+</p>
 
 ---
 
@@ -67,6 +56,10 @@
 ---
 
 ## 🧹 Normalizador Chileno — 7 pasos
+
+<p align="center">
+  <img src="assets/pipeline.png" width="100%" alt="7 pasos de normalización" />
+</p>
 
 | Paso | Nombre | Qué resuelve |
 |:----:|--------|-------------|
@@ -92,6 +85,10 @@
 ---
 
 ## 📊 Score 0–100
+
+<p align="center">
+  <img src="assets/score.png" width="80%" alt="Composición del Score" />
+</p>
 
 Cada dirección recibe un puntaje compuesto de 4 factores:
 
