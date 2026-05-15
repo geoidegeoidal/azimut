@@ -1,0 +1,16 @@
+{
+  "name": "Azimut — Geocodificador Chileno",
+  "short_name": "Azimut",
+  "description": "Geocodificador y normalizador de direcciones chilenas. Sube un CSV o XLSX, normaliza, geocodifica y exporta.",
+  "start_url": "/azimut/",
+  "display": "standalone",
+  "background_color": "#0c1433",
+  "theme_color": "#3b5bff",
+  "icons": [
+    {
+      "src": "/azimut/favicon.svg",
+      "sizes": "64x64",
+      "type": "image/svg+xml"
+    }
+  ]
+}

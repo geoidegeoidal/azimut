@@ -52,7 +52,7 @@ function sanitize(raw: string): { text: string; warnings: string[] } {
     text = text.replace(EMAIL_REGEX, "").trim();
   }
 
-  text = text.replace(/[^\w\sáéíóúñÁÉÍÓÚÑüÜ.,#\/\\-]/g, " ");
+  text = text.replace(/[^\w\sáéíóúñÁÉÍÓÚÑüÜ.,#\/\\\-]/g, " ");
   text = text.replace(/\s+/g, " ").trim();
   text = text.replace(/[,]+/g, ",").replace(/,\s*,/g, ",").trim();
   if (text.endsWith(",")) text = text.slice(0, -1).trim();
@@ -94,7 +94,12 @@ function tokenize(text: string): {
     }
   }
 
-  const tokens = text
+  // Split letter-digit boundaries for "todo pegado" cases
+  let expanded = text;
+  expanded = expanded.replace(/([a-zA-Záéíóúñü])(\d)/g, "$1 $2");
+  expanded = expanded.replace(/(\d)([a-zA-Záéíóúñü])/g, "$1 $2");
+
+  const tokens = expanded
     .replace(/[,]/g, " ")
     .split(/\s+/)
     .filter((t) => t.length > 0);
@@ -129,33 +134,46 @@ function classifyAndExpand(
   let reference: string | undefined;
 
   let i = 0;
-  const parts: string[] = [];
+  const rawParts: string[] = [];
 
+  // First pass: extract via, number, unit, and collect unmatched tokens
   while (i < tokens.length) {
-    let token = tokens[i];
-
+    const token = tokens[i];
     const lowerToken = token.toLowerCase();
 
-    if (VIA_ABBREVIATIONS[lowerToken]) {
+    // VIA detection (must be at the start)
+    if (rawParts.length === 0 && VIA_ABBREVIATIONS[lowerToken]) {
       via = VIA_ABBREVIATIONS[lowerToken];
       i++;
       continue;
+    }
+
+    // Handle number prefixes (N°, #, etc.)
+    if (token.startsWith("#")) {
+      const clean = token.slice(1);
+      if (/^\d+/.test(clean)) {
+        numero = clean;
+        i++;
+        continue;
+      }
     }
 
     const isNumberPrefix = NUMBER_PREFIXES.some((p) =>
       token.toLowerCase().startsWith(p.toLowerCase()),
     );
     if (isNumberPrefix) {
-      if (token.length > NUMBER_PREFIXES.find((p) => token.toLowerCase().startsWith(p.toLowerCase()))!.length) {
-        numero = token.slice(NUMBER_PREFIXES.find((p) => token.toLowerCase().startsWith(p.toLowerCase()))!.length).trim();
+      const matchedPrefix = NUMBER_PREFIXES.find((p) => token.toLowerCase().startsWith(p.toLowerCase()))!;
+      if (token.length > matchedPrefix.length) {
+        numero = token.slice(matchedPrefix.length).trim();
       } else if (i + 1 < tokens.length && /^\d/.test(tokens[i + 1])) {
-        numero = tokens[i + 1];
         i++;
+        numero = tokens[i];
       }
       i++;
       continue;
     }
 
+    // Sin Número
     if (SINALNUMERO.some((s) => s.toLowerCase() === lowerToken)) {
       numero = "Sin Número";
       warnings.push("SIN_NUMERO");
@@ -163,21 +181,28 @@ function classifyAndExpand(
       continue;
     }
 
+    // Pure number (potential house number or continuation)
+    // Skip if looks like part of a street name (followed by "de")
     if (/^\d+[A-Za-z]?$/.test(token)) {
-      if (!numero) {
-        numero = token;
-      } else if (!unidad && i > 0) {
-        const prevToken = tokens[i - 1]?.toLowerCase();
-        if (UNIT_ABBREVIATIONS[prevToken]) {
-          unidad = `${UNIT_ABBREVIATIONS[prevToken]} ${token}`;
-        } else {
-          unidad = token;
+      const nextToken = i + 1 < tokens.length ? tokens[i + 1]?.toLowerCase() : "";
+      const isOrdinalStreet = nextToken === "de" || nextToken === "del" || nextToken === "de la";
+      if (!isOrdinalStreet) {
+        if (!numero && rawParts.length > 0) {
+          numero = token;
+        } else if (!unidad && i > 0) {
+          const prevToken = tokens[i - 1]?.toLowerCase();
+          if (UNIT_ABBREVIATIONS[prevToken]) {
+            unidad = `${UNIT_ABBREVIATIONS[prevToken]} ${token}`;
+          } else if (numero) {
+            unidad = token;
+          }
         }
+        i++;
+        continue;
       }
-      i++;
-      continue;
     }
 
+    // Unit detection
     const unitMatch = UNIT_ABBREVIATIONS[lowerToken];
     if (unitMatch) {
       if (i + 1 < tokens.length && /^\d/.test(tokens[i + 1])) {
@@ -190,77 +215,80 @@ function classifyAndExpand(
       continue;
     }
 
-    const comunaMatch = normalizeComunaName(token);
-    if (comunaMatch) {
-      if (!comuna) {
-        comuna = comunaMatch;
-      } else {
-        parts.push(token);
-      }
-      i++;
-      continue;
-    }
-
+    // Region detection (can appear anywhere)
     const regionMatch = normalizeRegionName(token);
-    if (regionMatch) {
+    if (regionMatch && !region) {
       region = regionMatch;
       i++;
       continue;
     }
 
-    const comunaAbbr = COMUNA_ABBREVIATIONS[lowerToken];
-    if (comunaAbbr) {
-      comuna = comunaAbbr;
-      i++;
-      continue;
-    }
-
     const regionAbbr = REGIONS_MAP[lowerToken];
-    if (regionAbbr) {
+    if (regionAbbr && !region) {
       region = regionAbbr;
       i++;
       continue;
     }
 
-    parts.push(token);
+    // Collect unmatched tokens for second pass
+    rawParts.push(token);
     i++;
   }
 
-  if (_isRural && kmInfo) {
-    nombre = `${kmInfo.before} Kilómetro ${kmInfo.km}`;
-    warnings.push("RURAL");
-  } else if (parts.length > 0) {
-    const nameParts: string[] = [];
-    for (const p of parts) {
-      const comunaCheck = normalizeComunaName(p);
-      const regionCheck = normalizeRegionName(p);
-      if (!comunaCheck && !regionCheck) {
-        nameParts.push(p);
-      } else if (comunaCheck && !comuna) {
-        comuna = comunaCheck;
-      } else if (regionCheck && !region) {
-        region = regionCheck;
+  // Second pass: process rawParts to find nombre and comuna
+  // Comuna is usually at the END. Don't eat the nombre if via+numero already set and only 1 rawPart.
+  const nameTokens: string[] = [];
+
+  for (let j = rawParts.length - 1; j >= 0; j--) {
+    const token = rawParts[j];
+    const lowerToken = token.toLowerCase();
+
+    if (!comuna) {
+      const comunaMatch = normalizeComunaName(token);
+      // Be conservative: only treat as comuna if it's clearly extra (rawParts > 1) or no via+numero pair
+      const likelyStreetName = via && numero && rawParts.length === 1;
+      if (comunaMatch && !likelyStreetName) {
+        comuna = comunaMatch;
+        continue;
+      }
+      const comunaAbbr = COMUNA_ABBREVIATIONS[lowerToken];
+      if (comunaAbbr && !likelyStreetName) {
+        comuna = comunaAbbr;
+        continue;
       }
     }
-    if (nameParts.length > 0) {
-      nombre = nameParts.join(" ");
+
+    nameTokens.unshift(token);
+  }
+
+  // If no comuna found yet, try fuzzy match as suggestion only
+  if (!comuna && nameTokens.length > 0) {
+    const lastToken = nameTokens[nameTokens.length - 1];
+    const fuzzy = fuzzyMatchComuna(lastToken, 1);
+    if (fuzzy && fuzzy !== lastToken && nameTokens.length > 1) {
+      suggestions.push(`¿Quisiste decir ${fuzzy}?`);
     }
   }
 
-  if (!via && nombre && nombre.split(" ").length >= 2) {
+  if (nameTokens.length > 0) {
+    nombre = nameTokens.join(" ");
+  }
+
+  // Rural km detection
+  if (_isRural && kmInfo) {
+    nombre = `${kmInfo.before} Kilómetro ${kmInfo.km}`;
+    warnings.push("RURAL");
+  }
+
+  // Infer via if missing
+  if (!via && nombre && nombre.split(" ").length >= 1) {
     const firstWord = nombre.split(" ")[0].toLowerCase();
     if (firstWord.length > 3 && !/^\d/.test(firstWord)) {
       via = "Calle";
     }
   }
 
-  if (!comuna && nombre) {
-    const fuzzy = fuzzyMatchComuna(nombre.split(" ").slice(-1)[0], 2);
-    if (fuzzy && fuzzy !== nombre) {
-      suggestions.push(`¿Quisiste decir ${fuzzy}?`);
-    }
-  }
-
+  // Autocomplete region from comuna
   if (!region && comuna) {
     const found = COMUNAS.find((c) => c.nombre === comuna);
     if (found) {
@@ -268,13 +296,14 @@ function classifyAndExpand(
     }
   }
 
+  // Warnings
   if (!nombre && !numero) {
     warnings.push("DIRECCION_INCOMPLETA");
   }
   if (comuna && !nombre && !numero) {
     warnings.push("SOLO_COMUNA");
   }
-  if (region && !comuna && !nombre) {
+  if (region && !comuna && !nombre && !numero) {
     warnings.push("SOLO_REGION");
   }
 

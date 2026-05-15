@@ -148,9 +148,9 @@ export const COMUNA_ABBREVIATIONS: Record<string, string> = {
   sanjosedemaipo: "San José de Maipo",
 };
 
-export const PHONE_REGEX = /(?:\+56\s?)?(?:9\s?\d{4}\s?\d{4}|2\s?\d{7}|3\d\s?\d{7})/g;
+export const PHONE_REGEX = /\b(?:\+?569\s?\d{4}\s?\d{4}|\+?562\s?\d{7}|\+?56\s?[1-8]\d\s?\d{6})\b/g;
 
-export const RUT_REGEX = /\d{1,2}\.?\d{3}\.?\d{3}[\-]?\d{1}[Kk0-9]/g;
+export const RUT_REGEX = /\b\d{1,2}\.?\d{3}\.?\d{3}[-]?[\dkK]\b/g;
 
 export const EMAIL_REGEX = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
 
@@ -160,6 +160,6 @@ export const VILLA_PREFIXES = ["villa", "población", "pobl", "poblacion", "cond
 
 export const FUNDO_PREFIXES = ["fundo", "parcela", "sitio", "lote", "hijuela"];
 
-export const INTERSECTION_KEYWORDS = ["esq", "esquina", "c/", "con", "y"];
+export const INTERSECTION_KEYWORDS = ["esq", "esquina"];
 
 export const KM_KEYWORDS = ["km", "kilómetro", "kilometro"];
