@@ -2,17 +2,15 @@ import { useState } from "react";
 import { ChevronUp, ChevronDown, AlertTriangle } from "lucide-react";
 import { motion } from "framer-motion";
 import { useStore } from "@/hooks/useStore";
-import { ScoreBadge } from "@/components/ui/ScoreBadge";
 
-type SortKey = "id" | "score";
+type SortKey = "id" | "comuna" | "region";
 type SortDir = "asc" | "desc";
 
 export function ResultTable() {
   const rows = useStore((s) => s.rows);
   const [sortKey, setSortKey] = useState<SortKey>("id");
   const [sortDir, setSortDir] = useState<SortDir>("asc");
-  const [filterMin, setFilterMin] = useState(0);
-  const [filterPrecision, setFilterPrecision] = useState<string>("all");
+  const [filterWarning, setFilterWarning] = useState<string>("all");
 
   const handleSort = (key: SortKey) => {
     if (sortKey === key) {
@@ -24,56 +22,40 @@ export function ResultTable() {
   };
 
   const filtered = rows
-    .filter((r) => (r.geocode?.score ?? 0) >= filterMin)
     .filter((r) =>
-      filterPrecision === "all" ? true : r.geocode?.precision === filterPrecision,
+      filterWarning === "all"
+        ? true
+        : filterWarning === "with"
+          ? r.normalized.warnings.length > 0
+          : r.normalized.warnings.length === 0,
     )
     .sort((a, b) => {
-      const aVal = sortKey === "id" ? a.id : (a.geocode?.score ?? 0);
-      const bVal = sortKey === "id" ? b.id : (b.geocode?.score ?? 0);
-      return sortDir === "asc" ? aVal - bVal : bVal - aVal;
+      if (sortKey === "id") {
+        return sortDir === "asc" ? a.id - b.id : b.id - a.id;
+      }
+      const aVal = a.normalized[sortKey] || "";
+      const bVal = b.normalized[sortKey] || "";
+      return sortDir === "asc" ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
     });
 
   const SortIcon = ({ col }: { col: SortKey }) => {
     if (sortKey !== col) return <ChevronUp className="w-3 h-3 opacity-30" />;
-    return sortDir === "asc" ? (
-      <ChevronUp className="w-3 h-3" />
-    ) : (
-      <ChevronDown className="w-3 h-3" />
-    );
+    return sortDir === "asc" ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />;
   };
 
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-4">
         <div className="flex items-center gap-2">
-          <label className="text-xs text-gray-500 dark:text-gray-400">Score mín:</label>
-          <input
-            type="range"
-            min={0}
-            max={100}
-            value={filterMin}
-            onChange={(e) => setFilterMin(Number(e.target.value))}
-            className="w-24 accent-azimut-500"
-          />
-          <span className="text-xs font-mono text-gray-600 dark:text-gray-300 w-8">
-            {filterMin}
-          </span>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <label className="text-xs text-gray-500 dark:text-gray-400">Precisión:</label>
+          <label className="text-xs text-gray-500 dark:text-gray-400">Filtro:</label>
           <select
-            value={filterPrecision}
-            onChange={(e) => setFilterPrecision(e.target.value)}
+            value={filterWarning}
+            onChange={(e) => setFilterWarning(e.target.value)}
             className="text-xs bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-2 py-1"
           >
             <option value="all">Todas</option>
-            <option value="excelente">🟢 Excelente</option>
-            <option value="bueno">🟡 Bueno</option>
-            <option value="regular">🟠 Regular</option>
-            <option value="bajo">🔴 Bajo</option>
-            <option value="nulo">⚫ Nulo</option>
+            <option value="with">Con advertencias</option>
+            <option value="without">Sin advertencias</option>
           </select>
         </div>
 
@@ -87,30 +69,29 @@ export function ResultTable() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-200/50 dark:border-gray-800/50">
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 dark:text-gray-400">
-                  #
-                </th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 dark:text-gray-400">
-                  Dirección original
-                </th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 dark:text-gray-400">
-                  Normalizada
+                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 dark:text-gray-400">#</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 dark:text-gray-400">Dirección original</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 dark:text-gray-400">Normalizada</th>
+                <th
+                  className="text-left px-4 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 cursor-pointer hover:text-gray-700 dark:hover:text-gray-200"
+                  onClick={() => handleSort("comuna")}
+                >
+                  <span className="flex items-center gap-1">
+                    Comuna
+                    <SortIcon col="comuna" />
+                  </span>
                 </th>
                 <th
                   className="text-left px-4 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 cursor-pointer hover:text-gray-700 dark:hover:text-gray-200"
-                  onClick={() => handleSort("score")}
+                  onClick={() => handleSort("region")}
                 >
                   <span className="flex items-center gap-1">
-                    Score
-                    <SortIcon col="score" />
+                    Región
+                    <SortIcon col="region" />
                   </span>
                 </th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 dark:text-gray-400">
-                  Lat / Lon
-                </th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 dark:text-gray-400">
-                  ⚠️
-                </th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 dark:text-gray-400">Vía</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 dark:text-gray-400">⚠️</th>
               </tr>
             </thead>
             <tbody>
@@ -129,18 +110,23 @@ export function ResultTable() {
                   <td className="px-4 py-3 max-w-56 truncate text-gray-900 dark:text-white font-medium">
                     {row.normalized.normalized}
                   </td>
-                  <td className="px-4 py-3">
-                    <ScoreBadge score={row.geocode?.score ?? 0} size="sm" />
-                  </td>
                   <td className="px-4 py-3 text-gray-600 dark:text-gray-400">
                     {row.normalized.comuna || "—"}
                   </td>
-                  <td className="px-4 py-3 font-mono text-xs text-gray-500 dark:text-gray-400">
-                    {row.geocode ? `${row.geocode.lat.toFixed(4)}, ${row.geocode.lon.toFixed(4)}` : "—"}
+                  <td className="px-4 py-3 text-gray-600 dark:text-gray-400">
+                    {row.normalized.region || "—"}
+                  </td>
+                  <td className="px-4 py-3 text-gray-600 dark:text-gray-400">
+                    {row.normalized.via || "—"}
                   </td>
                   <td className="px-4 py-3">
                     {row.normalized.warnings.length > 0 && (
-                      <AlertTriangle className="w-4 h-4 text-amber-500" />
+                      <span
+                        className="text-amber-500 cursor-help"
+                        title={row.normalized.warnings.join(", ")}
+                      >
+                        <AlertTriangle className="w-4 h-4" />
+                      </span>
                     )}
                   </td>
                 </motion.tr>
