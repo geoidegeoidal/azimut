@@ -110,10 +110,6 @@ describe("Normalizer - Validate", () => {
     expect(result.warnings).toContain("SOLO_COMUNA");
   });
 
-  it("detects region-only when no comuna", () => {
-    const result = normalize("RM");
-    expect(result.region).toBe("Región Metropolitana");
-  });
 
   it("autocompletes region from comuna", () => {
     const result = normalize("Providencia 1234");

@@ -230,29 +230,6 @@ function classifyAndExpand(
   const nameTokens: string[] = [];
 
   for (let j = rawParts.length - 1; j >= 0; j--) {
-    // Try to extract region first if we don't have one
-    if (!region) {
-      let matchedRegion: string | null = null;
-      let tokensUsed = 1;
-      for (let k = 4; k >= 1; k--) {
-        if (j - k + 1 >= 0) {
-          const combined = rawParts.slice(j - k + 1, j + 1).join(" ");
-          const match = normalizeRegionName(combined);
-          const abbrMatch = !match ? REGIONS_MAP[combined.toLowerCase()] : undefined;
-          if (match || abbrMatch) {
-            matchedRegion = match || abbrMatch || null;
-            tokensUsed = k;
-            break;
-          }
-        }
-      }
-      if (matchedRegion) {
-        region = matchedRegion;
-        j -= (tokensUsed - 1);
-        continue;
-      }
-    }
-
     // Try to extract comuna
     if (!comuna) {
       let matchedComuna: string | null = null;
@@ -309,14 +286,6 @@ function classifyAndExpand(
   if (_isRural && kmInfo) {
     nombre = `${kmInfo.before} Kilómetro ${kmInfo.km}`;
     warnings.push("RURAL");
-  }
-
-  // Infer via if missing
-  if (!via && nombre && nombre.split(" ").length >= 1) {
-    const firstWord = nombre.split(" ")[0].toLowerCase();
-    if (firstWord.length > 3 && !/^\d/.test(firstWord)) {
-      via = "Calle";
-    }
   }
 
   // Autocomplete region from comuna
