@@ -1,50 +1,40 @@
 import { useState, useCallback } from "react";
-import { Upload, FileText, AlertCircle } from "lucide-react";
+import { Upload, FileText, AlertCircle, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useStore } from "@/hooks/useStore";
+import { parseCSV, parseXLSX, validateFile } from "@/engine/parser";
+import type { ParseError } from "@/engine/parser";
 
 export function DropZone() {
   const [isDragging, setIsDragging] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<ParseError | null>(null);
   const setFileData = useStore((s) => s.setFileData);
   const setStep = useStore((s) => s.setStep);
 
   const processFile = useCallback(
-    (file: File) => {
-      const ext = file.name.split(".").pop()?.toLowerCase();
-      if (!["csv", "xlsx", "xls"].includes(ext || "")) {
-        setError("Formato no soportado. Usá CSV o XLSX.");
+    async (file: File) => {
+      const validationError = validateFile(file);
+      if (validationError) {
+        setError(validationError);
         return;
       }
 
-      if (ext === "csv") {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          const text = e.target?.result as string;
-          const lines = text.split("\n").filter((l) => l.trim());
-          if (lines.length < 2) {
-            setError("El archivo está vacío o no tiene datos.");
-            return;
-          }
-          const headers = lines[0].split(/[;,]/).map((h) => h.trim().toLowerCase());
-          const data = lines.slice(1).map((line) => {
-            const values = line.split(/[;,]/).map((v) => v.trim());
-            const row: Record<string, string> = {};
-            headers.forEach((h, i) => (row[h] = values[i] || ""));
-            return row;
-          });
-          setFileData(data, file.name);
-          setStep("preview");
-        };
-        reader.readAsText(file);
-      } else {
-        // For XLSX, we'll simulate with mock data for now (Phase 3 will add SheetJS)
-        const mockData = [
-          { direccion: "Av. Providencia 1234", ciudad: "Santiago" },
-          { direccion: "Psje Los Alerces 567", ciudad: "Viña del Mar" },
-        ];
-        setFileData(mockData, file.name);
+      setError(null);
+      setLoading(true);
+
+      try {
+        const ext = file.name.split(".").pop()?.toLowerCase();
+        const result = ext === "csv"
+          ? await parseCSV(file)
+          : await parseXLSX(file);
+
+        setFileData(result.data, result.fileName);
         setStep("preview");
+      } catch (e) {
+        setError(e as ParseError);
+      } finally {
+        setLoading(false);
       }
     },
     [setFileData, setStep],
@@ -54,7 +44,6 @@ export function DropZone() {
     (e: React.DragEvent) => {
       e.preventDefault();
       setIsDragging(false);
-      setError(null);
       const file = e.dataTransfer.files[0];
       if (file) processFile(file);
     },
@@ -63,7 +52,6 @@ export function DropZone() {
 
   const handleFileInput = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      setError(null);
       const file = e.target.files?.[0];
       if (file) processFile(file);
     },
@@ -98,8 +86,8 @@ export function DropZone() {
             isDragging
               ? "border-azimut-500 bg-azimut-50 dark:bg-azimut-950/30 scale-105"
               : "border-gray-300 dark:border-gray-700 hover:border-azimut-400 dark:hover:border-azimut-600 bg-white/50 dark:bg-gray-900/50"
-          }`}
-          onClick={() => document.getElementById("file-input")?.click()}
+          } ${loading ? "pointer-events-none opacity-70" : ""}`}
+          onClick={() => !loading && document.getElementById("file-input")?.click()}
         >
           <input
             id="file-input"
@@ -110,19 +98,27 @@ export function DropZone() {
           />
 
           <motion.div
-            animate={isDragging ? { y: -8 } : { y: 0 }}
-            transition={{ type: "spring", stiffness: 300 }}
+            animate={isDragging ? { y: -8 } : loading ? { y: [0, -4, 0] } : { y: 0 }}
+            transition={loading ? { repeat: Infinity, duration: 1.5 } : { type: "spring", stiffness: 300 }}
           >
-            <Upload
-              className={`w-16 h-16 mx-auto mb-4 transition-colors ${
-                isDragging ? "text-azimut-500" : "text-gray-400"
-              }`}
-            />
+            {loading ? (
+              <Loader2 className="w-16 h-16 mx-auto mb-4 text-azimut-500 animate-spin" />
+            ) : (
+              <Upload
+                className={`w-16 h-16 mx-auto mb-4 transition-colors ${
+                  isDragging ? "text-azimut-500" : "text-gray-400"
+                }`}
+              />
+            )}
             <p className="text-lg font-medium text-gray-700 dark:text-gray-300">
-              {isDragging ? "Soltá el archivo acá" : "Arrastrá o hacé clic para subir"}
+              {loading
+                ? "Leyendo archivo..."
+                : isDragging
+                  ? "Soltá el archivo acá"
+                  : "Arrastrá o hacé clic para subir"}
             </p>
             <p className="text-sm text-gray-400 dark:text-gray-500 mt-2">
-              CSV, XLSX — Máx 500 direcciones sugeridas
+              CSV (con coma, punto y coma o tabulación) · XLSX (primera hoja) — Máx 500 direcciones sugeridas
             </p>
           </motion.div>
         </div>
@@ -136,7 +132,7 @@ export function DropZone() {
               className="mt-4 flex items-center gap-2 text-red-500 bg-red-50 dark:bg-red-950/20 rounded-xl px-4 py-3"
             >
               <AlertCircle className="w-5 h-5 flex-shrink-0" />
-              <span className="text-sm">{error}</span>
+              <span className="text-sm">{error.message}</span>
             </motion.div>
           )}
         </AnimatePresence>
@@ -144,7 +140,7 @@ export function DropZone() {
         <div className="mt-8 flex items-center justify-center gap-6 text-xs text-gray-400 dark:text-gray-500">
           <div className="flex items-center gap-1.5">
             <FileText className="w-4 h-4" />
-            <span>CSV / XLSX</span>
+            <span>CSV / XLSX (hasta 50 MB)</span>
           </div>
           <div className="flex items-center gap-1.5">
             <span>🔒</span>
