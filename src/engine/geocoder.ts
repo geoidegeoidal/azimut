@@ -1,7 +1,7 @@
 import type { GeocodeResult } from "@/types";
 import { buildGeocodeResult } from "./scorer";
 
-const USER_AGENT = "Azimut/1.0 (geocodificador gratuito chileno — github.com/geoidegeoidal/azimut)";
+const USER_AGENT = "Azimut/1.0 (geocodificador gratuito chileno - github.com/geoidegeoidal/azimut)";
 
 const NOMINATIM_URL = "https://nominatim.openstreetmap.org/search";
 const PHOTON_URL = "https://photon.komoot.io/api/";
