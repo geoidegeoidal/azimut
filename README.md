@@ -44,39 +44,41 @@
 | Paso | Acción | Qué pasa |
 |:----:|--------|----------|
 | 1 | 📂 **Sube tu archivo** | Arrastra un CSV o XLSX — detectamos encoding, delimitador y columnas automáticamente |
-| 2 | 🔍 **Confirma la columna** | Te sugerimos la columna con direcciones, ves un preview de 10 filas con la normalización |
+| 2 | 🔍 **Selecciona las columnas** | Te sugerimos la columna con direcciones (puedes unir varias), ves un preview de 10 filas |
 | 3 | ⚡ **Geocodificamos** | Procesamos 1 dirección por segundo con Nominatim (con fallback a Photon). Pausa, reanuda o cancela cuando quieras |
 | 4 | 📊 **Explora resultados** | Dashboard con scores, mapa interactivo con marcadores coloreados, tabla filtrable con detalle |
 | 5 | 📦 **Exporta** | 4 formatos: CSV, XLSX (celdas coloreadas), GeoJSON, Shapefile (.zip) |
 
 ---
 
-## 🧹 Normalizador Chileno — 7 pasos
+## 🧹 Normalizador Rápido — 5 pasos
 
-<p align="center">
-  <img src="assets/pipeline.png" width="100%" alt="7 pasos de normalización" />
-</p>
+```mermaid
+graph LR
+    A[Input] --> B(1. Espacios)
+    B --> C(2. Expandir Vía)
+    C --> D(3. Sin tildes)
+    D --> E(4. Limpiar)
+    E --> F(5. Capitalizar)
+    F --> G[Dirección Normalizada]
+```
 
-| Paso | Nombre | Qué resuelve |
+| Paso | Acción | Qué resuelve |
 |:----:|--------|-------------|
-| 1 | **SANITIZE** | Remueve teléfonos (+56), RUTs, emails intrusos. Normaliza espacios y puntuación |
-| 2 | **TOKENIZE** | Separa componentes: vía, nombre, número, unidad, comuna, región. Detecta Km rurales e intersecciones |
-| 3 | **CLASSIFY** | Clasifica cada token según su rol en la dirección |
-| 4 | **EXPAND** | `Av→Avenida` · `Pje→Pasaje` · `Stgo→Santiago` · `VdM→Viña del Mar` · `RM→Región Metropolitana` |
-| 5 | **VALIDATE** | Coteja contra 346 comunas y 16 regiones oficiales. Fuzzy matching (Levenshtein) para errores de tipeo |
-| 6 | **REBUILD** | Formato canónico: `[Vía] [Nombre] [Número] [Unidad], [Comuna], [Región], Chile` |
-| 7 | **DIAGNOSE** | Emite warnings y sugerencias: `SIN_NUMERO`, `RURAL`, `SOLO_COMUNA`, `¿Quisiste decir Providencia?` |
+| 1 | **Espacios** | Elimina espacios duplicados al inicio, final e intermedios. |
+| 2 | **Expandir** | `Av.→Avenida`, `Pje→Pasaje`, `Cmno→Camino`, etc. (solo la primera palabra). |
+| 3 | **Sin tildes** | Remueve acentos gráficos para simplificar la búsqueda. |
+| 4 | **Limpiar** | Elimina puntuación innecesaria al final (como comas o puntos sueltos). |
+| 5 | **Capitalizar** | Ajusta mayúsculas y minúsculas (ej. "Avenida Providencia 1234"). |
 
 ### Antes → Después
 
 | Input | Output |
 |-------|--------|
-| `Av. Providencia 1234` | `Avenida Providencia 1234, Providencia, Región Metropolitana, Chile` |
-| `Psje Los Alerces 567 VdM` | `Pasaje Los Alerces 567, Viña del Mar, Valparaíso, Chile` |
-| `P 18 N° 2345 Stgo` | `Pasaje 18 2345, Santiago, Región Metropolitana, Chile` |
-| `av providencia 1234 dpto 502` | `Avenida Providencia 1234 Departamento 502, Providencia, RM, Chile` |
-| `Km 25 Camino a Melipilla` | `Camino a Melipilla Kilómetro 25, Melipilla, RM, Chile` 🟡 RURAL |
-| `Los Nogales S/N` | `Los Nogales Sin Número, Chile` ⚠️ SIN_NUMERO |
+| `av. providencia 1234` | `Avenida Providencia 1234` |
+| `pje los alerces 567 ` | `Pasaje Los Alerces 567` |
+| `CAMINO A MELIPILLA 25`| `Camino A Melipilla 25` |
+| `AV libertador B. O'higgins` | `Avenida Libertador B. O'higgins` |
 
 ---
 
@@ -132,13 +134,10 @@ SCORE = (MatchType × 0,4) + (Importancia × 0,3) + (Completitud × 0,2) + (Unic
 
 <div align="center">
 
-| Tipo | Cantidad | Detalle |
-|:-----|:--------:|---------|
-| 🇨🇱 Comunas | **346** | Con aliases y fuzzy matching (Levenshtein ≤1) |
-| 🗺️ Regiones | **16** | Números romanos + abreviaturas (`RM`→`Región Metropolitana`) |
-| 🛣️ Abreviaturas viales | **~50** | `Av`→`Avenida`, `Pje`→`Pasaje`, `Cl`→`Calle`, `Cmno`→`Camino` |
-| 🏢 Unidades | **~20** | `Dpto`→`Departamento`, `Of`→`Oficina`, `Int`→`Interior` |
-| ✍️ Correcciones | **~150** | Tildes, nombres propios (`jose miguel carrera`→`José Miguel Carrera`) |
+| Tipo | Detalle |
+|:-----|:---------|
+| 🛣️ Abreviaturas viales | Mapeo rápido de prefijos (`Av`→`Avenida`, `Pje`→`Pasaje`, `Cl`→`Calle`, `Cmno`→`Camino`, etc.) |
+| ✍️ Non-capital words | Exclusión de palabras menores al capitalizar (`de`, `la`, `el`, `los`, `las`, `y`, etc.) |
 
 </div>
 

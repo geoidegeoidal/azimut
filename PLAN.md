@@ -107,104 +107,48 @@ Geocodificador + normalizador de direcciones chilenas. SPA 100% client-side aloj
 - XLSX parser: SheetJS, manejo de múltiples hojas (usar primera con datos)
 - Detección inteligente de columnas de dirección:
   - Busca por nombre: `direccion`, `address`, `calle`, `dirección`, `ubicacion`, `ubicación`, `domicilio`
-  - Si no hay match exacto, muestra selector de columna al usuario
-- Preview: tabla con primeras 10 filas, confirmación de mapeo
-- Validación: columna debe existir, archivo no vacío, encoding legible
+  - Soporte para **selección de múltiples columnas** (ej: unir calle y número).
+- Preview: tabla con primeras 10 filas, confirmación de mapeo y vista previa en vivo de la normalización.
+- Validación: columna(s) seleccionada(s) deben existir, archivo no vacío, encoding legible
 
 **Output**: Usuario sube CSV/XLSX → ve preview → confirma columna → avanza.
 
 ---
 
-### Fase 4 — Normalizador Chileno Bulletproof (7 pasos)
+### Fase 4 — Normalizador Rápido (5 pasos)
 
-**Modelo**: `Qwen3.6 Plus` (principal) / `Kimi K2.6` (alternativa, contexto 128K)
+**Modelo**: `Qwen3.6 Plus` (principal)
 
-Pipeline de 7 pasos con validación cruzada:
+Pipeline simplificado y optimizado de 5 pasos:
 
 ```
-PASO 1 — SANITIZE
-├─ Trim whitespace, colapsar múltiples espacios
-├─ Detectar y remover teléfonos (+56, 9, 2-XXX), RUTs (XX.XXX.XXX-X), emails
-├─ Normalizar caracteres (NFKD → ASCII para tildes, preservar ñ y ü)
-├─ Remover caracteres basura no imprimibles
-└─ Unificar puntuación (múltiples comas → una, punto al final → fuera)
+PASO 1 — ESPACIOS Y LIMPIEZA
+├─ Trim whitespace, colapsar múltiples espacios.
 
-PASO 2 — TOKENIZE
-├─ Separar componentes con regex consciente del español chileno
-├─ Detectar patrón: [vía] [nombre] [número] [unidad] [comuna] [región]
-├─ Caso especial: número antes del nombre → invertir ("1234 Providencia" → "Providencia 1234")
-├─ Caso especial: todo pegado → split letras/dígitos ("losalerces567" → "Los Alerces 567")
-├─ Detectar intersecciones: "esq.", "esquina", "con", "y"
-├─ Detectar kilómetros carreteros: "Km", "km", "KM", "Kilómetro"
-└─ Detectar nombres de edificio/población/villa/condominio/fundo/parcela
+PASO 2 — EXPANDIR VÍA
+├─ Analizar el primer token (separando por espacios).
+├─ Expandir según diccionario rápido (ej. `Av.` -> `Avenida`, `Pje` -> `Pasaje`).
 
-PASO 3 — CLASSIFY
-├─ Clasificar cada token como: VIA | NOMBRE | NUMERO | UNIDAD | COMUNA | REGION | REFERENCIA
-├─ Vía conocida al inicio → marca el tipo de vía
-├─ Dígitos después del nombre → Número
-├─ "Dpto/Depto/Of/Ofi/Loc/Int/Block" + número → Unidad
-├─ Coincidencia con gazetteer de 346 comunas → Comuna
-├─ Coincidencia con 16 regiones → Región
-└─ Token sobrante después del número → posible Referencia no geocodificable
+PASO 3 — SIN TILDES
+├─ Remover acentos gráficos (Normalización NFD) para robustecer el match con OSM.
 
-PASO 4 — EXPAND
-├─ Diccionario de abreviaturas con fuzzy matching (Levenshtein ≤ 2)
-├─ Vías: Av→Avenida, Pje→Pasaje, Cl→Calle, Cmno→Camino, Crta→Carretera
-├─ Unidades: Dpto→Departamento, Of→Oficina, Int→Interior, Loc→Local
-├─ Comunas de alta frecuencia:
-│   Stgo→Santiago, VdM→Viña del Mar, PdteHurtado→Padre Hurtado
-│   SnBdo→San Bernardo, Conce→Concepción, PtoMontt→Puerto Montt
-│   PtaArenas→Punta Arenas, Maipu→Maipú
-├─ Regiones: RM→Región Metropolitana, V→Valparaíso, VIII→Biobío, etc.
-└─ Números: S/N→Sin Número, N°/No/Núm→omitir prefijo
+PASO 4 — LIMPIAR PUNTUACIÓN
+├─ Remover puntos y comas residuales al final del string.
 
-PASO 5 — VALIDATE
-├─ Cotejar comuna contra lista oficial de 346 comunas (Levenshtein ≤ 2)
-├─ Cotejar región contra 16 regiones oficiales
-├─ Autocompletar comuna desde región si falta y viceversa (tabla de lookup)
-├─ Si calle+número vacíos → marcar como DIRECCION_INCOMPLETA
-├─ Si solo comuna → marcar como SOLO_COMUNA (score máximo 25)
-└─ Si solo región → marcar como SOLO_REGION (score máximo 15)
-
-PASO 6 — REBUILD
-├─ Formato canónico: [Vía] [Nombre] [Número] [Unidad], [Comuna], [Región], Chile
-├─ Capitalización: primera letra mayúscula en nombres propios
-├─ Tildes correctas en comunas y regiones conocidas
-├─ Si vía no explícita, inferir: "Calle" si empieza con nombre propio
-└─ Si no hay vía ni número → preservar dirección original con warning
-
-PASO 7 — DIAGNOSE
-├─ Emitir warnings: DIRECCION_INCOMPLETA, SOLO_COMUNA, SIN_NUMERO, RURAL
-├─ Sugerencias: "¿Quisiste decir Providencia?" si Levenshtein ≤ 2
-├─ Flag: POSIBLE_TELEFONO_IGNORADO, POSIBLE_RUT_IGNORADO
-├─ Flag: REFERENCIA_NO_GEOCODIFICABLE
-└─ Flag: EDIFICIO_DETECTADO (nombre de edificio preservado como metadata)
+PASO 5 — CAPITALIZAR
+├─ Poner en mayúsculas la primera letra de cada palabra.
+├─ Omitir de la capitalización palabras menores (`de`, `la`, `el`, `los`, etc.).
+└─ Ensamblar vía y resto de la dirección.
 ```
-
-**Diccionarios embebidos** (346 comunas, 16 regiones, ~50 abreviaturas de vía, ~20 de unidad).
 
 **Casos de frontera que DEBE resolver**:
 
 | Caso | Input real | Output |
 |------|-----------|--------|
-| Teléfono intruso | `Av. Providencia 1234 +56987654321` | `Avenida Providencia 1234, Providencia, RM` ⚠️ teléfono ignorado |
-| RUT intruso | `Los Leones 56, RUT 12.345.678-9` | `Los Leones 56, Providencia, RM` ⚠️ RUT ignorado |
-| Fundo/Parcela | `Fundo El Peumo, Lote 5, Km 12 Camino a Melipilla` | `Fundo El Peumo Lote 5, Camino a Melipilla Kilómetro 12, Melipilla, RM` |
-| Villa/Población | `Villa Frei Block 23 Dpto 405` | `Villa Frei Block 23 Departamento 405, Ñuñoa, RM` |
-| Intersección | `Esq. Alameda c/ San Antonio` | `Avenida Libertador Bernardo O'Higgins esquina San Antonio, Santiago, RM` |
-| Solo comuna | `Providencia` | `Providencia, Región Metropolitana` 🟠 SOLO_COMUNA |
-| Dirección invertida | `Santiago, Providencia 1234` | `Avenida Providencia 1234, Providencia, RM` |
-| Edificio | `Edif. Costanera Center, Andrés Bello 2425` | `Avenida Andrés Bello 2425, Providencia, RM` 🏢 Costanera Center |
-| Sin número + ref | `Los Nogales S/N Frente al Lider` | `Los Nogales Sin Número` ⚠️ SIN_NUMERO + REFERENCIA_NO_GEOCODIFICABLE |
-| Km carretero | `Panamericana Norte Km 45` | `Ruta 5 Norte Kilómetro 45` 🟡 RURAL |
-| Código postal solo | `8320000` | `8320000, Santiago, RM` 🔴 SOLO_COMUNA |
-| Todo minúsculas | `av providencia 1234 dpto 502` | `Avenida Providencia 1234 Departamento 502, Providencia, RM` |
-| Todo pegado | `avenidaprovidencia1234` | `Avenida Providencia 1234, Providencia, RM` |
-| Calle numérica | `Calle 12 #5678` | `Calle 12 5678` |
-| Avenida con ordinal | `Av. 11 de Septiembre 1234` | `Avenida 11 de Septiembre 1234, Providencia, RM` |
-| Pasaje abreviado extremo | `P 18 N° 2345 Stgo` | `Pasaje 18 2345, Santiago, RM` |
-| Sin tildes | `jose miguel carrera 1234` | `José Miguel Carrera 1234, Santiago, RM` |
-| Rural sin calle | `Km 25 Camino a Melipilla` | `Camino a Melipilla Kilómetro 25, Melipilla, RM` 🟡 RURAL |
+| Todo minúsculas | `av. providencia 1234` | `Avenida Providencia 1234` |
+| Mayúsculas | `CAMINO A MELIPILLA 25` | `Camino A Melipilla 25` |
+| Puntuación extra | `los leones 56,` | `Los Leones 56` |
+| Sin vía | `santiago centro 123` | `Santiago Centro 123` |
 
 **Output**: Módulo `NormalizerEngine` con función `normalize(raw: string): NormalizedAddress`.
 
