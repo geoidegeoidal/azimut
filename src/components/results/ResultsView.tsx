@@ -20,7 +20,7 @@ export function ResultsView() {
         <ExportButtons />
       </motion.div>
 
-      <div className="flex gap-2">
+      <div className="flex flex-wrap gap-2">
         {[
           { key: "dashboard" as const, label: "Dashboard", icon: BarChart3 },
           { key: "map" as const, label: "Mapa", icon: Map },

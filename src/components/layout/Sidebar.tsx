@@ -1,4 +1,4 @@
-import { Upload, FileCheck, Loader2, BarChart3, CheckCircle2 } from "lucide-react";
+import { Upload, FileCheck, Loader2, BarChart3, CheckCircle2, X } from "lucide-react";
 import { useStore } from "@/hooks/useStore";
 import type { WizardStep } from "@/types";
 
@@ -9,11 +9,28 @@ const STEPS: { key: WizardStep; label: string; icon: typeof Upload }[] = [
   { key: "results", label: "Resultados", icon: BarChart3 },
 ];
 
-export function Sidebar() {
+interface SidebarProps {
+  open: boolean;
+  onClose: () => void;
+}
+
+export function Sidebar({ open, onClose }: SidebarProps) {
   const step = useStore((s) => s.step);
 
   return (
-    <aside className="w-72 border-r border-gray-200/50 dark:border-gray-800/50 bg-white/40 dark:bg-gray-950/40 backdrop-blur-xl flex flex-col">
+    <aside
+      className={`w-72 border-r border-gray-200/50 dark:border-gray-800/50 bg-white/40 dark:bg-gray-950/40 backdrop-blur-xl flex flex-col
+        fixed inset-y-0 left-0 z-50 transition-transform duration-300 ease-in-out
+        lg:relative lg:inset-auto lg:z-auto lg:translate-x-0 lg:transition-none
+        ${open ? "translate-x-0" : "-translate-x-full"}`}
+    >
+      <button
+        onClick={onClose}
+        className="lg:hidden absolute top-4 right-4 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors z-10"
+        aria-label="Cerrar menú"
+      >
+        <X className="w-5 h-5 text-gray-500 dark:text-gray-400" />
+      </button>
       <div className="p-6 space-y-1">
         <h2 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-4">
           Progreso

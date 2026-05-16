@@ -277,7 +277,7 @@ export function ColumnMapper() {
         </div>
       </motion.div>
 
-      <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-200/50 dark:border-gray-800/50">
+      <div className="flex flex-wrap items-center justify-between gap-3 mt-6 pt-4 border-t border-gray-200/50 dark:border-gray-800/50">
         <button onClick={() => setStep("upload")} className="flex items-center gap-2 px-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
           <ArrowLeft className="w-4 h-4" /> Volver
         </button>

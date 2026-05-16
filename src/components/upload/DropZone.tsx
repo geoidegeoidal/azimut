@@ -82,7 +82,7 @@ export function DropZone() {
           }}
           onDragLeave={() => setIsDragging(false)}
           onDrop={handleDrop}
-          className={`relative border-2 border-dashed rounded-2xl p-12 text-center transition-all duration-300 cursor-pointer ${
+          className={`relative border-2 border-dashed rounded-2xl p-6 sm:p-12 text-center transition-all duration-300 cursor-pointer ${
             isDragging
               ? "border-azimut-500 bg-azimut-50 dark:bg-azimut-950/30 scale-105"
               : "border-gray-300 dark:border-gray-700 hover:border-azimut-400 dark:hover:border-azimut-600 bg-white/50 dark:bg-gray-900/50"
@@ -137,7 +137,7 @@ export function DropZone() {
           )}
         </AnimatePresence>
 
-        <div className="mt-8 flex items-center justify-center gap-6 text-xs text-gray-400 dark:text-gray-500">
+        <div className="mt-8 flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-xs text-gray-400 dark:text-gray-500">
           <div className="flex items-center gap-1.5">
             <FileText className="w-4 h-4" />
             <span>CSV / XLSX (hasta 50 MB)</span>
