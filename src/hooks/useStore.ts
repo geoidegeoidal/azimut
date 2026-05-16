@@ -14,7 +14,7 @@ interface AppState {
   fileName: string | null;
   fileData: Record<string, string>[];
   headers: string[];
-  addressColumn: string | null;
+  addressColumns: string[];
   rows: AddressRow[];
   isDark: boolean;
   processing: {
@@ -25,7 +25,7 @@ interface AppState {
   };
   setStep: (step: WizardStep) => void;
   setFileData: (data: Record<string, string>[], fileName: string) => void;
-  setAddressColumn: (col: string) => void;
+  setAddressColumns: (cols: string[]) => void;
   setRows: (rows: AddressRow[]) => void;
   updateRowGeocode: (id: number, geocode: GeocodeResult) => void;
   toggleTheme: () => void;
@@ -38,7 +38,7 @@ export const useStore = create<AppState>((set, get) => ({
   fileName: null,
   fileData: [],
   headers: [],
-  addressColumn: null,
+  addressColumns: [],
   rows: [],
   isDark: window.matchMedia("(prefers-color-scheme: dark)").matches,
   processing: { current: 0, total: 0, paused: false, elapsed: 0 },
@@ -50,7 +50,7 @@ export const useStore = create<AppState>((set, get) => ({
     set({ fileData: data, headers, fileName });
   },
 
-  setAddressColumn: (col) => set({ addressColumn: col }),
+  setAddressColumns: (cols) => set({ addressColumns: cols }),
 
   setRows: (rows) => set({ rows }),
 
@@ -78,7 +78,7 @@ export const useStore = create<AppState>((set, get) => ({
       fileName: null,
       fileData: [],
       headers: [],
-      addressColumn: null,
+      addressColumns: [],
       rows: [],
       processing: { current: 0, total: 0, paused: false, elapsed: 0 },
       isDark,

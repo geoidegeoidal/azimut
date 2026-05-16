@@ -1,5 +1,5 @@
 import { useState, useMemo, useCallback, useRef } from "react";
-import { FileText, ArrowRight, ArrowLeft, MapPin, FileQuestion, Pause, Play, X } from "lucide-react";
+import { FileText, ArrowRight, ArrowLeft, MapPin, FileQuestion, Pause, Play, X, Plus } from "lucide-react";
 import { motion } from "framer-motion";
 import { useStore } from "@/hooks/useStore";
 import { detectAddressColumn } from "@/engine/parser";
@@ -11,12 +11,12 @@ export function ColumnMapper() {
   const headers = useStore((s) => s.headers);
   const fileName = useStore((s) => s.fileName);
   const fileData = useStore((s) => s.fileData);
-  const setAddressColumn = useStore((s) => s.setAddressColumn);
+  const setAddressColumns = useStore((s) => s.setAddressColumns);
   const setStep = useStore((s) => s.setStep);
   const setRows = useStore((s) => s.setRows);
   const updateProcessing = useStore((s) => s.updateProcessing);
 
-  const [selected, setSelected] = useState<string | null>(null);
+  const [selected, setSelected] = useState<string[]>([]);
   const [working, setWorking] = useState(false);
   const [paused, setPaused] = useState(false);
   const [progress, setProgress] = useState({ current: 0, total: 0, elapsed: 0 });
@@ -25,23 +25,36 @@ export function ColumnMapper() {
   const suggested = useMemo(() => detectAddressColumn(headers), [headers]);
   const previewRows = useMemo(() => fileData.slice(0, 10), [fileData]);
 
+  const buildAddress = useCallback((row: Record<string, string>) => {
+    return selected.map((col) => (row[col] || "").trim()).filter(Boolean).join(" ");
+  }, [selected]);
+
   const normalizedPreview = useMemo(() => {
-    if (!selected) return [];
-    const addresses = fileData.slice(0, 10).map((row) => row[selected] || "");
+    if (selected.length === 0) return [];
+    const addresses = fileData.slice(0, 10).map((row) => buildAddress(row));
     return normalizeBatch(addresses);
-  }, [selected, fileData]);
+  }, [selected, fileData, buildAddress]);
+
+  const toggleColumn = useCallback((col: string) => {
+    setSelected((prev) => {
+      if (prev.includes(col)) {
+        return prev.filter((c) => c !== col);
+      }
+      return [...prev, col];
+    });
+  }, []);
 
   const handleConfirm = useCallback(async () => {
-    if (!selected) return;
+    if (selected.length === 0) return;
 
-    setAddressColumn(selected);
+    setAddressColumns(selected);
     setWorking(true);
     setStep("processing");
 
     const addresses = fileData.map((row, i) => ({
       index: i,
       original: { ...row },
-      address: row[selected] || "",
+      address: buildAddress(row),
     }));
 
     const normalized: NormalizedAddress[] = normalizeBatch(addresses.map((a) => a.address));
@@ -81,7 +94,7 @@ export function ColumnMapper() {
     setWorking(false);
     setPaused(false);
     setStep("results");
-  }, [selected, fileData, setAddressColumn, setStep, setRows, updateProcessing]);
+  }, [selected, fileData, buildAddress, setAddressColumns, setStep, setRows, updateProcessing]);
 
   const handlePause = useCallback(() => {
     if (paused) {
@@ -167,7 +180,7 @@ export function ColumnMapper() {
         <div className="flex items-center gap-3 mb-6">
           <FileText className="w-6 h-6 text-azimut-500" />
           <div>
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white">Confirma la columna de direcciones</h2>
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white">Confirma las columnas de dirección</h2>
             <p className="text-sm text-gray-500 dark:text-gray-400">{fileName} — {fileData.length} filas · {headers.length} columnas</p>
           </div>
         </div>
@@ -177,31 +190,63 @@ export function ColumnMapper() {
             <div className="p-4 border-b border-gray-200/50 dark:border-gray-800/50">
               <div className="flex items-center gap-2">
                 <FileQuestion className="w-4 h-4 text-azimut-500" />
-                <p className="text-sm font-medium text-gray-700 dark:text-gray-300">¿Cuál columna tiene las direcciones?</p>
+                <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  ¿Qué columnas forman la dirección?
+                </p>
               </div>
-              {suggested && (
+              <p className="text-xs text-gray-400 dark:text-gray-500 mt-1 ml-6">
+                Selecciona en orden: calle, número, comuna... Se unirán con espacio.
+              </p>
+              {suggested && !selected.includes(suggested) && (
                 <p className="text-xs text-azimut-600 dark:text-azimut-400 mt-1.5 ml-6">
                   <MapPin className="w-3 h-3 inline mr-1" />Sugerimos "{suggested}"
                 </p>
               )}
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 p-4">
-              {headers.map((h) => (
-                <button key={h} onClick={() => setSelected(h)}
-                  className={`px-4 py-3 rounded-xl text-sm font-medium transition-all truncate ${
-                    selected === h ? "bg-azimut-500 text-white shadow-lg shadow-azimut-500/25"
-                    : h === suggested ? "bg-azimut-50 dark:bg-azimut-950/30 text-azimut-700 dark:text-azimut-300 border border-azimut-200 dark:border-azimut-800"
-                    : "bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
-                  }`} title={h}>{h}</button>
-              ))}
+              {headers.map((h) => {
+                const idx = selected.indexOf(h);
+                const isSelected = idx !== -1;
+                return (
+                  <button key={h} onClick={() => toggleColumn(h)}
+                    className={`relative px-4 py-3 rounded-xl text-sm font-medium transition-all truncate text-left ${
+                      isSelected
+                        ? "bg-azimut-500 text-white shadow-lg shadow-azimut-500/25"
+                        : h === suggested
+                          ? "bg-azimut-50 dark:bg-azimut-950/30 text-azimut-700 dark:text-azimut-300 border border-azimut-200 dark:border-azimut-800"
+                          : "bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    }`} title={h}>
+                    {isSelected && (
+                      <span className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-white dark:bg-gray-900 text-azimut-600 dark:text-azimut-400 text-xs font-bold flex items-center justify-center shadow border border-azimut-200 dark:border-azimut-800">
+                        {idx + 1}
+                      </span>
+                    )}
+                    {h}
+                  </button>
+                );
+              })}
             </div>
+
+            {selected.length > 1 && (
+              <div className="px-4 pb-4 flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+                <span>Orden:</span>
+                {selected.map((col, i) => (
+                  <span key={col} className="flex items-center gap-1">
+                    <span className="bg-azimut-100 dark:bg-azimut-900/50 text-azimut-700 dark:text-azimut-300 px-1.5 py-0.5 rounded font-medium">{col}</span>
+                    {i < selected.length - 1 && <Plus className="w-3 h-3" />}
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
 
           <div className="bg-white/70 dark:bg-gray-900/70 backdrop-blur-xl rounded-2xl border border-gray-200/50 dark:border-gray-800/50 overflow-hidden">
             <div className="p-4 border-b border-gray-200/50 dark:border-gray-800/50">
               <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Vista previa de normalización</p>
               <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
-                {selected ? `Columna "${selected}" — 10 de ${fileData.length} filas` : "Selecciona una columna"}
+                {selected.length > 0
+                  ? `${selected.length} columna(s) — 10 de ${fileData.length} filas`
+                  : "Selecciona al menos una columna"}
               </p>
             </div>
             <div className="overflow-x-auto max-h-80 overflow-y-auto">
@@ -209,25 +254,22 @@ export function ColumnMapper() {
                 <thead>
                   <tr className="border-b border-gray-200/50 dark:border-gray-800/50 bg-gray-50/50 dark:bg-gray-800/30">
                     <th className="text-left px-3 py-2 font-medium text-gray-500 dark:text-gray-400 w-8">#</th>
-                    <th className="text-left px-3 py-2 font-medium text-gray-500 dark:text-gray-400 max-w-40">Original</th>
-                    <th className="text-left px-3 py-2 font-medium text-azimut-600 dark:text-azimut-300 max-w-48">Normalizada</th>
-                    <th className="text-left px-3 py-2 font-medium text-gray-500 dark:text-gray-400">Comuna</th>
-                    <th className="text-left px-3 py-2 font-medium text-gray-500 dark:text-gray-400">⚠️</th>
+                    <th className="text-left px-3 py-2 font-medium text-gray-500 dark:text-gray-400 max-w-60">Dirección unida</th>
+                    <th className="text-left px-3 py-2 font-medium text-azimut-600 dark:text-azimut-300 max-w-60">Normalizada</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {selected ? previewRows.map((row, i) => {
+                  {selected.length > 0 ? previewRows.map((row, i) => {
                     const norm = normalizedPreview[i];
+                    const joined = buildAddress(row);
                     return (
                       <tr key={i} className="border-b border-gray-100 dark:border-gray-800/30 hover:bg-gray-50 dark:hover:bg-gray-800/20">
                         <td className="px-3 py-1.5 font-mono text-gray-400">{i + 1}</td>
-                        <td className="px-3 py-1.5 truncate max-w-40 text-gray-600 dark:text-gray-400">{row[selected] || "—"}</td>
-                        <td className="px-3 py-1.5 truncate max-w-48 font-medium text-gray-900 dark:text-white">{norm?.normalized || "—"}</td>
-                        <td className="px-3 py-1.5 text-gray-600 dark:text-gray-400">{norm?.comuna || "—"}</td>
-                        <td className="px-3 py-1.5">{(norm?.warnings.length ?? 0) > 0 && <span className="text-amber-500">⚠️</span>}</td>
+                        <td className="px-3 py-1.5 truncate max-w-60 text-gray-600 dark:text-gray-400">{joined || "—"}</td>
+                        <td className="px-3 py-1.5 truncate max-w-60 font-medium text-gray-900 dark:text-white">{norm?.normalized || "—"}</td>
                       </tr>
                     );
-                  }) : <tr><td colSpan={5} className="px-3 py-8 text-center text-gray-400">Selecciona una columna para ver la normalización</td></tr>}
+                  }) : <tr><td colSpan={3} className="px-3 py-8 text-center text-gray-400">Selecciona columnas para ver la normalización</td></tr>}
                 </tbody>
               </table>
             </div>
@@ -239,9 +281,9 @@ export function ColumnMapper() {
         <button onClick={() => setStep("upload")} className="flex items-center gap-2 px-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
           <ArrowLeft className="w-4 h-4" /> Volver
         </button>
-        <button onClick={handleConfirm} disabled={!selected}
+        <button onClick={handleConfirm} disabled={selected.length === 0}
           className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-medium transition-all ${
-            selected ? "bg-azimut-500 text-white hover:bg-azimut-600 shadow-lg shadow-azimut-500/25"
+            selected.length > 0 ? "bg-azimut-500 text-white hover:bg-azimut-600 shadow-lg shadow-azimut-500/25"
             : "bg-gray-200 dark:bg-gray-800 text-gray-400 cursor-not-allowed"
           }`}>
           Geocodificar {fileData.length} direcciones <ArrowRight className="w-4 h-4" />
