@@ -32,7 +32,7 @@ interface PhotonResult {
 }
 
 async function nominatimSearch(query: string, signal: AbortSignal): Promise<NominatimResult[]> {
-  const url = `${NOMINATIM_URL}?format=json&q=${encodeURIComponent(query)}&limit=5&addressdetails=1&accept-language=es`;
+  const url = `${NOMINATIM_URL}?format=json&q=${encodeURIComponent(query)}&limit=5&addressdetails=1&accept-language=es&countrycodes=cl`;
   const res = await fetch(url, {
     headers: { "User-Agent": USER_AGENT },
     signal,
@@ -42,7 +42,8 @@ async function nominatimSearch(query: string, signal: AbortSignal): Promise<Nomi
 }
 
 async function photonSearch(query: string, signal: AbortSignal): Promise<PhotonResult[]> {
-  const url = `${PHOTON_URL}?q=${encodeURIComponent(query)}&limit=5&lang=es`;
+  const pQuery = query.toLowerCase().includes("chile") ? query : `${query}, Chile`;
+  const url = `${PHOTON_URL}?q=${encodeURIComponent(pQuery)}&limit=5&lang=es`;
   const res = await fetch(url, {
     headers: { "User-Agent": USER_AGENT },
     signal,
