@@ -7,6 +7,17 @@ import { normalizeBatch } from "@/engine/normalizer";
 import { geocodeBatch, pause, resume, cancel } from "@/engine/geocoder.worker";
 import type { NormalizedAddress } from "@/types";
 
+const COMUNA_KEYWORDS = ["comuna", "com", "ciudad", "municipalidad"];
+
+function detectComunaColumn(headers: string[]): string | null {
+  for (const kw of COMUNA_KEYWORDS) {
+    for (const h of headers) {
+      if (h.toLowerCase().trim() === kw || h.toLowerCase().includes(kw)) return h;
+    }
+  }
+  return null;
+}
+
 export function ColumnMapper() {
   const headers = useStore((s) => s.headers);
   const fileName = useStore((s) => s.fileName);
@@ -17,12 +28,14 @@ export function ColumnMapper() {
   const updateProcessing = useStore((s) => s.updateProcessing);
 
   const [selected, setSelected] = useState<string[]>([]);
+  const [comunaCol, setComunaCol] = useState<string | null>(null);
   const [working, setWorking] = useState(false);
   const [paused, setPaused] = useState(false);
   const [progress, setProgress] = useState({ current: 0, total: 0, elapsed: 0 });
   const abortRef = useRef<AbortController | null>(null);
 
   const suggested = useMemo(() => detectAddressColumn(headers), [headers]);
+  const suggestedComuna = useMemo(() => detectComunaColumn(headers), [headers]);
   const previewRows = useMemo(() => fileData.slice(0, 10), [fileData]);
 
   const buildAddress = useCallback((row: Record<string, string>) => {
@@ -32,8 +45,9 @@ export function ColumnMapper() {
   const normalizedPreview = useMemo(() => {
     if (selected.length === 0) return [];
     const addresses = fileData.slice(0, 10).map((row) => buildAddress(row));
-    return normalizeBatch(addresses);
-  }, [selected, fileData, buildAddress]);
+    const comunas = comunaCol ? fileData.slice(0, 10).map((row) => row[comunaCol]?.trim() || undefined) : undefined;
+    return normalizeBatch(addresses, comunas);
+  }, [selected, fileData, buildAddress, comunaCol]);
 
   const toggleColumn = useCallback((col: string) => {
     setSelected((prev) => {
@@ -47,6 +61,12 @@ export function ColumnMapper() {
   const handleConfirm = useCallback(async () => {
     if (selected.length === 0) return;
 
+    // Auto-set comuna column from suggestion if not manually set
+    const effectiveComuna = comunaCol || (suggestedComuna && !selected.includes(suggestedComuna) ? suggestedComuna : null);
+    if (effectiveComuna && effectiveComuna !== comunaCol) {
+      setComunaCol(effectiveComuna);
+    }
+
     setAddressColumns(selected);
     setWorking(true);
     setStep("processing");
@@ -57,7 +77,11 @@ export function ColumnMapper() {
       address: buildAddress(row),
     }));
 
-    const normalized: NormalizedAddress[] = normalizeBatch(addresses.map((a) => a.address));
+    const comunas = effectiveComuna
+      ? addresses.map((a) => a.original[effectiveComuna]?.trim() || undefined)
+      : undefined;
+
+    const normalized: NormalizedAddress[] = normalizeBatch(addresses.map((a) => a.address), comunas);
 
     const baseRows = addresses.map((a, i) => ({
       id: i + 1,
@@ -94,7 +118,7 @@ export function ColumnMapper() {
     setWorking(false);
     setPaused(false);
     setStep("results");
-  }, [selected, fileData, buildAddress, setAddressColumns, setStep, setRows, updateProcessing]);
+  }, [selected, fileData, buildAddress, setAddressColumns, setStep, setRows, updateProcessing, comunaCol, suggestedComuna]);
 
   const handlePause = useCallback(() => {
     if (paused) {
@@ -200,6 +224,11 @@ export function ColumnMapper() {
               {suggested && !selected.includes(suggested) && (
                 <p className="text-xs text-azimut-600 dark:text-azimut-400 mt-1.5 ml-6">
                   <MapPin className="w-3 h-3 inline mr-1" />Sugerimos "{suggested}"
+                </p>
+              )}
+              {suggestedComuna && !selected.includes(suggestedComuna) && (
+                <p className="text-xs text-emerald-600 dark:text-emerald-400 mt-0.5 ml-6">
+                  <MapPin className="w-3 h-3 inline mr-1" />Comuna: "{suggestedComuna}" (callejero IDE Chile)
                 </p>
               )}
             </div>

@@ -110,7 +110,7 @@ export async function geocodeBatch(
       continue;
     }
 
-    const result = await geocodeWithRetry(query, signal, rateLimiter);
+    const result = await geocodeWithRetry(query, signal, rateLimiter, 3, addr);
     await cacheSet(cacheKey, result);
     results.push(result);
 

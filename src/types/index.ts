@@ -13,6 +13,8 @@ export interface NormalizedAddress {
   reference?: string;
   isRural: boolean;
   isIntersection: boolean;
+  callejeroMatch?: boolean;
+  callejeroCorrected?: string;
 }
 
 export type PrecisionLevel = "excelente" | "bueno" | "regular" | "bajo" | "nulo";

@@ -1,21 +1,6 @@
 import { VIA_ABBREVIATIONS } from "./normalizer.rules";
-
-export interface NormalizedAddress {
-  original: string;
-  normalized: string;
-  via?: string;
-  nombre?: string;
-  numero?: string;
-  unidad?: string;
-  comuna?: string;
-  region?: string;
-  warnings: string[];
-  suggestions: string[];
-  buildingName?: string;
-  reference?: string;
-  isRural: boolean;
-  isIntersection: boolean;
-}
+import { lookupStreet, correctViaType } from "./callejero";
+import type { NormalizedAddress } from "@/types";
 
 function removeAccents(text: string): string {
   return text.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -61,7 +46,7 @@ function cleanPunctuation(text: string): string {
   return text.replace(/[,.]+$/, "").replace(/\s+/g, " ").trim();
 }
 
-export function normalize(raw: string): NormalizedAddress {
+export function normalize(raw: string, comuna?: string): NormalizedAddress {
   const original = raw.trim();
 
   if (!original) {
@@ -76,7 +61,7 @@ export function normalize(raw: string): NormalizedAddress {
   }
 
   // Step 1: Normalize whitespace & basic cleanup
-  let text = original.replace(/\s+/g, " ").trim();
+  const text = original.replace(/\s+/g, " ").trim();
 
   // Step 2: Expand via abbreviation (first token)
   const { via, rest } = expandVia(text);
@@ -102,18 +87,53 @@ export function normalize(raw: string): NormalizedAddress {
     normalized = restCapitalized;
   }
 
+  // Step 6: Callejero cross-reference (if comuna is known)
+  let callejeroMatch: boolean | undefined;
+  let callejeroCorrected: string | undefined;
+  const suggestions: string[] = [];
+  const warnings: string[] = [];
+
+  if (comuna) {
+    // First try correcting the via type (e.g., "Pasaje Ossa" → "Calle Ossa")
+    const viaCorrected = correctViaType(normalized, comuna);
+    if (viaCorrected !== normalized) {
+      suggestions.push(viaCorrected);
+    }
+
+    // Then do fuzzy lookup
+    const lookupResult = lookupStreet(normalized, comuna);
+    if (lookupResult.found) {
+      callejeroMatch = true;
+      if (lookupResult.correctedName) {
+        callejeroCorrected = lookupResult.correctedName;
+        suggestions.push(lookupResult.correctedName);
+      }
+    } else if (lookupResult.suggestions.length > 0) {
+      callejeroMatch = false;
+      for (const s of lookupResult.suggestions) {
+        if (s.name !== normalized) suggestions.push(s.name);
+      }
+      warnings.push("CALLE_NO_ENCONTRADA_EN_COMUNA");
+    } else if (normalized.length > 3) {
+      callejeroMatch = false;
+      warnings.push("CALLE_NO_ENCONTRADA_EN_COMUNA");
+    }
+  }
+
   return {
     original,
     normalized,
     via: viaCapitalized,
     nombre: restCapitalized || undefined,
-    warnings: [],
-    suggestions: [],
+    warnings,
+    suggestions: suggestions.slice(0, 5),
     isRural: false,
     isIntersection: false,
+    callejeroMatch,
+    callejeroCorrected,
   };
 }
 
-export function normalizeBatch(addresses: string[]): NormalizedAddress[] {
-  return addresses.map(normalize);
+export function normalizeBatch(addresses: string[], comunas?: (string | undefined)[]): NormalizedAddress[] {
+  return addresses.map((a, i) => normalize(a, comunas?.[i]));
 }

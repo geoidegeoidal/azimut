@@ -1,5 +1,5 @@
 import { normalize } from './src/engine/normalizer';
-import { geocodeNominatim, geocodePhoton } from './src/engine/geocoder';
+import { geocodeNominatim } from './src/engine/geocoder';
 
 const addr1 = "Pio Nono 110, Recoleta";
 

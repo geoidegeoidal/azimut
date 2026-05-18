@@ -1,5 +1,6 @@
-import type { GeocodeResult } from "@/types";
+import type { GeocodeResult, NormalizedAddress } from "@/types";
 import { buildGeocodeResult } from "./scorer";
+import { searchSegment } from "./callejero";
 
 const USER_AGENT = "Azimut/1.0 (geocodificador gratuito chileno - github.com/geoidegeoidal/azimut)";
 
@@ -114,10 +115,56 @@ export async function geocodePhoton(
   );
 }
 
+export function geocodeCallejero(
+  normalized: NormalizedAddress,
+): GeocodeResult | null {
+  const viaCompleta = normalized.callejeroCorrected || normalized.normalized;
+  const comuna = normalized.comuna;
+
+  if (!comuna) return null;
+
+  // Try to extract a number from the address
+  const numStr = normalized.numero;
+  if (!numStr) return null;
+
+  const numero = parseInt(numStr, 10);
+  if (isNaN(numero) || numero <= 0) return null;
+
+  const result = searchSegment(viaCompleta, numero, comuna);
+  if (!result.found || result.lat === undefined || result.lon === undefined) return null;
+
+  const displayName = `${viaCompleta} ${numero}, ${comuna}, Chile`;
+  const score = Math.min(100, 85 + (result.seg ? 10 : 0));
+
+  return {
+    lat: result.lat,
+    lon: result.lon,
+    score,
+    precision: score >= 85 ? "excelente" : "bueno",
+    matchType: "callejero",
+    importance: 0.9,
+    api: "Callejero IDE Chile",
+    displayName,
+    found: true,
+    osmType: "callejero",
+    completeness: 95,
+    uniqueness: 100,
+    timestamp: Date.now(),
+  };
+}
+
 export async function geocodeWithFallback(
   address: string,
   signal: AbortSignal,
+  normalized?: NormalizedAddress,
 ): Promise<GeocodeResult> {
+  // Layer 1: Callejero (if comuna and number are known)
+  if (normalized) {
+    const callejeroResult = geocodeCallejero(normalized);
+    if (callejeroResult) return callejeroResult;
+  }
+
+  // Layer 2: Nominatim
   try {
     const nominatimResult = await geocodeNominatim(address, signal);
     if (nominatimResult.found) return nominatimResult;
@@ -125,6 +172,7 @@ export async function geocodeWithFallback(
     // Nominatim failed, try Photon
   }
 
+  // Layer 3: Photon
   try {
     return await geocodePhoton(address, signal);
   } catch {
@@ -152,8 +200,9 @@ function notFoundResult(): GeocodeResult {
 export function geocodeAddress(
   address: string,
   signal: AbortSignal,
+  normalized?: NormalizedAddress,
 ): Promise<GeocodeResult> {
-  return geocodeWithFallback(address, signal);
+  return geocodeWithFallback(address, signal, normalized);
 }
 
 export class RateLimiter {
@@ -179,6 +228,7 @@ export async function geocodeWithRetry(
   signal: AbortSignal,
   rateLimiter: RateLimiter,
   maxRetries = 3,
+  normalized?: NormalizedAddress,
 ): Promise<GeocodeResult> {
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
@@ -189,7 +239,7 @@ export async function geocodeWithRetry(
       const timeoutId = setTimeout(() => controller.abort(), 10000);
 
       try {
-        const result = await geocodeAddress(address, linkedSignal);
+        const result = await geocodeAddress(address, linkedSignal, normalized);
         clearTimeout(timeoutId);
         return result;
       } catch (e) {

@@ -70,7 +70,7 @@ export function calculateScore(result: {
   }
 
   const count = result.resultCount ?? 1;
-  let uniqueness = 0;
+  let uniqueness: number;
   if (count === 1) uniqueness = 100;
   else if (count === 2) uniqueness = 80;
   else if (count === 3) uniqueness = 60;
