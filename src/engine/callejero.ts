@@ -166,6 +166,9 @@ let segmentsLoaded = false;
 let segmentsLoadPromise: Promise<number> | null = null;
 const segmentsByComuna: Map<string, CallejeroSegment[]> = new Map();
 
+// Index: comuna -> unique street names found in segments (for fuzzy matching)
+const segmentNamesByComuna: Map<string, Set<string>> = new Map();
+
 export async function loadSegments(baseUrl?: string): Promise<number> {
   if (segmentsLoaded) return segmentsByComuna.size;
   if (segmentsLoadPromise) return segmentsLoadPromise;
@@ -184,6 +187,13 @@ export async function loadSegments(baseUrl?: string): Promise<number> {
 
       for (const [comuna, segs] of Object.entries(data)) {
         segmentsByComuna.set(comuna, segs);
+
+        // Build unique street name index for this comuna
+        const names = new Set<string>();
+        for (const seg of segs) {
+          names.add(seg.v);
+        }
+        segmentNamesByComuna.set(comuna, names);
       }
       segmentsLoaded = true;
       const totalSegs = Object.values(data).reduce((sum, arr) => sum + arr.length, 0);
@@ -227,7 +237,7 @@ export function searchSegment(
   viaCompleta: string,
   numero: number,
   comuna: string,
-): { found: boolean; lat?: number; lon?: number; seg?: CallejeroSegment } {
+): { found: boolean; lat?: number; lon?: number; seg?: CallejeroSegment; correctedName?: string } {
   if (!segmentsLoaded) return { found: false };
 
   const normComuna = normalizeCalle(comuna);
@@ -236,7 +246,7 @@ export function searchSegment(
 
   const normVia = normalizeCalle(viaCompleta);
 
-  // Exact match first
+  // Phase 1: Exact match
   for (const seg of segs) {
     if (seg.v !== normVia) continue;
 
@@ -270,6 +280,62 @@ export function searchSegment(
         clamped,
       );
       return { found: true, lat, lon, seg };
+    }
+  }
+
+  // Phase 2: Fuzzy match against unique street names in this comuna
+  const uniqueNames = segmentNamesByComuna.get(normComuna);
+  if (!uniqueNames) return { found: false };
+
+  let bestMatch: string | null = null;
+  let bestDist = Infinity;
+
+  for (const name of uniqueNames) {
+    const dist = levenshtein(normVia, name);
+    // Dynamic threshold: longer names allow more distance
+    const maxDist = Math.max(2, Math.floor(name.length / 8));
+    if (dist <= maxDist && dist < bestDist) {
+      bestDist = dist;
+      bestMatch = name;
+    }
+  }
+
+  if (!bestMatch) return { found: false };
+
+  // Phase 3: Search segments with the corrected name
+  for (const seg of segs) {
+    if (seg.v !== bestMatch) continue;
+
+    if (numero >= seg.n[0] && numero <= seg.n[1]) {
+      const [lat, lon] = interpolatePoint(
+        seg.g[0],
+        seg.g[1],
+        seg.n[0],
+        seg.n[1],
+        numero,
+      );
+      return { found: true, lat, lon, seg, correctedName: bestMatch };
+    }
+  }
+
+  // Fallback with tolerance for corrected name
+  for (const seg of segs) {
+    if (seg.v !== bestMatch) continue;
+
+    const minNum = seg.n[0];
+    const maxNum = seg.n[1];
+    const tolerance = 10;
+
+    if (numero >= minNum - tolerance && numero <= maxNum + tolerance) {
+      const clamped = Math.min(maxNum, Math.max(minNum, numero));
+      const [lat, lon] = interpolatePoint(
+        seg.g[0],
+        seg.g[1],
+        minNum,
+        maxNum,
+        clamped,
+      );
+      return { found: true, lat, lon, seg, correctedName: bestMatch };
     }
   }
 

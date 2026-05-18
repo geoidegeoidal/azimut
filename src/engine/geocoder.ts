@@ -144,7 +144,10 @@ export async function geocodeCallejero(
   const result = searchSegment(viaCompleta, numero, comuna);
   if (!result.found || result.lat === undefined || result.lon === undefined) return null;
 
-  const displayName = `${viaCompleta} ${numero}, ${comuna}, Chile`;
+  // Use corrected name if fuzzy match found it
+  const displayName = result.correctedName
+    ? `${result.correctedName} ${numero}, ${comuna}, Chile`
+    : `${viaCompleta} ${numero}, ${comuna}, Chile`;
 
   return {
     lat: result.lat,
