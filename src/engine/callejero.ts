@@ -132,17 +132,14 @@ export function correctViaType(street: string, comuna: string): string {
   const set = namesByComuna.get(normComuna);
   if (!set) return street;
 
-  // Try exact match first
   if (set.has(normInput)) return street;
 
-  // Extract via type and rest
   const parts = normInput.split(/\s+/);
   if (parts.length < 2) return street;
 
   const inputVia = parts[0];
   const inputRest = parts.slice(1).join(" ");
 
-  // Try swapping via type: check all known streets with same rest but different via
   for (const candidate of set) {
     const candParts = candidate.split(/\s+/);
     if (candParts.length < 2) continue;
@@ -166,27 +163,47 @@ export interface CallejeroSegment {
 }
 
 let segmentsLoaded = false;
+let segmentsLoadPromise: Promise<number> | null = null;
 const segmentsByComuna: Map<string, CallejeroSegment[]> = new Map();
 
-export async function loadSegments(baseUrl = ""): Promise<number> {
+export async function loadSegments(baseUrl?: string): Promise<number> {
   if (segmentsLoaded) return segmentsByComuna.size;
+  if (segmentsLoadPromise) return segmentsLoadPromise;
 
-  try {
-    const url = `${baseUrl}/callejero-segments-index.json`;
-    const res = await fetch(url);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data: Record<string, CallejeroSegment[]> = await res.json();
+  const resolvedBase = baseUrl ?? import.meta.env.BASE_URL ?? "";
+  // Remove trailing slash to avoid double slashes
+  const cleanBase = resolvedBase.replace(/\/$/, "");
+  const url = `${cleanBase}/callejero-segments-index.json`;
 
-    for (const [comuna, segs] of Object.entries(data)) {
-      segmentsByComuna.set(comuna, segs);
+  segmentsLoadPromise = (async () => {
+    try {
+      console.log(`[Callejero] Loading segments from ${url}...`);
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText}`);
+      const data: Record<string, CallejeroSegment[]> = await res.json();
+
+      for (const [comuna, segs] of Object.entries(data)) {
+        segmentsByComuna.set(comuna, segs);
+      }
+      segmentsLoaded = true;
+      const totalSegs = Object.values(data).reduce((sum, arr) => sum + arr.length, 0);
+      console.log(`[Callejero] Loaded ${Object.keys(data).length} comunas, ${totalSegs.toLocaleString()} segments`);
+      return segmentsByComuna.size;
+    } catch (err) {
+      console.error("[Callejero] Failed to load segments:", err);
+      segmentsLoadPromise = null; // allow retry
+      return 0;
     }
-    segmentsLoaded = true;
-    console.log(`[Callejero] Loaded ${Object.keys(data).length} comunas with segments`);
-  } catch (err) {
-    console.warn("[Callejero] Failed to load segments:", err);
-  }
+  })();
 
-  return segmentsByComuna.size;
+  return segmentsLoadPromise;
+}
+
+/** Ensure segments are loaded before searching. Waits if loading in progress. */
+export async function ensureSegmentsLoaded(): Promise<boolean> {
+  if (segmentsLoaded) return true;
+  const count = await loadSegments();
+  return count > 0;
 }
 
 function interpolatePoint(
@@ -219,6 +236,7 @@ export function searchSegment(
 
   const normVia = normalizeCalle(viaCompleta);
 
+  // Exact match first
   for (const seg of segs) {
     if (seg.v !== normVia) continue;
 
@@ -234,7 +252,7 @@ export function searchSegment(
     }
   }
 
-  // No exact segment found, but maybe the number is close to a range
+  // Fallback: check if number is close to any range (tolerance of 10)
   for (const seg of segs) {
     if (seg.v !== normVia) continue;
 
@@ -260,4 +278,8 @@ export function searchSegment(
 
 export function isSegmentsLoaded(): boolean {
   return segmentsLoaded;
+}
+
+export function getSegmentsCount(): number {
+  return segmentsByComuna.size;
 }

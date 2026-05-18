@@ -1,6 +1,6 @@
 import type { GeocodeResult, NormalizedAddress } from "@/types";
 import { buildGeocodeResult } from "./scorer";
-import { searchSegment } from "./callejero";
+import { searchSegment, ensureSegmentsLoaded } from "./callejero";
 
 const USER_AGENT = "Azimut/1.0 (geocodificador gratuito chileno - github.com/geoidegeoidal/azimut)";
 
@@ -115,34 +115,42 @@ export async function geocodePhoton(
   );
 }
 
-export function geocodeCallejero(
+/**
+ * Try to geocode using the official Chilean callejero (IDE Chile).
+ * Waits for segments to load if needed.
+ * Returns null if callejero can't resolve this address (falls through to Nominatim/Photon).
+ */
+export async function geocodeCallejero(
   normalized: NormalizedAddress,
-): GeocodeResult | null {
-  // Build the street name without number for segment lookup
+): Promise<GeocodeResult | null> {
+  const comuna = normalized.comuna || "";
+  const numStr = normalized.numero;
+
+  // Callejero requires both comuna and street number
+  if (!comuna || !numStr) return null;
+
+  const numero = parseInt(numStr, 10);
+  if (isNaN(numero) || numero <= 0) return null;
+
+  // Build street name WITHOUT number for segment lookup
   const viaCompleta = normalized.callejeroCorrected
     || (normalized.via && normalized.nombre ? `${normalized.via} ${normalized.nombre}` : undefined)
     || normalized.normalized;
 
-  const comuna = normalized.comuna || "";
-  if (!comuna) return null;
-
-  const numStr = normalized.numero;
-  if (!numStr) return null;
-
-  const numero = parseInt(numStr, 10);
-  if (isNaN(numero) || numero <= 0) return null;
+  // Ensure segments are loaded before searching (waits if loading in progress)
+  const loaded = await ensureSegmentsLoaded();
+  if (!loaded) return null;
 
   const result = searchSegment(viaCompleta, numero, comuna);
   if (!result.found || result.lat === undefined || result.lon === undefined) return null;
 
   const displayName = `${viaCompleta} ${numero}, ${comuna}, Chile`;
-  const score = 95; // High confidence: official callejero data
 
   return {
     lat: result.lat,
     lon: result.lon,
-    score,
-    precision: score >= 85 ? "excelente" : "bueno",
+    score: 95,
+    precision: "excelente",
     matchType: "callejero",
     importance: 0.9,
     api: "Callejero IDE Chile",
@@ -162,8 +170,12 @@ export async function geocodeWithFallback(
 ): Promise<GeocodeResult> {
   // Layer 1: Callejero (if comuna and number are known)
   if (normalized) {
-    const callejeroResult = geocodeCallejero(normalized);
-    if (callejeroResult) return callejeroResult;
+    try {
+      const callejeroResult = await geocodeCallejero(normalized);
+      if (callejeroResult) return callejeroResult;
+    } catch {
+      // Callejero failed, fall through to APIs
+    }
   }
 
   // Layer 2: Nominatim
