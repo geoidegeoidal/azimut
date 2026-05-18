@@ -118,12 +118,14 @@ export async function geocodePhoton(
 export function geocodeCallejero(
   normalized: NormalizedAddress,
 ): GeocodeResult | null {
-  const viaCompleta = normalized.callejeroCorrected || normalized.normalized;
-  const comuna = normalized.comuna;
+  // Build the street name without number for segment lookup
+  const viaCompleta = normalized.callejeroCorrected
+    || (normalized.via && normalized.nombre ? `${normalized.via} ${normalized.nombre}` : undefined)
+    || normalized.normalized;
 
+  const comuna = normalized.comuna || "";
   if (!comuna) return null;
 
-  // Try to extract a number from the address
   const numStr = normalized.numero;
   if (!numStr) return null;
 
@@ -134,7 +136,7 @@ export function geocodeCallejero(
   if (!result.found || result.lat === undefined || result.lon === undefined) return null;
 
   const displayName = `${viaCompleta} ${numero}, ${comuna}, Chile`;
-  const score = Math.min(100, 85 + (result.seg ? 10 : 0));
+  const score = 95; // High confidence: official callejero data
 
   return {
     lat: result.lat,
