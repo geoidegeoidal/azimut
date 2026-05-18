@@ -22,6 +22,7 @@ function normalizeCalle(text: string): string {
     .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase()
     .replace(/\s+/g, " ")
+    .replace(/['']/g, "")
     .trim();
 }
 
@@ -159,7 +160,7 @@ export interface CallejeroSegment {
   c: string; // comuna (normalized)
   v: string; // via completa (normalized)
   n: [number, number]; // number range: [min, max]
-  g: [[number, number], [number, number]]; // geometry: start/end points
+  g: [[number, number], [number, number]]; // geometry: [start, end] as [lon, lat]
 }
 
 let segmentsLoaded = false;
@@ -174,7 +175,6 @@ export async function loadSegments(baseUrl?: string): Promise<number> {
   if (segmentsLoadPromise) return segmentsLoadPromise;
 
   const resolvedBase = baseUrl ?? import.meta.env.BASE_URL ?? "";
-  // Remove trailing slash to avoid double slashes
   const cleanBase = resolvedBase.replace(/\/$/, "");
   const url = `${cleanBase}/callejero-segments-index.json`;
 
@@ -216,6 +216,10 @@ export async function ensureSegmentsLoaded(): Promise<boolean> {
   return count > 0;
 }
 
+/**
+ * Interpolate a point along a line segment based on street number.
+ * Input points are [lon, lat]. Returns [lon, lat].
+ */
 function interpolatePoint(
   start: [number, number],
   end: [number, number],
@@ -233,65 +237,24 @@ function interpolatePoint(
   ];
 }
 
-export function searchSegment(
-  viaCompleta: string,
-  numero: number,
+/**
+ * Find the best matching street name using fuzzy matching.
+ * Returns the corrected name if a close match is found, or null.
+ */
+function fuzzyMatchStreetName(
+  input: string,
   comuna: string,
-): { found: boolean; lat?: number; lon?: number; seg?: CallejeroSegment; correctedName?: string } {
-  if (!segmentsLoaded) return { found: false };
-
+): string | null {
+  const normInput = normalizeCalle(input);
   const normComuna = normalizeCalle(comuna);
-  const segs = segmentsByComuna.get(normComuna);
-  if (!segs) return { found: false };
-
-  const normVia = normalizeCalle(viaCompleta);
-
-  // Phase 1: Exact match
-  for (const seg of segs) {
-    if (seg.v !== normVia) continue;
-
-    if (numero >= seg.n[0] && numero <= seg.n[1]) {
-      const [lat, lon] = interpolatePoint(
-        seg.g[0],
-        seg.g[1],
-        seg.n[0],
-        seg.n[1],
-        numero,
-      );
-      return { found: true, lat, lon, seg };
-    }
-  }
-
-  // Fallback: check if number is close to any range (tolerance of 10)
-  for (const seg of segs) {
-    if (seg.v !== normVia) continue;
-
-    const minNum = seg.n[0];
-    const maxNum = seg.n[1];
-    const tolerance = 10;
-
-    if (numero >= minNum - tolerance && numero <= maxNum + tolerance) {
-      const clamped = Math.min(maxNum, Math.max(minNum, numero));
-      const [lat, lon] = interpolatePoint(
-        seg.g[0],
-        seg.g[1],
-        minNum,
-        maxNum,
-        clamped,
-      );
-      return { found: true, lat, lon, seg };
-    }
-  }
-
-  // Phase 2: Fuzzy match against unique street names in this comuna
   const uniqueNames = segmentNamesByComuna.get(normComuna);
-  if (!uniqueNames) return { found: false };
+  if (!uniqueNames) return null;
 
   let bestMatch: string | null = null;
   let bestDist = Infinity;
 
   for (const name of uniqueNames) {
-    const dist = levenshtein(normVia, name);
+    const dist = levenshtein(normInput, name);
     // Dynamic threshold: longer names allow more distance
     const maxDist = Math.max(2, Math.floor(name.length / 8));
     if (dist <= maxDist && dist < bestDist) {
@@ -300,42 +263,74 @@ export function searchSegment(
     }
   }
 
-  if (!bestMatch) return { found: false };
+  return bestMatch;
+}
 
-  // Phase 3: Search segments with the corrected name
+export interface SegmentSearchResult {
+  found: boolean;
+  /** Latitude (correctly ordered) */
+  lat?: number;
+  /** Longitude (correctly ordered) */
+  lon?: number;
+  seg?: CallejeroSegment;
+  correctedName?: string;
+}
+
+/**
+ * Search for a street segment by name and number.
+ * Uses 3-phase approach: exact match → fuzzy match → number interpolation.
+ *
+ * IMPORTANT: Segment geometry is stored as [lon, lat].
+ * This function returns lat/lon correctly separated.
+ */
+export function searchSegment(
+  viaCompleta: string,
+  numero: number,
+  comuna: string,
+): SegmentSearchResult {
+  if (!segmentsLoaded) return { found: false };
+
+  const normComuna = normalizeCalle(comuna);
+  const segs = segmentsByComuna.get(normComuna);
+  if (!segs) return { found: false };
+
+  const normVia = normalizeCalle(viaCompleta);
+
+  // Phase 1: Exact match on street name
   for (const seg of segs) {
-    if (seg.v !== bestMatch) continue;
+    if (seg.v !== normVia) continue;
 
     if (numero >= seg.n[0] && numero <= seg.n[1]) {
-      const [lat, lon] = interpolatePoint(
+      // Geometry is [lon, lat]
+      const [lon, lat] = interpolatePoint(
         seg.g[0],
         seg.g[1],
         seg.n[0],
         seg.n[1],
         numero,
       );
-      return { found: true, lat, lon, seg, correctedName: bestMatch };
+      return { found: true, lat, lon, seg };
     }
   }
 
-  // Fallback with tolerance for corrected name
+  // Phase 2: Fuzzy match on street name
+  const correctedName = fuzzyMatchStreetName(normVia, comuna);
+  if (!correctedName) return { found: false };
+
+  // Phase 3: Search segments with corrected name
   for (const seg of segs) {
-    if (seg.v !== bestMatch) continue;
+    if (seg.v !== correctedName) continue;
 
-    const minNum = seg.n[0];
-    const maxNum = seg.n[1];
-    const tolerance = 10;
-
-    if (numero >= minNum - tolerance && numero <= maxNum + tolerance) {
-      const clamped = Math.min(maxNum, Math.max(minNum, numero));
-      const [lat, lon] = interpolatePoint(
+    if (numero >= seg.n[0] && numero <= seg.n[1]) {
+      // Geometry is [lon, lat]
+      const [lon, lat] = interpolatePoint(
         seg.g[0],
         seg.g[1],
-        minNum,
-        maxNum,
-        clamped,
+        seg.n[0],
+        seg.n[1],
+        numero,
       );
-      return { found: true, lat, lon, seg, correctedName: bestMatch };
+      return { found: true, lat, lon, seg, correctedName };
     }
   }
 
