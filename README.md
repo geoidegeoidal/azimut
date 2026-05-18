@@ -9,7 +9,7 @@
 *Sube un CSV, normaliza, geocodifica y exporta — todo desde el navegador, sin API keys.*
 
 [![Deploy](https://img.shields.io/github/actions/workflow/status/geoidegeoidal/azimut/deploy.yml?branch=main&label=deploy&style=flat-square&color=3b5bff)](https://geoidegeoidal.github.io/azimut/)
-[![Tests](https://img.shields.io/badge/tests-47%20passed-10b981?style=flat-square)](https://github.com/geoidegeoidal/azimut)
+[![Tests](https://img.shields.io/badge/tests-62%20passed-10b981?style=flat-square)](https://github.com/geoidegeoidal/azimut)
 [![Stack](https://img.shields.io/badge/react%2019-vite%207-0c1433?style=flat-square&logo=react)](https://github.com/geoidegeoidal/azimut)
 [![Chile](https://img.shields.io/badge/hecho%20en-chile-ef4444?style=flat-square)](https://github.com/geoidegeoidal/azimut)
 
@@ -105,7 +105,7 @@ Fallback cuando el callejero no puede resolver (sin comuna, sin número, o calle
 
 ---
 
-## 🧹 Normalizador — 6 pasos
+## 🧹 Normalizador — 8 pasos
 
 ```mermaid
 graph LR
@@ -115,25 +115,28 @@ graph LR
     D --> E(4. Sin tildes)
     E --> F(5. Limpiar)
     F --> G(6. Capitalizar)
-    G --> H[Callejero]
-    H --> I[Dirección Normalizada]
+    G --> H(7. Callejero)
+    H --> I(8. Reconstruir)
+    I --> J[Dirección Normalizada]
 ```
 
 | Paso | Acción               | Qué resuelve                                                                        |
 | :--: | --------------------- | ------------------------------------------------------------------------------------ |
 |  1  | **Espacios**    | Elimina espacios duplicados al inicio, final e intermedios.                          |
-|  2  | **Expandir**    | `Av.→Avenida`, `Pje→Pasaje`, `Cmno→Camino`, etc. (solo la primera palabra). |
+|  2  | **Expandir**    | `Av.→Avenida`, `Pje→Pasaje`, `Ruta 5 Norte→Ruta 5 Norte`, etc. Soporta prefijos multi-word. |
 |  3  | **Extraer Nº**  | Separa número de calle (`Providencia 1234` → calle + `1234`). Preserva `N°`, `#`, `Depto`. |
 |  4  | **Sin tildes**  | Remueve acentos gráficos para simplificar la búsqueda.                             |
 |  5  | **Limpiar**     | Elimina puntuación innecesaria al final (como comas o puntos sueltos).              |
 |  6  | **Capitalizar** | Ajusta mayúsculas y minúsculas (ej. "Avenida Providencia").                        |
+|  7  | **Callejero**   | Valida y corrige la calle contra el callejero oficial (si se conoce la comuna).     |
+|  8  | **Reconstruir** | Ensambla la dirección final con nombre corregido, número y unidad.                  |
 
 ### Callejero cross-reference
 
 Si se detecta la comuna, el normalizador:
 
 - ✅ Valida que la calle exista en el callejero oficial de esa comuna
-- 🔧 Corrige typos mediante fuzzy matching (Levenshtein ≤ 2)
+- 🔧 Corrige typos mediante fuzzy matching (Levenshtein ≤ 2 en normalizador, ≤ 2–4 dinámico en segmentos)
 - 🛣️ Corrige tipo de vía (ej. "Pasaje Ossa" → "Calle Ossa" si el callejero dice "Calle")
 - ⚠️ Genera warnings si la calle no se encuentra en la comuna
 
@@ -163,7 +166,7 @@ SCORE = (MatchType × 0,4) + (Importancia × 0,3) + (Completitud × 0,2) + (Unic
 
 | Sub-puntaje           | Peso | Ejemplo                                                                 |
 | --------------------- | :--: | ----------------------------------------------------------------------- |
-| **Match Type**  | 40% | `callejero=95` · `building=100` · `house_number=95` · `street=70` |
+| **Match Type**  | 40% | `callejero exacto=95` · `callejero fuzzy=85` · `building=100` · `house_number=95` · `street=70` |
 | **Importancia** | 30% | Relevancia OSM del resultado (0–1 × 100)                              |
 | **Completitud** | 20% | % de tokens de tu dirección encontrados en el resultado                |
 | **Unicidad**    | 10% | 1 solo match=100 · varios matches posibles=menos                       |
@@ -191,7 +194,7 @@ SCORE = (MatchType × 0,4) + (Importancia × 0,3) + (Completitud × 0,2) + (Unic
 | **Geocoding** | Callejero IDE Chile · Nominatim · Photon |
 | **Estado**    | Zustand · IndexedDB cache (30d)         |
 | **Export**    | GeoJSON nativo ·`@crmackey/shp-write` |
-| **Testing**   | Vitest · 47 tests                       |
+| **Testing**   | Vitest · 62 tests                       |
 | **Paquetes**  | pnpm (seguro, sin dependencias fantasma) |
 
 </div>
@@ -218,7 +221,7 @@ SCORE = (MatchType × 0,4) + (Importancia × 0,3) + (Completitud × 0,2) + (Unic
 
 ```bash
 pnpm install         # Instalar dependencias (seguro, sin scripts automáticos)
-pnpm test            # 47 tests (normalizador · scorer · parser)
+pnpm test            # 62 tests (normalizador · scorer · parser · callejero)
 pnpm dev             # Dev en localhost:5173
 pnpm build           # Build producción
 pnpm lint            # ESLint

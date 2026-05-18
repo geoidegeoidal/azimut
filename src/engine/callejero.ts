@@ -2,18 +2,30 @@ import callejeroData from "@/data/callejero-names.json";
 
 const namesByComuna = new Map<string, Set<string>>();
 const namesIndex = new Map<string, Map<string, string[]>>();
+// Reverse index: comuna → (rest-of-name → full-street-name) for O(1) via-type correction
+const viaReverseIndex = new Map<string, Map<string, string>>();
 
 for (const [comuna, streets] of Object.entries(callejeroData as Record<string, string[]>)) {
   const set = new Set(streets);
   namesByComuna.set(comuna, set);
 
   const byLetter = new Map<string, string[]>();
+  const byRest = new Map<string, string>();
   for (const street of streets) {
     const letter = street.charAt(0);
     if (!byLetter.has(letter)) byLetter.set(letter, []);
     byLetter.get(letter)!.push(street);
+
+    // Build reverse index: "providencia" → "avenida providencia"
+    const spaceIdx = street.indexOf(" ");
+    if (spaceIdx > 0) {
+      const rest = street.slice(spaceIdx + 1);
+      // First entry wins (most common via type for that name)
+      if (!byRest.has(rest)) byRest.set(rest, street);
+    }
   }
   namesIndex.set(comuna, byLetter);
+  viaReverseIndex.set(comuna, byRest);
 }
 
 function normalizeCalle(text: string): string {
@@ -50,6 +62,17 @@ function levenshtein(a: string, b: string): number {
     curr = tmp;
   }
   return prev[n];
+}
+
+/**
+ * Dynamic Levenshtein threshold aligned with README spec.
+ * Caps at 4 to prevent false positives on long street names.
+ */
+function getMaxFuzzyDistance(nameLength: number): number {
+  if (nameLength <= 16) return 2;
+  if (nameLength <= 24) return 3;
+  if (nameLength <= 32) return 3;
+  return 4;
 }
 
 export interface CallejeroMatch {
@@ -103,7 +126,10 @@ export function lookupStreet(
   }
 
   const byLetter = namesIndex.get(normComuna);
-  const candidates = byLetter?.get(normInput.charAt(0)) ?? [...set];
+  const letterCandidates = byLetter?.get(normInput.charAt(0));
+  // BUG-01 fix: fallback to full set if first-letter bucket is empty or missing
+  // This handles typos in the first character (e.g. "Bvenida" vs "Avenida")
+  const candidates = letterCandidates && letterCandidates.length > 0 ? letterCandidates : [...set];
 
   const suggestions: CallejeroMatch[] = [];
   for (const candidate of candidates) {
@@ -138,17 +164,13 @@ export function correctViaType(street: string, comuna: string): string {
   const parts = normInput.split(/\s+/);
   if (parts.length < 2) return street;
 
-  const inputVia = parts[0];
   const inputRest = parts.slice(1).join(" ");
 
-  for (const candidate of set) {
-    const candParts = candidate.split(/\s+/);
-    if (candParts.length < 2) continue;
-    const candVia = candParts[0];
-    const candRest = candParts.slice(1).join(" ");
-    if (candRest === inputRest && candVia !== inputVia) {
-      return `${candVia} ${candRest}`;
-    }
+  // O(1) lookup using reverse index instead of O(n) iteration
+  const byRest = viaReverseIndex.get(normComuna);
+  const match = byRest?.get(inputRest);
+  if (match && match !== normInput) {
+    return match;
   }
 
   return street;
@@ -255,8 +277,8 @@ function fuzzyMatchStreetName(
 
   for (const name of uniqueNames) {
     const dist = levenshtein(normInput, name);
-    // Dynamic threshold: longer names allow more distance
-    const maxDist = Math.max(2, Math.floor(name.length / 8));
+    // Dynamic threshold aligned with README documentation, capped at 4
+    const maxDist = getMaxFuzzyDistance(name.length);
     if (dist <= maxDist && dist < bestDist) {
       bestDist = dist;
       bestMatch = name;

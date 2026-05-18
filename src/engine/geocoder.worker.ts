@@ -94,7 +94,8 @@ export async function geocodeBatch(
     await waitIfPaused(signal);
 
     const query = addr.normalized || addr.original;
-    const cacheKey = query.toLowerCase().trim();
+    const comunaPrefix = (addr.comuna || "").toLowerCase().trim();
+    const cacheKey = comunaPrefix ? `${comunaPrefix}:${query.toLowerCase().trim()}` : query.toLowerCase().trim();
 
     const cached = await cacheGet(cacheKey);
     if (cached) {

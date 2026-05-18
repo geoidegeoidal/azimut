@@ -12,8 +12,19 @@ function expandVia(text: string): { via?: string; rest: string } {
 
   const lower = trimmed.toLowerCase();
   const tokens = lower.split(/\s+/);
-  const firstToken = tokens[0].replace(/\.$/, "");
 
+  // Try multi-word matches first (up to 3 tokens), then single-word
+  const maxPrefixLen = Math.min(tokens.length - 1, 3);
+  for (let len = maxPrefixLen; len >= 1; len--) {
+    const prefix = tokens.slice(0, len).join(" ").replace(/\.$/, "");
+    const expanded = VIA_ABBREVIATIONS[prefix];
+    if (expanded && tokens.length > len) {
+      return { via: expanded, rest: tokens.slice(len).join(" ") };
+    }
+  }
+
+  // Single-token without trailing dot
+  const firstToken = tokens[0].replace(/\.$/, "");
   const expanded = VIA_ABBREVIATIONS[firstToken];
   if (expanded && tokens.length > 1) {
     return { via: expanded, rest: tokens.slice(1).join(" ") };
