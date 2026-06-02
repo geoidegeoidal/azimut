@@ -125,3 +125,41 @@ describe("Callejero - getComunasDisponibles", () => {
     }
   });
 });
+
+// ── Smart Search Multi-Signal Integration Tests ──────────
+
+describe("Smart Search - Multi-Signal Capabilities on Callejero", () => {
+  it("Phase 1: Exact full match", () => {
+    const result = lookupStreet("avenida tobalaba", "iquique");
+    expect(result.found).toBe(true);
+    expect(result.exactMatch).toBe(true);
+    expect(result.suggestions[0].name).toBe("avenida tobalaba");
+  });
+
+  it("Phase 2: Via-agnostic / Via-corrected match", () => {
+    const result = lookupStreet("calle tobalaba", "iquique");
+    expect(result.found).toBe(true);
+    expect(result.exactMatch).toBe(false);
+    expect(result.correctedName).toBe("avenida tobalaba");
+  });
+
+  it("Phase 3: Token overlap and prefix match", () => {
+    const result = lookupStreet("tobalaba", "iquique");
+    expect(result.found).toBe(true);
+    expect(result.exactMatch).toBe(false);
+    expect(result.correctedName).toBe("avenida tobalaba");
+  });
+
+  it("Phase 4 & 5: Token & Full-string Levenshtein (fuzzy)", () => {
+    const result = lookupStreet("tobalabaa", "iquique");
+    expect(result.found).toBe(true);
+    expect(result.exactMatch).toBe(false);
+    expect(result.correctedName).toBe("avenida tobalaba");
+  });
+
+  it("Rejects non-matching inputs safely", () => {
+    const result = lookupStreet("calle inexistente del desierto de tarapaca", "iquique");
+    expect(result.found).toBe(false);
+    expect(result.exactMatch).toBe(false);
+  });
+});

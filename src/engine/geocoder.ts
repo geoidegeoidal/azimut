@@ -144,9 +144,16 @@ export async function geocodeCallejero(
   const result = searchSegment(viaCompleta, numero, comuna);
   if (!result.found || result.lat === undefined || result.lon === undefined) return null;
 
-  // Dynamic scoring: exact matches get higher confidence than fuzzy
+  // Dynamic scoring: exact matches get higher confidence than fuzzy, adjusted by smartSearch score
   const isFuzzy = !!result.correctedName;
-  const score = isFuzzy ? 85 : 95;
+  const score = result.matchScore !== undefined ? result.matchScore : (isFuzzy ? 85 : 95);
+
+  let precision: "excelente" | "bueno" | "regular" | "bajo" | "nulo";
+  if (score >= 85) precision = "excelente";
+  else if (score >= 60) precision = "bueno";
+  else if (score >= 35) precision = "regular";
+  else if (score > 0) precision = "bajo";
+  else precision = "nulo";
 
   // Use corrected name if fuzzy match found it
   const displayName = result.correctedName
@@ -157,14 +164,14 @@ export async function geocodeCallejero(
     lat: result.lat,
     lon: result.lon,
     score,
-    precision: score >= 85 ? "excelente" : "bueno",
+    precision,
     matchType: "callejero",
-    importance: isFuzzy ? 0.8 : 0.9,
+    importance: Math.round(score) / 100,
     api: "Callejero IDE Chile",
     displayName,
     found: true,
     osmType: "callejero",
-    completeness: isFuzzy ? 85 : 95,
+    completeness: score,
     uniqueness: 100,
     timestamp: Date.now(),
   };
