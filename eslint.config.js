@@ -10,6 +10,6 @@ export default tseslint.config(
     },
   },
   {
-    ignores: ["dist/", "scripts/", "server/", "supabase/"],
+    ignores: ["dist/", "scripts/", "server/", "supabase/", ".agents/", ".impeccable/"],
   },
 );

@@ -6,7 +6,7 @@ Panel de búsqueda y revisión de direcciones chilenas. Combina el Maestro de Ca
 
 Node 22 o superior y pnpm. Instala con `pnpm install --frozen-lockfile` y ejecuta `pnpm dev`. El panel está en `http://localhost:5173/azimut/`. Las interpolaciones oficiales funcionan sin servidor externo.
 
-La propuesta de diseño propia **Atlas** está en `/azimut/?design=atlas`: mapa continuo, cuaderno lateral, papel cálido, verde bosque y tipografía IBM Plex Sans/Instrument Serif. Permite volver al diseño Swiss original para comparar. [Decisiones de diseño](docs/design-atlas.md).
+**Destino** es la interfaz por defecto en `/azimut/`: importación a la izquierda, tabla de revisión principal y mapa/evidencia de la fila a la derecha. Abre primero los lotes, permite buscar dentro de ellos sin depender de tildes, avanzar al siguiente caso por revisar y paginar de 100 en 100. Exporta la selección completa, aunque la tabla esté filtrada o paginada. El diseño Swiss original sigue en `?design=classic`; cambiar de diseño conserva el archivo y las correcciones.
 
 Para enriquecer con OSM en desarrollo, ejecuta en otra terminal:
 
@@ -72,7 +72,7 @@ pnpm build
 
 Las migraciones y `supabase/tests/address_index.sql` se verificaron en una base PostGIS aislada. [Comparación de cinco direcciones públicas](docs/benchmarks/README.md): cuatro números OSM registrados y una interpolación en el ensayo. Es consistencia entre fuentes; no un estudio nacional ni un levantamiento topográfico.
 
-El test opcional `node scripts/browser-check.mjs` requiere Playwright instalado o `PLAYWRIGHT_MODULE` apuntando al paquete de un runtime existente. Verifica 320–1440px, búsqueda/fallback, ajuste manual por teclado, un lote y las cuatro exportaciones. [Revisión de las 30 leyes de UX](docs/verification/ux-review.md).
+El test opcional `node scripts/browser-check.mjs` requiere Playwright instalado o `PLAYWRIGHT_MODULE` apuntando al paquete de un runtime existente. Verifica 320–1440px y el ancho del usuario, búsqueda/fallback, ajuste manual por teclado, filtros, un lote de tres direcciones, cancelación/paginación con 103 filas y las cuatro exportaciones. [Revisión de las 30 leyes de UX de Destino](docs/verification/destino-ux-review.md). Los ensayos de UI simulan fallos de fuentes externas; no prueban exactitud geográfica.
 
 La compilación avisa de un bundle principal de unos 3,24MB (805kB gzip), debido sobre todo al catálogo de nombres. La geometría oficial se carga por comuna; la optimización del catálogo inicial queda pendiente de medición de uso real.
 

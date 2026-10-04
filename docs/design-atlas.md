@@ -1,5 +1,7 @@
 # Atlas — cuaderno cartográfico
 
+Historical prototype, superseded by Destino on 2026-10-04. The user requested a table-first GIS batch workflow and authorized the Impeccable proposal. The live default is now `/azimut/`, with Swiss comparison at `?design=classic`; the appearance described below is no longer served.
+
 La persona está comprobando una dirección chilena o preparando un lote para exportar a un SIG. Necesita ver el punto y saber si procede de una dirección registrada o de un tramo interpolado. Debe sentirse como una herramienta de cartografía con un cuaderno al lado: útil, sobria y legible.
 
 El usuario rechazó la primera alternativa por parecer una plantilla y autorizó una dirección propia. Esta propuesta se aparta de la referencia Swiss; el diseño original sigue disponible para comparar.

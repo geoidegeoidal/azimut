@@ -8,6 +8,20 @@ await mkdir(out, { recursive: true });
 const browser = await chromium.launch({ headless: true });
 const failures = [], checks = [];
 let page;
+async function capture(path) {
+  // The real map may fetch a new tile set after each responsive resize.
+  await page.waitForFunction(() => {
+    const map = document.querySelector('.workspace-map');
+    if (!map) return true;
+    const bounds = map.getBoundingClientRect();
+    const tiles = [...map.querySelectorAll('img.leaflet-tile')].filter(tile => {
+      const box = tile.getBoundingClientRect();
+      return box.right > bounds.left && box.left < bounds.right && box.bottom > bounds.top && box.top < bounds.bottom;
+    });
+    return tiles.length > 0 && tiles.every(tile => tile.complete && tile.naturalWidth > 0);
+  }, null, { timeout: 15000 });
+  await page.screenshot({ path, fullPage: true });
+}
 try {
   page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
   page.on('pageerror', error => failures.push(error.message));
@@ -18,14 +32,20 @@ try {
   await page.route('**/api/osm', route => route.fulfill({ status: 200, contentType: 'application/json', body: '{"elements":[]}' }));
   await page.goto(process.env.UI_URL || 'http://127.0.0.1:5173/azimut/');
   await page.locator('h1').waitFor(); await page.evaluate(() => document.fonts.ready);
-  for (const width of [1440, 1024, 768, 390, 320]) {
+  const userWidth = Number(process.env.UI_USER_WIDTH || 649);
+  for (const width of [...new Set([1440, 1024, 768, 390, 320, userWidth])]) {
     await page.setViewportSize({ width, height: 1000 });
     const dimensions = await page.evaluate(() => ({ width: innerWidth, scroll: document.documentElement.scrollWidth }));
     assert.ok(dimensions.scroll <= dimensions.width, `Page overflow at ${width}: ${dimensions.scroll}`);
     checks.push({ viewport: width, noPageOverflow: true });
-    if ([1440,390].includes(width)) await page.screenshot({ path: `${out}/panel-${width}.png`, fullPage: true });
+    if ([1440,390,userWidth].includes(width)) await capture(`${out}/panel-${width}.png`);
   }
   await page.setViewportSize({ width: 1440, height: 1000 });
+  if (await page.getByRole('button', { name: 'Buscar dirección', exact: true }).count()) {
+    assert.equal(await page.getByRole('button', { name: 'Lotes', exact: true }).getAttribute('aria-current'), 'page');
+    checks.push({ batchFirst: true });
+    await page.getByRole('button', { name: 'Buscar dirección', exact: true }).click();
+  }
   await page.getByRole('button', { name: /^Matucana 501/ }).click();
   await page.getByRole('button', { name: /LOCALIZAR DIRECCIÓN|Buscar en el mapa/ }).click();
   await page.getByText('Consulta terminada. Revisa el método y la evidencia.', { exact: true }).waitFor();
@@ -53,13 +73,26 @@ try {
     await file.saveAs(saved);
     checks.push({ export: format, saved: true });
   }
-  await page.getByRole('button', { name: /Procesar lote|Procesar archivo/i }).click();
+  await page.getByRole('button', { name: /Procesar lote|Procesar archivo|^Lotes$/i }).click();
   await page.locator('input[type=file]').setInputFiles({ name: 'direcciones.csv', mimeType: 'text/csv', buffer: Buffer.from('dirección,comuna\nMatucana 501,Santiago\n"José Miguel de la Barra 650",Santiago\nMaipú 2359,Concepción') });
   await page.getByText(/Jos[eé] Miguel de la Barra/i).first().waitFor();
   await page.getByRole('button', { name: /PROCESAR.*3/i }).click();
   await page.getByText('Lote terminado. Puedes revisar y exportar los resultados.', { exact: true }).waitFor({ timeout: 30000 });
   assert.equal(await page.locator('tbody tr').count(), 3);
   checks.push({ batch: 3, utf8Accents: true, completed: true });
+  if (await page.getByLabel('Buscar dentro del lote').count()) {
+    await page.getByLabel('Buscar dentro del lote').fill('jose');
+    assert.equal(await page.locator('tbody tr').count(), 1);
+    assert.match(await page.locator('tbody').innerText(), /barra/i);
+    await page.getByLabel('Buscar dentro del lote').fill('');
+    await page.getByRole('button', { name: 'Siguiente por revisar', exact: true }).click();
+    assert.match(await page.locator('.evidence-reference').innerText(), /002/);
+    assert.equal(await page.locator('.active-row .row-address').evaluate(el => el === document.activeElement), true);
+    await page.getByRole('button', { name: /^Registradas/ }).click();
+    assert.match(await page.locator('.empty-table').innerText(), /No hay filas/);
+    await page.getByRole('button', { name: /^Todos/ }).click();
+    checks.push({ accentInsensitiveLotSearch: true, nextReviewKeyboardFocus: true, filterEmptyState: true });
+  }
   const initialDesign = await page.locator('.control-panel').getAttribute('class');
   await page.locator('.design-comparison').click();
   assert.notEqual(await page.locator('.control-panel').getAttribute('class'), initialDesign);
@@ -70,7 +103,26 @@ try {
   assert.equal(await page.locator('tbody tr').count(), 3);
   checks.push({ designSwitch: true, preservedBatchAndSelection: true });
   await page.getByRole('button', { name: 'Todos', exact: false }).click();
-  await page.screenshot({ path: `${out}/panel-results.png`, fullPage: true });
+  await capture(`${out}/panel-results.png`);
+  for (const width of [1440, 390, userWidth]) {
+    await page.setViewportSize({ width, height: 1000 });
+    await capture(`${out}/results-${width}.png`);
+  }
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  if (await page.getByLabel('Buscar dentro del lote').count()) {
+    const entries = Array.from({ length: 103 }, () => 'Matucana 501,Santiago').join('\n');
+    await page.locator('input[type=file]').setInputFiles({ name: 'paginacion.csv', mimeType: 'text/csv', buffer: Buffer.from(`dirección,comuna\n${entries}`) });
+    await page.getByRole('button', { name: /PROCESAR.*103/i }).click();
+    await page.getByRole('button', { name: /DETENER/ }).click();
+    await page.getByText('Lote detenido. Se conservaron las filas procesadas.', { exact: true }).waitFor();
+    assert.equal(await page.locator('tbody tr').count(), 100);
+    await page.getByRole('button', { name: 'Página siguiente', exact: true }).click();
+    assert.equal(await page.locator('tbody tr').count(), 3);
+    assert.match(await page.locator('tbody').innerText(), /101/);
+    await page.getByRole('button', { name: 'Página anterior', exact: true }).click();
+    assert.equal(await page.locator('tbody tr').count(), 100);
+    checks.push({ pagination: 103, visibleRowLimit: 100, cancellationPreservesPendingRows: true });
+  }
   await page.setViewportSize({ width: 720, height: 1000 });
   assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
   await page.emulateMedia({ reducedMotion: 'reduce' });
