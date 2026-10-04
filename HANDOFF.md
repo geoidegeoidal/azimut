@@ -1,5 +1,13 @@
 # Session handoff
 
+## 2026-10-04 — Backend checkpoint
+
+- Completed: PostGIS migrations execute in isolated PostgreSQL 17; SQL assertions pass for privileges, exact street matching, directed ranges, quotas and cache eviction. Native OSM query checks pass. Edge enrichment validates Auth and limits cache to 20MiB/128 entries.
+- Decision: service keys are only in ignored local environment; browser uses public key and a genuine anonymous Auth session. Native fetch avoids a new SDK.
+- Cloud: user created azimut in São Paulo in the Free organization; configuration/import/deployment is in progress.
+- Next: finish cloud connection and publish the panel checkpoint with browser evidence and benchmark documentation.
+- Commits: 808a8c1 (engine), pushed to codex/address-workbench; backend commit follows this entry.
+
 ## 2026-10-04 — Address workbench, in progress
 
 - Objective: improve Chilean address resolution and replace the wizard with a Swiss control panel.

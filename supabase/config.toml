@@ -1,0 +1,4 @@
+project_id = "azimut"
+
+[functions.osm-enrich]
+verify_jwt = false
