@@ -26,6 +26,7 @@ export function ControlPanel() {
   const [error, setError] = useState(""), [notice, setNotice] = useState("");
   const [editing, setEditing] = useState(false), [filter, setFilter] = useState("all");
   const [rowQuery, setRowQuery] = useState(""), [page, setPage] = useState(0);
+  const [entryExpanded, setEntryExpanded] = useState(false);
   const [manualLat, setManualLat] = useState(""), [manualLon, setManualLon] = useState("");
   const [file, setFile] = useState<{ name: string; data: Record<string, string>[]; headers: string[] } | null>(null);
   const [columns, setColumns] = useState<string[]>([]), [comunaColumn, setComunaColumn] = useState("");
@@ -78,6 +79,7 @@ export function ControlPanel() {
       setColumns(suggested ? [suggested] : []);
       setComunaColumn(parsed.headers.find(h => /^(comuna|municipalidad)$/i.test(h)) || "");
       setMode("batch");
+      setEntryExpanded(true);
     } catch (e) { setError((e as { message?: string }).message || "No se pudo leer el archivo."); }
     finally { setFileBusy(false); if (fileInput.current) fileInput.current.value = ""; }
   }
@@ -96,6 +98,7 @@ export function ControlPanel() {
     const next: AddressRow[] = file.data.map((original, i) => ({ id: i + 1, original,
       normalized: normalize(columns.map(c => original[c]).filter(Boolean).join(" "), original[comunaColumn] || comuna || undefined), selected: true }));
     setRows(next); setActiveId(1); setBusy(true); setPaused(false); setEditing(false); setError(""); setNotice(""); setFilter("all");
+    setEntryExpanded(false);
     setProgress({ current: 0, total: next.length }); setRowQuery(""); setPage(0);
     const controller = new AbortController(); abort.current = controller;
     try {
@@ -135,6 +138,12 @@ export function ControlPanel() {
   const pageCount = Math.max(1, Math.ceil(filtered.length / 100));
   const currentPage = Math.min(page, pageCount - 1);
   const displayedRows = filtered.slice(currentPage * 100, (currentPage + 1) * 100);
+  const compactEntry = destino && mode === "batch" && !!file && completed.length > 0 && !busy;
+  function changeRowQuery(text: string) {
+    setRowQuery(text); setPage(0);
+    const visible = visibleRows(filter, text);
+    if (!visible.some(row => row.id === activeId)) { setActiveId(visible[0]?.id ?? null); setEditing(false); }
+  }
   function changeFilter(key: string) {
     setFilter(key); setPage(0);
     const visible = visibleRows(key, rowQuery);
@@ -144,7 +153,11 @@ export function ControlPanel() {
     if (!review.length) return;
     const index = (review.findIndex(row => row.id === activeId) + 1) % review.length;
     setActiveId(review[index].id); setEditing(false); setFilter("review"); setRowQuery(""); setPage(Math.floor(index / 100));
-    requestAnimationFrame(() => document.getElementById(`address-row-${review[index].id}`)?.focus({ preventScroll: true }));
+    requestAnimationFrame(() => {
+      const target = document.getElementById(`address-row-${review[index].id}`);
+      target?.focus({ preventScroll: true });
+      target?.scrollIntoView({ block: "nearest", inline: "nearest", behavior: "instant" });
+    });
   }
   const pct = progress.total ? Math.round(progress.current / progress.total * 100) : 0;
 
@@ -179,9 +192,10 @@ export function ControlPanel() {
       </section>}
 
       <div className="workspace">
-        <section className="query-panel" id="query" aria-labelledby="query-heading">
+        <section className={`query-panel ${compactEntry ? "has-batch" : ""} ${compactEntry && !entryExpanded ? "compact-entry" : ""}`} id="query" aria-labelledby="query-heading">
           <div className="panel-heading"><span>01</span><h2 id="query-heading">{destino ? mode === "search" ? "Dirección a consultar" : "Archivo de entrada" : mode === "search" ? "CONSULTA" : "ENTRADA DE DATOS"}</h2><Search size={17} /></div>
-          <div className="query-body">
+          {compactEntry && <button className="entry-toggle" aria-expanded={entryExpanded} aria-controls="entry-settings" onClick={() => setEntryExpanded(!entryExpanded)}><span>Archivo y columnas<small>{file?.name} · {file?.data.length} filas</small></span><ChevronDown size={18} /></button>}
+          <div className="query-body" id="entry-settings">
             <h3>{mode === "search" ? <>BUSCA.<br />UBICA.</> : <>UN ARCHIVO.<br />MUCHOS PUNTOS.</>}</h3>
             <p className="supporting">{mode === "search" ? destino ? "Calle, número y comuna. Empieza por un lugar que conozcas." : "Cruza calle, numeración y comuna con las fuentes disponibles." : "Selecciona las columnas de dirección. La comuna ayuda a evitar coincidencias lejanas."}</p>
             {mode === "search" ? <form onSubmit={search}>
@@ -227,7 +241,7 @@ export function ControlPanel() {
           <div className="export-controls"><label className="sr-only" htmlFor="export-format">Formato de exportación</label><select id="export-format" value={format} onChange={e => setFormat(e.target.value as typeof format)}><option value="geojson">GeoJSON</option><option value="csv">CSV</option><option value="xlsx">Excel</option><option value="shp">Shapefile</option></select><button className="black-button" disabled={!selected.length || exporting || busy} onClick={exportRows}><ArrowDownToLine size={16} />{exporting ? "EXPORTANDO…" : `EXPORTAR (${selected.length})`}</button></div>
         </div>
         <div className="ledger-filters" aria-label="Filtrar resultados">{[{ key: "all", label: "Todos", count: rows.length }, { key: "review", label: "Por revisar", count: review.length }, { key: "unlocated", label: "Sin ubicación", count: unlocated.length }, { key: "address", label: "Registradas", count: recorded.length }].map(item => <button key={item.key} aria-pressed={filter === item.key} onClick={() => changeFilter(item.key)}>{item.label}<span>{item.count}</span></button>)}<p>Selecciona una fila para inspeccionarla en el mapa.</p></div>
-        {destino && rows.length > 0 && <div className="review-tools"><label className="row-search"><Search size={16} /><span className="sr-only">Buscar dentro del lote</span><input value={rowQuery} placeholder="Buscar dirección o comuna" onChange={e => { setRowQuery(e.target.value); setPage(0); }} /></label><button className="secondary-button" disabled={!review.length || busy} onClick={nextReview}><ListFilter size={16} />Siguiente por revisar</button></div>}
+        {destino && rows.length > 0 && <div className="review-tools"><label className="row-search"><Search size={16} /><span className="sr-only">Buscar dentro del lote</span><input value={rowQuery} placeholder="Buscar dirección o comuna" onChange={e => changeRowQuery(e.target.value)} /></label><button className="secondary-button" disabled={!review.length || busy} onClick={nextReview}><ListFilter size={16} />Siguiente por revisar</button></div>}
         {rows.length ? <div className="table-scroll" tabIndex={0} role="region" aria-label="Tabla de direcciones; desplázate para ver todas las columnas"><table><thead><tr><th><input type="checkbox" aria-label="Seleccionar todas las filas" checked={rows.every(row => row.selected)} onChange={e => setRows(rows.map(row => ({ ...row, selected: e.target.checked })))} /></th><th>REF.</th><th>DIRECCIÓN / COMUNA</th><th>MÉTODO</th><th title="Indicador de evidencia, no probabilidad de exactitud">EVIDENCIA</th><th>FUENTE</th><th>ESTADO</th></tr></thead><tbody>{displayedRows.map(row => <tr key={row.id} className={activeId === row.id ? "active-row" : ""}><td><input type="checkbox" aria-label={`Seleccionar fila ${row.id} para exportar`} checked={row.selected} onChange={e => setRows(rows.map(current => current.id === row.id ? { ...current, selected: e.target.checked } : current))} /></td><td className="mono">{row.id.toString().padStart(3, "0")}</td><td><button id={`address-row-${row.id}`} className="row-address" onClick={() => { setActiveId(row.id); setEditing(false); }} aria-pressed={activeId === row.id}>{row.normalized.normalized}<small>{row.normalized.comuna || "Comuna sin indicar"}</small></button></td><td>{row.geocode?.method ? METHOD_LABELS[row.geocode.method] : row.geocode ? "Sin resultado" : "Pendiente"}</td><td className="mono">{row.geocode?.found && row.geocode.method !== "manual" ? `${row.geocode.score} / 100` : "—"}</td><td>{row.geocode?.api || "—"}</td><td><span className={`row-status ${!row.geocode ? "status-pending" : !row.geocode.found ? "status-missing" : row.geocode.needsReview ? "status-review" : "status-recorded"}`}>{!row.geocode ? "Pendiente" : !row.geocode.found ? "Sin ubicación" : row.geocode.method === "manual" ? "Manual · revisar" : row.geocode.needsReview ? "Revisar" : "Registrada"}</span></td></tr>)}</tbody></table>{!filtered.length && <p className="empty-table">No hay filas para este filtro.</p>}</div> : <div className="empty-ledger">{destino ? <><div className="empty-table-head"><span>Dirección / comuna</span><span>Método</span><span>Estado</span></div><div className="empty-lot"><FileUp size={32} strokeWidth={1.5} /><h3>{mode === "batch" ? "Tu lote empieza aquí" : "Una dirección, con evidencia"}</h3><p>{mode === "batch" ? "Importa un CSV o Excel y selecciona las columnas. Aquí podrás revisar cada ubicación antes de exportar." : "Consulta una dirección. Aquí aparecerán su método, fuente y estado."}</p>{mode === "batch" && <button className="primary-button" disabled={busy || fileBusy} onClick={() => fileInput.current?.click()}>Importar archivo <ArrowRight size={18} /></button>}<p className="empty-lot-note">Los casos interpolados o ambiguos se marcarán para revisión.</p></div></> : <><span>—</span><p>El registro está listo.<small>Busca una dirección o importa un archivo para comenzar.</small></p><span className="mono">00 / 00</span></>}</div>}
         {rows.length > 0 && <div className="ledger-pagination"><span>{filtered.length ? `${currentPage * 100 + 1}–${Math.min((currentPage + 1) * 100, filtered.length)} de ${filtered.length}` : "0 filas"} · {selected.length} ubicaciones seleccionadas</span><div><button className="secondary-button" aria-label="Página anterior" disabled={currentPage === 0} onClick={() => setPage(currentPage - 1)}><ChevronLeft size={16} /></button><span>{currentPage + 1} / {pageCount}</span><button className="secondary-button" aria-label="Página siguiente" disabled={currentPage + 1 >= pageCount} onClick={() => setPage(currentPage + 1)}><ChevronRight size={16} /></button></div></div>}
       </section>

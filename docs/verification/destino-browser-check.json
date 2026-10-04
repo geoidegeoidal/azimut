@@ -1,5 +1,5 @@
 {
-  "testedAt": "2026-10-04T05:57:30.741Z",
+  "testedAt": "2026-10-04T06:08:34.753Z",
   "checks": [
     {
       "viewport": 1440,
@@ -54,12 +54,24 @@
     },
     {
       "accentInsensitiveLotSearch": true,
+      "searchReconcilesSelectionAndClosesHiddenEdit": true,
       "nextReviewKeyboardFocus": true,
+      "nextReviewScrollsIntoView": true,
       "filterEmptyState": true
     },
     {
       "designSwitch": true,
       "preservedBatchAndSelection": true
+    },
+    {
+      "compactProcessedEntryAt": 390,
+      "mappingRemainsEditable": true,
+      "reviewInFirstViewport": true
+    },
+    {
+      "compactProcessedEntryAt": 649,
+      "mappingRemainsEditable": true,
+      "reviewInFirstViewport": true
     },
     {
       "pagination": 103,

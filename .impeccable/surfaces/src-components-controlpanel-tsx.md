@@ -2,7 +2,7 @@
 version: 1
 slug: "src-components-controlpanel-tsx"
 primary_target: "src/components/ControlPanel.tsx"
-related_targets: ["src/components/WorkspaceMap.tsx","src/components/atlas.css"]
+related_targets: ["src/components/WorkspaceMap.tsx","src/components/destino.css"]
 ---
 
 # Lotes de direcciones — Destino

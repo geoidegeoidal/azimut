@@ -48,6 +48,7 @@
 .destino-panel .panel-heading > span, .destino-panel .panel-heading > svg { display: none; }
 .destino-panel .panel-heading h2 { font-size: .875rem; font-weight: 600; letter-spacing: 0; }
 .destino-panel .query-body { padding: 0 20px 24px; }
+.entry-toggle { display: none; }
 .destino-panel .query-body > h3 { display: none; }
 .destino-panel .supporting { font-size: 12px; line-height: 1.55; margin: 0 0 20px; }
 .destino-panel .field-label { font-size: 12px; font-weight: 500; letter-spacing: 0; margin: 20px 0 8px; text-transform: none; }
@@ -218,6 +219,13 @@
   .destino-panel .page-title h1 { font-size: 20px; }
   .destino-panel .work-summary { gap: 20px; font-size: 11px; }
   .destino-panel .query-panel { order: 1; }
+  .destino-panel .query-panel.has-batch .panel-heading { display: none; }
+  .destino-panel .query-panel.compact-entry .query-body { display: none; }
+  .destino-panel .entry-toggle { display: flex; width: 100%; align-items: center; justify-content: space-between; gap: 16px; padding: 14px 16px; border: 0; background: #f3f6f8; color: #173c58; min-height: 64px; text-align: left; font-size: 12px; }
+  .destino-panel .entry-toggle > span { min-width: 0; }
+  .destino-panel .entry-toggle small { display: block; margin-top: 4px; color: #536b7b; font-size: 11px; overflow-wrap: anywhere; }
+  .destino-panel .entry-toggle[aria-expanded=true] svg { transform: rotate(180deg); }
+  .destino-panel .entry-toggle:hover { background: #e7eef4; }
   .destino-panel .query-body { display: block; padding: 0 16px 20px; }
   .destino-panel .panel-heading { padding-left: 16px; padding-right: 16px; }
   .destino-panel .ledger { order: 2; min-height: 0; border-bottom: 1px solid #d7e1e8; }

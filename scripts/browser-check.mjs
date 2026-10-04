@@ -81,17 +81,29 @@ try {
   assert.equal(await page.locator('tbody tr').count(), 3);
   checks.push({ batch: 3, utf8Accents: true, completed: true });
   if (await page.getByLabel('Buscar dentro del lote').count()) {
+    await page.getByRole('button', { name: 'UBICAR MANUALMENTE' }).click();
     await page.getByLabel('Buscar dentro del lote').fill('jose');
     assert.equal(await page.locator('tbody tr').count(), 1);
     assert.match(await page.locator('tbody').innerText(), /barra/i);
+    assert.match(await page.locator('.evidence-body h3').innerText(), /barra/i);
+    assert.equal(await page.locator('.manual-coordinates').count(), 0);
+    await page.getByLabel('Buscar dentro del lote').fill('ninguna coincidencia');
+    assert.equal(await page.locator('.evidence-body').count(), 0);
     await page.getByLabel('Buscar dentro del lote').fill('');
+    await page.setViewportSize({ width: 1440, height: 400 });
     await page.getByRole('button', { name: 'Siguiente por revisar', exact: true }).click();
     assert.match(await page.locator('.evidence-reference').innerText(), /002/);
     assert.equal(await page.locator('.active-row .row-address').evaluate(el => el === document.activeElement), true);
+    assert.equal(await page.locator('.active-row .row-address').evaluate(el => {
+      const bounds = el.getBoundingClientRect();
+      return bounds.top >= 0 && bounds.bottom <= innerHeight + 1;
+    }), true, 'Next-review focus must scroll the row into view');
+    await page.setViewportSize({ width: 1440, height: 1000 });
+    await page.evaluate(() => window.scrollTo(0, 0));
     await page.getByRole('button', { name: /^Registradas/ }).click();
     assert.match(await page.locator('.empty-table').innerText(), /No hay filas/);
     await page.getByRole('button', { name: /^Todos/ }).click();
-    checks.push({ accentInsensitiveLotSearch: true, nextReviewKeyboardFocus: true, filterEmptyState: true });
+    checks.push({ accentInsensitiveLotSearch: true, searchReconcilesSelectionAndClosesHiddenEdit: true, nextReviewKeyboardFocus: true, nextReviewScrollsIntoView: true, filterEmptyState: true });
   }
   const initialDesign = await page.locator('.control-panel').getAttribute('class');
   await page.locator('.design-comparison').click();
@@ -105,7 +117,16 @@ try {
   await page.getByRole('button', { name: 'Todos', exact: false }).click();
   await capture(`${out}/panel-results.png`);
   for (const width of [1440, 390, userWidth]) {
-    await page.setViewportSize({ width, height: 1000 });
+    await page.setViewportSize({ width, height: width === userWidth ? 672 : 1000 });
+    if (width <= 760 && await page.locator('.destino-panel').count()) {
+      assert.equal(await page.locator('.entry-toggle').getAttribute('aria-expanded'), 'false');
+      assert.equal(await page.locator('.query-body').isVisible(), false);
+      assert.equal(await page.locator('.ledger-toolbar').evaluate(el => el.getBoundingClientRect().bottom < innerHeight), true);
+      await page.getByRole('button', { name: /Archivo y columnas/ }).click();
+      assert.equal(await page.locator('.query-body').isVisible(), true);
+      await page.getByRole('button', { name: /Archivo y columnas/ }).click();
+      checks.push({ compactProcessedEntryAt: width, mappingRemainsEditable: true, reviewInFirstViewport: true });
+    }
     await capture(`${out}/results-${width}.png`);
   }
   await page.setViewportSize({ width: 1440, height: 1000 });

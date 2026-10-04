@@ -4,7 +4,7 @@ Scope: `/azimut/`, individual query and GIS batch import/review/export; 1440, 10
 
 ## Findings
 
-The first capture run expected the unlocated filter to be empty. Two real local failures were correctly present; the check now uses the recorded-address filter, which is empty under the simulated remote-source failure. Captures now wait for visible real map tiles after resize. No unresolved page overflow or application errors in the final functional run. The independent finish review is still in progress.
+The first capture run expected the unlocated filter to be empty. Two real local failures were correctly present; the check now uses the recorded-address filter, which is empty under the simulated remote-source failure. Captures now wait for visible real map tiles after resize. The independent finish review returned `fix`: lot search could hide the edited row, next-review focus could be offscreen, and processed mobile import pushed review below the first viewport. All three changes were implemented in one batch and pass focused browser checks; the verdict pass is pending. No page overflow or application errors in the functional run.
 
 ## Matrix
 
@@ -17,9 +17,9 @@ The first capture run expected the unlocated filter to be empty. Two real local 
 | Goal-Gradient Effect | applied | Real completed-row count and progress; no invented query percentage. |
 | Von Restorff Effect | applied | Active reference repeats in row/marker/evidence; review and failure have text. |
 | Zeigarnik Effect | applied | Cancel test preserves all 103 rows and available results; session-only. |
-| Flow | applied | Next-review button advances selection and keyboard focus. |
+| Flow | applied | Next-review button advances selection, keyboard focus and visible scroll position. |
 | Chunking | applied | Entry, table, map and evidence are distinct work regions. |
-| Working Memory | applied | File/columns, selected row and location provenance remain available. |
+| Working Memory | applied | File/columns remain editable in a mobile disclosure; selected row and provenance reconcile with search. |
 | Occam's Razor | applied | Existing stack and engine; CSS layout, native controls, no new runtime dependency. |
 | Uniform Connectedness | applied | Numbered row/marker/evidence and actual interpolation geometry. |
 | Fitts's Law | compliant | Primary/secondary and zoom buttons are 44px; mobile mode controls 48px. |
@@ -46,7 +46,7 @@ The first capture run expected the unlocated filter to be empty. Two real local 
 - `npm test`: 93 Vitest cases and three native query checks pass.
 - `npm run lint`: passes; upstream skill assets excluded from application lint.
 - `npm run build`: passes; existing ~806kB gzip entry bundle warning remains.
-- `scripts/browser-check.mjs`: six widths without page overflow; manual coordinates and comparison preserve work; CSV/XLSX/GeoJSON/SHP downloads; UTF-8 lot, accent-insensitive search, next-review focus, empty filter, 103-row pagination and cancellation pass. Report: `destino-browser-check.json`.
+- `scripts/browser-check.mjs`: six widths without page overflow; manual coordinates and comparison preserve work; CSV/XLSX/GeoJSON/SHP downloads; UTF-8 lot, accent-insensitive search, selection/hidden-edit reconciliation, next-review focus/visible scroll at 1440x400, empty filter, mobile disclosure with first-viewport review at 390/649x672, 103-row pagination and cancellation pass. Report: `destino-browser-check.json`.
 - Initial and populated captures were opened at desktop/mobile/user width; map tiles are actual OSM. Remote query sources were mocked empty/unavailable to check recovery and local interpolation. Public live-engine benchmark is separate.
 - Computed UI typography: IBM Plex Sans; body 14px, secondary copy 11–12px, task heading 22px at the inspected desktop scale. Contrast from inspected CSS palette: main 10.61:1, secondary 5.15:1, active nav 8.84:1, secondary nav 7.96:1, review 6.33:1, failure 7.99:1, recorded 6.73:1.
 - Impeccable detector ran once over the changed UI: `[]`. No browser overlay was injected; this is source detection plus rendered review.
