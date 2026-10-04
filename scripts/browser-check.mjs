@@ -25,7 +25,7 @@ async function capture(path) {
 try {
   page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
   page.on('pageerror', error => failures.push(error.message));
-  page.on('console', message => { if (message.type() === 'error' && !message.text().includes('503')) { failures.push(message.text()); console.log('Browser:', message.text()); } });
+  page.on('console', message => { if (message.type() === 'error' && !message.text().includes('503') && !message.text().includes('EXPECTED_EXPORT_FAILURE')) { failures.push(message.text()); console.log('Browser:', message.text()); } });
   // Test failure recovery and local interpolation deterministically, without API dependence.
   await page.route('https://photon.komoot.io/**', route => route.fulfill({ status: 503, body: '{}' }));
   await page.route('https://*.supabase.co/**', route => route.fulfill({ status: 200, contentType: 'application/json', body: '{"segments":[],"addresses":[],"elements":[]}' }));
@@ -34,13 +34,21 @@ try {
   await page.locator('h1').waitFor(); await page.evaluate(() => document.fonts.ready);
   const userWidth = Number(process.env.UI_USER_WIDTH || 649);
   for (const width of [...new Set([1440, 1024, 768, 390, 320, userWidth])]) {
-    await page.setViewportSize({ width, height: 1000 });
+    await page.setViewportSize({ width, height: width === userWidth ? Number(process.env.UI_USER_HEIGHT || 672) : 1000 });
     const dimensions = await page.evaluate(() => ({ width: innerWidth, scroll: document.documentElement.scrollWidth }));
     assert.ok(dimensions.scroll <= dimensions.width, `Page overflow at ${width}: ${dimensions.scroll}`);
     checks.push({ viewport: width, noPageOverflow: true });
     if ([1440,390,userWidth].includes(width)) await capture(`${out}/panel-${width}.png`);
   }
   await page.setViewportSize({ width: 1440, height: 1000 });
+  if (await page.getByRole('button', { name: 'Mapa claro', exact: true }).count()) {
+    await page.getByRole('button', { name: 'Mapa claro', exact: true }).click();
+    assert.equal(await page.locator('.map-light').count(), 1);
+    assert.equal(await page.locator('.leaflet-tile-pane').evaluate(el => getComputedStyle(el).filter), 'none');
+    await page.getByRole('button', { name: 'Mapa oscuro', exact: true }).click();
+    assert.equal(await page.locator('.map-dark').count(), 1);
+    checks.push({ mapToneSwitchPreservesOriginalTiles: true });
+  }
   if (await page.getByRole('button', { name: 'Buscar dirección', exact: true }).count()) {
     assert.equal(await page.getByRole('button', { name: 'Lotes', exact: true }).getAttribute('aria-current'), 'page');
     checks.push({ batchFirst: true });
@@ -117,7 +125,7 @@ try {
   await page.getByRole('button', { name: 'Todos', exact: false }).click();
   await capture(`${out}/panel-results.png`);
   for (const width of [1440, 390, userWidth]) {
-    await page.setViewportSize({ width, height: width === userWidth ? 672 : 1000 });
+    await page.setViewportSize({ width, height: width === userWidth ? Number(process.env.UI_USER_HEIGHT || 672) : 1000 });
     if (width <= 760 && await page.locator('.destino-panel').count()) {
       assert.equal(await page.locator('.entry-toggle').getAttribute('aria-expanded'), 'false');
       assert.equal(await page.locator('.query-body').isVisible(), false);
@@ -126,6 +134,27 @@ try {
       assert.equal(await page.locator('.query-body').isVisible(), true);
       await page.getByRole('button', { name: /Archivo y columnas/ }).click();
       checks.push({ compactProcessedEntryAt: width, mappingRemainsEditable: true, reviewInFirstViewport: true });
+      if (width === 390) {
+        // Break the browser's download primitive, then restore it to exercise recovery.
+        await page.evaluate(() => {
+          window.__azimutDownload = URL.createObjectURL;
+          URL.createObjectURL = () => { throw new Error('EXPECTED_EXPORT_FAILURE'); };
+        });
+        await page.getByLabel('Formato de exportación').selectOption('csv');
+        await page.getByRole('button', { name: 'EXPORTAR (1)', exact: true }).click();
+        await page.getByRole('alert').waitFor();
+        assert.equal(await page.getByRole('alert').isVisible(), true);
+        assert.equal(await page.locator('.query-body').isVisible(), false);
+        assert.equal(await page.locator('tbody input[type=checkbox]:checked').count(), 3);
+        await capture(`${out}/mobile-export-error.png`);
+        await page.evaluate(() => { URL.createObjectURL = window.__azimutDownload; delete window.__azimutDownload; });
+        const retry = page.waitForEvent('download');
+        await page.getByRole('button', { name: 'EXPORTAR (1)', exact: true }).click();
+        await retry;
+        assert.equal(await page.getByRole('alert').count(), 0);
+        assert.equal(await page.getByText('1 ubicaciones exportadas.', { exact: true }).isVisible(), true);
+        checks.push({ mobileExportErrorVisibleWithCollapsedEntry: true, exportRecoveryPreservesSelection: true });
+      }
     }
     await capture(`${out}/results-${width}.png`);
   }

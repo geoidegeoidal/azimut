@@ -12,13 +12,21 @@ The system SHALL provide text search, CSV/XLSX batch mapping, a map, candidate e
 - **THEN** labeled controls, visible focus, usable touch targets and contained table scrolling preserve the primary flow.
 
 ### Requirement: Reviewable alternative design
-The system SHALL open Destino by default and retain the original Swiss design through `?design=classic`, preserving the same resolution and review behavior. This replaces the rejected Atlas prototype.
+The system SHALL open the modern colorful Prisma proposal by default and retain the original Swiss design through `?design=classic`, preserving the same resolution and review behavior. This replaces the rejected flat Destino and Atlas prototypes.
 
 #### Scenario: Compare layout alternatives
-- **WHEN** Destino is opened
-- **THEN** batch import leads, with a dominant review table and numbered map/evidence inspector on desktop, navy/cool-white/yellow states and IBM Plex Sans, no hero/KPI cards and usable mobile reflow.
+- **WHEN** Prisma is opened
+- **THEN** batch import leads, with a broad map and horizontal review table, graphite/lime/cyan/coral/violet roles, linked numbered selection and usable mobile reflow.
 - **WHEN** the user compares designs
 - **THEN** the imported file, rows, selection and manual corrections survive without reloading.
+
+#### Scenario: Change map presentation
+- **WHEN** the user chooses Mapa claro
+- **THEN** original OSM raster colors are restored without changing geometry, coordinates, attribution or selected row.
+
+#### Scenario: Recover from export failure on mobile
+- **WHEN** export fails while the processed importer is collapsed
+- **THEN** show the error beside the export area, retain the selection and permit another format/retry; no previous success notice contradicts the error.
 
 ### Requirement: GIS batch review
 The system SHALL support accent-insensitive lot search, uncertainty and unlocated filters, next-review keyboard focus and pagination of at most 100 visible rows.

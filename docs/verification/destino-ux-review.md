@@ -1,5 +1,7 @@
 # Laws of UX review — Destino, 2026-10-04
 
+Historical checkpoint, superseded by Prisma after the user rejected this visual direction. Current evidence: `prisma-ux-review.md` and `prisma-browser-check.json`. The pending review wording below describes the prior checkpoint; it is not a current approval.
+
 Scope: `/azimut/`, individual query and GIS batch import/review/export; 1440, 1024, 768, 649 (measured user width), 390 and 320 CSS px; keyboard/manual coordinates, native file input and buttons. Swiss comparison remains at `?design=classic`. The earlier Atlas/Swiss reports describe previous checkpoints.
 
 ## Findings
