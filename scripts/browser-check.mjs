@@ -9,6 +9,9 @@ const browser = await chromium.launch({ headless: true });
 const failures = [], checks = [];
 let page;
 async function capture(path) {
+  await page.evaluate(async () => {
+    await Promise.all(document.getAnimations().filter(animation => animation.effect?.getTiming().iterations !== Infinity).map(animation => animation.finished.catch(() => {})));
+  });
   // The real map may fetch a new tile set after each responsive resize.
   await page.waitForFunction(() => {
     const map = document.querySelector('.workspace-map');
@@ -32,6 +35,24 @@ try {
   await page.route('**/api/osm', route => route.fulfill({ status: 200, contentType: 'application/json', body: '{"elements":[]}' }));
   await page.goto(process.env.UI_URL || 'http://127.0.0.1:5173/azimut/');
   await page.locator('h1').waitFor(); await page.evaluate(() => document.fonts.ready);
+  if (await page.locator('.title-bearing').count()) {
+    assert.equal(await page.getByRole('button', { name: 'Importar archivo', exact: true }).count(), 1);
+    assert.equal(await page.locator('.ledger, .evidence-panel').count(), 0, 'Empty workspace must not duplicate import or evidence panels');
+    assert.match(await page.locator('h1').evaluate(el => getComputedStyle(el).fontFamily), /Outfit/);
+    assert.equal(await page.evaluate(() => document.fonts.check('500 32px Outfit')), true);
+    const box = await page.locator('.file-drop').boundingBox();
+    await page.mouse.move(box.x + 10, box.y + 15);
+    const bearing = await page.locator('.file-drop').evaluate(el => el.style.getPropertyValue('--bearing'));
+    assert.ok(bearing.endsWith('deg'), 'Import bearing must respond to the pointer');
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.mouse.move(box.x + box.width - 10, box.y + box.height - 15);
+    assert.equal(await page.locator('.file-drop').evaluate(el => el.style.getPropertyValue('--bearing')), bearing);
+    assert.equal(await page.locator('.title-bearing .bearing-arc').evaluate(el => getComputedStyle(el).animationName), 'none');
+    await page.emulateMedia({ reducedMotion: 'no-preference' });
+    await page.mouse.move(10, 10);
+    assert.equal(await page.locator('.file-drop').evaluate(el => el.style.getPropertyValue('--bearing')), '');
+    checks.push({ singleImportAction: true, emptyWorkspaceConsolidated: true, localOutfitFontLoaded: true, pointerBearing: true, reducedMotionStopsBearingAndDraw: true });
+  }
   const userWidth = Number(process.env.UI_USER_WIDTH || 649);
   for (const width of [...new Set([1440, 1024, 768, 390, 320, userWidth])]) {
     await page.setViewportSize({ width, height: width === userWidth ? Number(process.env.UI_USER_HEIGHT || 672) : 1000 });
@@ -41,6 +62,10 @@ try {
     if ([1440,390,userWidth].includes(width)) await capture(`${out}/panel-${width}.png`);
   }
   await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.locator('input[type=file]').setInputFiles({ name: 'invalid.csv', mimeType: 'text/csv', buffer: Buffer.from('dirección,dirección\nMatucana,501') });
+  await page.getByRole('alert').waitFor();
+  assert.equal(await page.getByRole('alert').isVisible(), true, 'Input validation must remain visible before any rows exist');
+  checks.push({ emptyImportValidationVisible: true });
   if (await page.getByRole('button', { name: 'Mapa claro', exact: true }).count()) {
     await page.getByRole('button', { name: 'Mapa claro', exact: true }).click();
     assert.equal(await page.locator('.map-light').count(), 1);
@@ -58,6 +83,12 @@ try {
   await page.getByRole('button', { name: /LOCALIZAR DIRECCIÓN|Buscar en el mapa/ }).click();
   await page.getByText('Consulta terminada. Revisa el método y la evidencia.', { exact: true }).waitFor();
   assert.match(await page.locator('.evidence-body').innerText(), /Interpolación/i);
+  assert.equal(await page.locator('.street-evidence').getAttribute('pathLength'), '1');
+  checks.push({ selectedStreetUsesFullGeometryWithNormalizedAnimation: true });
+  if (await page.locator('.source-summary').count()) {
+    assert.match(await page.locator('.source-summary').innerText(), /no disponible|sin coincidencias/i);
+    checks.push({ closedSourceSummaryExposesDegradedSources: true });
+  }
   if (!await page.locator('.source-details').evaluate(el => el.open)) await page.locator('.source-details summary').click();
   assert.match(await page.locator('.evidence-body').innerText(), /Photon/);
   await page.getByRole('button', { name: 'UBICAR MANUALMENTE' }).click();
@@ -93,7 +124,7 @@ try {
     await page.getByLabel('Buscar dentro del lote').fill('jose');
     assert.equal(await page.locator('tbody tr').count(), 1);
     assert.match(await page.locator('tbody').innerText(), /barra/i);
-    assert.match(await page.locator('.evidence-body h3').innerText(), /barra/i);
+    assert.match(await page.locator('.inspector-heading h2, .evidence-body h3').innerText(), /barra/i);
     assert.equal(await page.locator('.manual-coordinates').count(), 0);
     await page.getByLabel('Buscar dentro del lote').fill('ninguna coincidencia');
     assert.equal(await page.locator('.evidence-body').count(), 0);

@@ -46,19 +46,25 @@ export function WorkspaceMap({ rows, activeId, editing, dark = false, onSelect, 
     if (!map || !group) return;
     group.clearLayers();
     const active = rows.find(row => row.id === activeId);
+    const viewKey = active?.geocode?.found ? `${active.id}:${active.geocode.lat}:${active.geocode.lon}` : "";
+    const arriving = viewKey !== lastView.current;
     for (const row of rows) {
       if (!row.geocode?.found) continue;
       const { lat, lon } = row.geocode;
       const selected = row.id === activeId;
       const marker = L.marker([lat, lon], { keyboard: true, title: `${row.id}. ${row.normalized.normalized}`, draggable: selected && editing,
-        icon: L.divIcon({ className: "survey-marker", html: `<span class="${selected ? "selected" : ""}">${row.id}</span>`, iconSize: [32, 32], iconAnchor: [16, 16] }) });
+        icon: L.divIcon({ className: "survey-marker", html: `<span class="${selected ? `selected ${arriving ? "point-arrival" : ""}` : ""}">${row.id}</span>`, iconSize: [32, 32], iconAnchor: [16, 16] }) });
       marker.on("click", () => callbacks.current.onSelect(row.id));
       marker.on("dragend", () => { const point = marker.getLatLng(); callbacks.current.onManual(point.lat, point.lng); });
       group.addLayer(marker);
     }
     if (active?.geocode?.found) {
       const result = active.geocode;
-      if (result.geometry) group.addLayer(L.polyline(result.geometry.map(p => [p[1], p[0]]), { color: "#FF3000", className: "street-evidence", weight: 4, opacity: 0.85 }));
+      if (result.geometry) {
+        const street = L.polyline(result.geometry.map(p => [p[1], p[0]]), { color: "#FF3000", className: `street-evidence ${arriving ? "evidence-arrival" : ""}`, weight: 4, opacity: 0.85 });
+        group.addLayer(street);
+        street.getElement()?.setAttribute("pathLength", "1");
+      }
       for (const candidate of result.candidates || []) {
         if (Math.abs(candidate.lat - result.lat) + Math.abs(candidate.lon - result.lon) < 0.00001) continue;
         const marker = L.circleMarker([candidate.lat, candidate.lon], { color: "#000", fillColor: "#fff", fillOpacity: 1, radius: 6, weight: 2, bubblingMouseEvents: false });
@@ -67,7 +73,6 @@ export function WorkspaceMap({ rows, activeId, editing, dark = false, onSelect, 
         marker.bindTooltip(label).on("click", () => callbacks.current.onCandidate(candidate));
         group.addLayer(marker);
       }
-      const viewKey = `${active.id}:${result.lat}:${result.lon}`;
       if (lastView.current !== viewKey) {
         const bounds = result.geometry?.map(p => [p[1], p[0]] as L.LatLngTuple) || [[result.lat, result.lon] as L.LatLngTuple];
         map.fitBounds(L.latLngBounds(bounds), { padding: [48, 48], maxZoom: 17, animate: false });

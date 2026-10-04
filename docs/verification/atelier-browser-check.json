@@ -1,0 +1,106 @@
+{
+  "testedAt": "2026-10-04T07:09:53.812Z",
+  "checks": [
+    {
+      "singleImportAction": true,
+      "emptyWorkspaceConsolidated": true,
+      "localOutfitFontLoaded": true,
+      "pointerBearing": true,
+      "reducedMotionStopsBearingAndDraw": true
+    },
+    {
+      "viewport": 1440,
+      "noPageOverflow": true
+    },
+    {
+      "viewport": 1024,
+      "noPageOverflow": true
+    },
+    {
+      "viewport": 768,
+      "noPageOverflow": true
+    },
+    {
+      "viewport": 390,
+      "noPageOverflow": true
+    },
+    {
+      "viewport": 320,
+      "noPageOverflow": true
+    },
+    {
+      "viewport": 1304,
+      "noPageOverflow": true
+    },
+    {
+      "emptyImportValidationVisible": true
+    },
+    {
+      "mapToneSwitchPreservesOriginalTiles": true
+    },
+    {
+      "batchFirst": true
+    },
+    {
+      "selectedStreetUsesFullGeometryWithNormalizedAnimation": true
+    },
+    {
+      "closedSourceSummaryExposesDegradedSources": true
+    },
+    {
+      "preservedManualCoordinatesWhenChangingDesign": true
+    },
+    {
+      "export": "geojson",
+      "saved": true
+    },
+    {
+      "export": "csv",
+      "saved": true
+    },
+    {
+      "export": "xlsx",
+      "saved": true
+    },
+    {
+      "export": "shp",
+      "saved": true
+    },
+    {
+      "batch": 3,
+      "utf8Accents": true,
+      "completed": true
+    },
+    {
+      "accentInsensitiveLotSearch": true,
+      "searchReconcilesSelectionAndClosesHiddenEdit": true,
+      "nextReviewKeyboardFocus": true,
+      "nextReviewScrollsIntoView": true,
+      "filterEmptyState": true
+    },
+    {
+      "designSwitch": true,
+      "preservedBatchAndSelection": true
+    },
+    {
+      "compactProcessedEntryAt": 390,
+      "mappingRemainsEditable": true,
+      "reviewInFirstViewport": true
+    },
+    {
+      "mobileExportErrorVisibleWithCollapsedEntry": true,
+      "exportRecoveryPreservesSelection": true
+    },
+    {
+      "pagination": 103,
+      "visibleRowLimit": 100,
+      "cancellationPreservesPendingRows": true
+    },
+    {
+      "reflowEquivalentTo200PercentAt1440": true,
+      "reducedMotionTransition": "0s"
+    }
+  ],
+  "pageErrors": [],
+  "network": "Remote sources mocked unavailable/empty to verify local fallback. Map tiles real. Public-address benchmark runs separately against live OSM."
+}
