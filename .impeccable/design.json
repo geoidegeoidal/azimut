@@ -471,18 +471,19 @@
         "header": "min-height76px; padding0 24px; gap24px",
         "populated": {
           "columns": "288px minmax(0,1fr) 300px",
-          "rows": "76px minmax(280px,.8fr) minmax(420px,1fr)",
-          "height": "calc(100dvh - 76px)",
+          "rows": "76px 340px minmax(420px,auto)",
+          "height": "auto",
           "minHeight": "844px",
           "padding": "12px 24px 24px",
           "gap": "16px",
-          "composition": "Title across all columns. Importer left across map/ledger rows. Real map center, evidence right, ledger across center/right beneath."
+          "composition": "Title across all columns. Importer left across map/ledger rows. Real map center in a340px row, evidence right, ledger across center/right beneath. Importer and ledger align-self:start; importer and columns use intrinsic content height with visible overflow; table body max-height440px. Mobile resets importer and ledger alignment to stretch."
         },
         "empty": {
           "columns": "320px minmax(0,1fr) 300px",
           "rows": "200px minmax(460px,1fr)",
           "minHeight": "756px",
-          "composition": "Opening title, one import surface left and broad real map spanning both right columns. No empty ledger or inspector."
+          "composition": "Opening title, one import surface left and broad real map spanning both right columns. No empty ledger or inspector.",
+          "mapMaxHeight": "640px"
         }
       },
       "responsive": {
@@ -492,7 +493,7 @@
       },
       "states": {
         "empty": "Batch is the default; the sample is explicitly labeled public/example and is calculated only after processing.",
-        "fileSelected": "Graphite dashed-border filename surface; mapping preview and process control. Reads/configuration blocked while busy.",
+        "fileSelected": "Graphite dashed-border filename surface; mapping preview and process control. Reads/configuration blocked while busy. Importer min-height:max-content, overflow:visible; column-options max-height:none and overflow:visible.",
         "processing": "Counts, native progress, pause/resume/cancel and pending rows remain visible. Cancellation preserves working rows.",
         "selection": "Active row uses selected surface; reference cell, numbered selected marker and inspector reference use cyan. Click/keyboard row selection and marker selection share row state.",
         "review": "Manual positions remain review-required; score denotes evidence and manual score is a dash. Closed source disclosure still exposes unavailable/empty counts.",

@@ -50,7 +50,7 @@
 .destino-panel .backend-indicator small { font-size: 11px; color: #a9b6c8; margin-top: 4px; }
 .destino-panel .backend-indicator > .signal-square { background: var(--destino-yellow); }
 .destino-panel .design-comparison { color: #a9b6c8; font-size: 11px; text-decoration: underline; text-underline-offset: 4px; }
-.destino-panel main { display: grid; grid-template-columns: 288px minmax(0, 1fr) 300px; grid-template-rows: 76px minmax(280px, .8fr) minmax(420px, 1fr); height: calc(100dvh - 76px); min-height: 844px; max-width: none; padding: 12px 24px 24px; gap: 16px; }
+.destino-panel main { display: grid; grid-template-columns: 288px minmax(0, 1fr) 300px; grid-template-rows: 76px 340px minmax(420px, auto); height: auto; min-height: 844px; max-width: none; padding: 12px 24px 24px; gap: 16px; }
 .destino-panel main.is-empty { grid-template-columns: 320px minmax(0,1fr) 300px; grid-template-rows: 200px minmax(460px,1fr); min-height: 756px; }
 .destino-panel .is-empty .query-panel { grid-row: 2; }
 .destino-panel .is-empty .map-panel { grid-row: 2; }
@@ -72,7 +72,7 @@
 .destino-panel .review-count::before { content: ""; width: 8px; height: 8px; background: currentColor; border-radius: 50%; }
 .destino-panel .workspace { display: contents; }
 .destino-panel .query-panel, .destino-panel .map-panel, .destino-panel .evidence-panel, .destino-panel .ledger { border: 1px solid var(--survey-rule); border-radius: 12px; background: var(--survey-paper); min-width: 0; min-height: 0; }
-.destino-panel .query-panel { grid-column: 1; grid-row: 2 / 4; overflow: auto; }
+.destino-panel .query-panel { grid-column: 1; grid-row: 2 / 4; align-self: start; min-height: max-content; overflow: visible; }
 .destino-panel .panel-heading { min-height: 56px; padding: 20px 20px 12px; border: 0; gap: 10px; }
 .destino-panel .panel-heading > span, .destino-panel .panel-heading > svg { display: none; }
 .destino-panel .panel-heading h2 { font-family: var(--font-display); font-size: 17px; font-weight: 500; letter-spacing: -.01em; }
@@ -116,6 +116,7 @@
 .destino-panel .sample-lot button { width: 100%; background: transparent; border: 0; justify-content: space-between; padding: 8px 0; font-size: 12px; }
 .destino-panel .sample-lot p { font-size: 11px; line-height: 1.5; color: var(--survey-secondary); }
 .destino-panel .data-note { font-size: 11px; line-height: 1.55; margin-top: 24px; }
+.destino-panel .column-options { max-height: none; overflow: visible; }
 .destino-panel .column-options label { font-size: 13px; padding: 10px 0; border-color: var(--survey-rule); }
 .destino-panel .column-options label:has(input:checked) { background: var(--survey-muted); }
 .destino-panel .batch-preview { border: 0; border-top: 1px solid var(--survey-rule); border-bottom: 1px solid var(--survey-rule); padding: 12px 0; margin: 20px 0; background: transparent; }
@@ -133,7 +134,7 @@
 .destino-panel .examples button { color: var(--survey-ink); font-size: 13px; background: transparent; border-color: var(--survey-rule); }
 .destino-panel .examples button small { display: block; color: var(--survey-secondary); font-size: 11px; margin-top: 3px; }
 .destino-panel .examples .eyebrow { letter-spacing: 0; font-weight: 400; font-size: 12px; }
-.destino-panel .ledger { grid-column: 2 / 4; grid-row: 3; display: flex; flex-direction: column; margin: 0; overflow: hidden; }
+.destino-panel .ledger { grid-column: 2 / 4; grid-row: 3; align-self: start; display: flex; flex-direction: column; margin: 0; overflow: hidden; }
 .destino-panel .ledger-toolbar { flex-wrap: wrap; padding: 12px 20px; gap: 12px; min-height: 68px; }
 .destino-panel .ledger-toolbar h2 { margin: 0; font-size: 18px; font-weight: 500; letter-spacing: -.01em; }
 .destino-panel .ledger-toolbar h2 > span { font-size: 12px; color: var(--survey-secondary); font-weight: 400; }
@@ -153,7 +154,7 @@
 .row-search > svg { position: absolute; left: 10px; color: var(--survey-secondary); pointer-events: none; }
 .destino-panel .row-search input { padding-left: 34px; }
 .destino-panel .review-tools > button { font-size: 12px; padding: 8px 12px; }
-.destino-panel .table-scroll { flex: 1; max-height: none; min-height: 0; }
+.destino-panel .table-scroll { flex: 1; max-height: 440px; min-height: 0; }
 .destino-panel table { min-width: 780px; font-size: 12px; }
 .destino-panel th { font-size: 10px; font-weight: 500; letter-spacing: .02em; padding: 10px 14px; background: var(--survey-paper); border-color: var(--survey-rule); }
 .destino-panel td { padding: 4px 14px; border-color: var(--survey-rule); }
@@ -172,7 +173,7 @@
 .ledger-pagination > div { display: flex; align-items: center; gap: 12px; }
 .ledger-pagination button { min-width: 44px; padding: 8px; }
 .destino-panel .map-panel { grid-column: 2; grid-row: 2; display: flex; flex-direction: column; overflow: hidden; }
-.destino-panel .is-empty .map-panel { grid-column: 2 / 4; }
+.destino-panel .is-empty .map-panel { grid-column: 2 / 4; max-height: 640px; }
 .destino-panel .map-panel .panel-heading { min-height: 48px; padding: 12px 20px; }
 .destino-panel .map-panel .panel-heading h2 { font-size: 14px; font-weight: 500; }
 .destino-panel .coordinate-system { border: 0; padding: 0; font-size: 11px; color: var(--survey-secondary); }
@@ -295,7 +296,7 @@
   .destino-panel .file-drop:not(.has-file) .secondary-button { grid-column: 1 / -1; }
   .destino-panel .page-title p { font-size: 13px; }
   .destino-panel .work-summary { gap: 20px; font-size: 11px; }
-  .destino-panel .query-panel { order: 1; }
+  .destino-panel .query-panel { order: 1; align-self: stretch; }
   .destino-panel .query-panel.has-batch .panel-heading { display: none; }
   .destino-panel .query-panel.compact-entry .query-body { display: none; }
   .destino-panel .entry-toggle { display: flex; width: 100%; align-items: center; justify-content: space-between; gap: 16px; padding: 14px 16px; border: 0; border-radius: 12px; background: var(--survey-paper); color: var(--survey-ink); min-height: 64px; text-align: left; font-size: 12px; }
@@ -305,7 +306,7 @@
   .destino-panel .entry-toggle:hover { background: var(--survey-muted); }
   .destino-panel .query-body { padding: 0 16px 20px; }
   .destino-panel .panel-heading { padding-left: 16px; padding-right: 16px; }
-  .destino-panel .ledger { order: 2; }
+  .destino-panel .ledger { order: 2; align-self: stretch; }
   .destino-panel .ledger-toolbar { padding: 16px; }
   .destino-panel .ledger-toolbar h2 { font-size: 17px; }
   .destino-panel .export-controls { width: 100%; }

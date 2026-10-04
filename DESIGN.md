@@ -211,7 +211,7 @@ Outfit is self-hosted as a variable font (weights 100–900) with `font-display:
 
 ## Layout
 
-The default surface uses a fluid grid with minimum-zero content columns, explicit bounded working regions and a repeated compact spacing rhythm. Desktop gutters use the recorded gutter step; inner panel content usually uses the panel-inset step. The header and outer desktop margin use the outer step.
+The default surface uses a fluid grid with minimum-zero content columns, content-driven importer height and bounded review regions and a repeated compact spacing rhythm. Desktop gutters use the recorded gutter step; inner panel content usually uses the panel-inset step. The header and outer desktop margin use the outer step.
 
 The present batch workspace has three desktop columns (288px, flexible map, 300px evidence). Before rows, the importer is wider (320px) and the map spans the two right columns. With rows, a horizontal ledger spans the map/evidence width while the importer continues down the left. These are current surface compositions, not requirements for every future Azimut screen.
 
@@ -251,7 +251,7 @@ Compact badges use review, error, pending or recorded treatments, always accompa
 
 ### Cards / Containers
 
-Fine slate borders frame working graphite panels. Interior headings and content use the observed compact spacing. On desktop the importer and evidence can scroll internally; mobile exposes the full evidence content and collapses processed import settings into a disclosure.
+Fine slate borders frame working graphite panels. Interior headings and content use the observed compact spacing. The importer and its column list grow with their content, using ordinary page flow at every width. Desktop importer and ledger align to the start of their tracks; the populated map row is340px, so long mappings do not inflate neighboring panels. The review table keeps a bounded scrolling body (440px desktop/medium, 400px mobile); desktop evidence may scroll internally. Mobile panels stretch to full width, expose full evidence and collapse processed import settings into a disclosure. The empty map is capped at640px so a long column list does not stretch it indefinitely.
 
 ### Importer
 

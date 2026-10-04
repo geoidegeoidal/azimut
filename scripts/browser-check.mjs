@@ -61,9 +61,26 @@ try {
     await page.setViewportSize({ width, height: width === userWidth ? Number(process.env.UI_USER_HEIGHT || 672) : 1000 });
     const dimensions = await page.evaluate(() => ({ width: innerWidth, scroll: document.documentElement.scrollWidth }));
     assert.ok(dimensions.scroll <= dimensions.width, `Page overflow at ${width}: ${dimensions.scroll}`);
+    assert.equal(await page.locator('.query-panel').evaluate(el => el.scrollHeight <= el.clientHeight + 1), true, `Importer content must fit its panel at ${width}`);
     checks.push({ viewport: width, noPageOverflow: true });
     if ([1440,390,userWidth].includes(width)) await capture(`${out}/panel-${width}.png`);
   }
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  const extraColumns = Array.from({ length: 30 }, (_, i) => `campo_${i}`);
+  await page.locator('input[type=file]').setInputFiles({ name: 'archivo-con-muchas-columnas.csv', mimeType: 'text/csv', buffer: Buffer.from(`dirección,comuna,${extraColumns.join(',')}\nMatucana 501,Santiago,${extraColumns.map(() => 'dato').join(',')}`) });
+  await page.getByText('archivo-con-muchas-columnas.csv', { exact: true }).waitFor();
+  for (const width of [1304,390]) {
+    await page.setViewportSize({ width, height: 884 });
+    for (const selector of ['.query-panel','.column-options']) assert.equal(await page.locator(selector).evaluate(el => el.scrollHeight <= el.clientHeight + 1), true, `${selector} must expose all columns at ${width}`);
+    assert.equal(await page.locator('.query-panel').evaluate(el => {
+      const panel = el.getBoundingClientRect();
+      const note = el.querySelector('.data-note').getBoundingClientRect();
+      return note.bottom <= panel.bottom;
+    }), true);
+    if (width === 1304) assert.ok(await page.locator('.map-panel').evaluate(el => el.getBoundingClientRect().height <= 641), 'Many input columns must not stretch the map indefinitely');
+    await capture(`${out}/many-columns-${width}.png`);
+  }
+  checks.push({ importerUsesPageFlow: true, all32ColumnsVisibleWithoutInternalScroll: true, checkedAt: [1304,390] });
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.locator('input[type=file]').setInputFiles({ name: 'invalid.csv', mimeType: 'text/csv', buffer: Buffer.from('dirección,dirección\nMatucana,501') });
   await page.getByRole('alert').waitFor();
@@ -160,6 +177,17 @@ try {
   await capture(`${out}/panel-results.png`);
   for (const width of [1440, 390, userWidth]) {
     await page.setViewportSize({ width, height: width === userWidth ? Number(process.env.UI_USER_HEIGHT || 672) : 1000 });
+    if (width > 1040 && await page.locator('.destino-panel').count()) {
+      const layout = await page.evaluate(() => ({
+        mapHeight: document.querySelector('.map-panel').getBoundingClientRect().height,
+        ledgerHeight: document.querySelector('.ledger').getBoundingClientRect().height,
+        importerBottomGap: document.querySelector('.query-panel').getBoundingClientRect().bottom - document.querySelector('.data-note').getBoundingClientRect().bottom,
+      }));
+      assert.ok(layout.mapHeight <= 341, 'A short lot must not inflate the working map');
+      assert.ok(layout.ledgerHeight < 600, 'A three-row ledger must remain compact');
+      assert.ok(layout.importerBottomGap < 30, 'Importer must end after its content, without stretching to the review tracks');
+      checks.push({ compactPopulatedLayoutAt: width, ...layout });
+    }
     if (width <= 760 && await page.locator('.destino-panel').count()) {
       assert.equal(await page.locator('.entry-toggle').getAttribute('aria-expanded'), 'false');
       assert.equal(await page.locator('.query-body').isVisible(), false);
@@ -200,6 +228,7 @@ try {
     await page.getByRole('button', { name: /DETENER/ }).click();
     await page.getByText('Lote detenido. Se conservaron las filas procesadas.', { exact: true }).waitFor();
     assert.equal(await page.locator('tbody tr').count(), 100);
+    assert.ok(await page.locator('.table-scroll').evaluate(el => el.clientHeight <= 441 && el.scrollHeight > el.clientHeight), 'Large review tables must retain a bounded scroll body');
     await page.getByRole('button', { name: 'Página siguiente', exact: true }).click();
     assert.equal(await page.locator('tbody tr').count(), 3);
     assert.match(await page.locator('tbody').innerText(), /101/);

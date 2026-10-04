@@ -1,5 +1,15 @@
 # Session handoff
 
+## 2026-10-04 — Input panel without nested scrolling
+
+- Objective: remove the vertical scrollbar inside Archivo de entrada while preserving the cartographic workshop design and GIS review flow.
+- Completed: importer and column list grow in normal page flow; desktop input and ledger align to content, populated map row340px, empty map capped640px, table body capped440px/400px mobile. Mobile panels remain full width and retain the processed-entry disclosure.
+- Decisions: reuse native grid/flex CSS, no dependency. Auto-height fractional tracks inflated neighboring panels during review; bounded map track plus content alignment resolves that pitfall. AGENTS, DESIGN/sidecar and OpenSpec record the final behavior.
+- Verification: lint/build and full browser workflow pass at1440/1304/1024/768/390/320;32columns visible without inner scrolling, compact three-row regions,103-row bounded table, exports and mobile recovery. Independent scoped layout assessment passed; final mechanical layout scan returned no findings. Reports in docs/verification/import-flow-*; API sources mocked empty/unavailable, local IDE and tiles real.
+- Blockers: none for this UI change. Supabase ingestion/Auth/Edge remain separate pending backend work.
+- Next: user review of the revised input flow; keep Vite/native preview available.
+- Commits: follows pushed a9f72b2 on codex/cartographic-workspace; this entry accompanies the input-flow fix checkpoint.
+
 ## 2026-10-04 — Artistic cartographic workshop
 
 - Objective: address the user's rejection of duplicated import, typography and anonymous identity; retain the requested modern, tech, colorful GIS workflow with artistic expression and interactive motion.

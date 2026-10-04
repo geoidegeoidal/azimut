@@ -52,3 +52,9 @@ The system SHALL support accent-insensitive lot search, uncertainty and unlocate
 - **THEN** a finite animation emphasizes its real marker and street geometry.
 - **WHEN** reduced motion is requested
 - **THEN** remove spatial and drawing animation while preserving visible selection and status feedback.
+
+#### Scenario: Read all input settings without nested scrolling
+- **WHEN** the user imports an address file, including one with many columns
+- **THEN** the input panel and column list grow with their content and use normal page scrolling; all settings and the explanatory footer remain visible.
+- **WHEN** input settings grow or a short lot is processed
+- **THEN** the map and review table retain bounded working regions without stretching into oversized blank panels; mobile preserves full-width panels and the processed-entry disclosure.

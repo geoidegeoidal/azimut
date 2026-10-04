@@ -11,3 +11,4 @@
 - [x] Choose replacement direction on the Impeccable board; implement table-first batch UI.
 - [x] Complete bounded captures, fresh Impeccable finish review and design documentation for the replacement.
 - [x] Resolve duplicate import, replace typography, establish cartographic identity and verify interactive/reduced motion.
+- [x] Remove nested importer/column scrolling and verify intrinsic input height with bounded map/table regions on desktop and mobile.
