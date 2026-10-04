@@ -13,3 +13,4 @@ tsconfig.app.tsbuildinfo
 .impeccable/mocks/
 .impeccable/live/
 .impeccable/cache/
+.impeccable/questions/

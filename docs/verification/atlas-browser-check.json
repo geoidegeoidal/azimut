@@ -1,5 +1,5 @@
 {
-  "testedAt": "2026-10-04T05:12:04.365Z",
+  "testedAt": "2026-10-04T05:22:00.735Z",
   "checks": [
     {
       "viewport": 1440,
@@ -41,6 +41,10 @@
       "batch": 3,
       "utf8Accents": true,
       "completed": true
+    },
+    {
+      "designSwitch": true,
+      "preservedBatchAndSelection": true
     },
     {
       "reflowEquivalentTo200PercentAt1440": true,

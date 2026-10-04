@@ -1,5 +1,5 @@
 {
-  "testedAt": "2026-10-04T05:14:16.245Z",
+  "testedAt": "2026-10-04T05:22:54.128Z",
   "checks": [
     {
       "viewport": 1440,
@@ -22,6 +22,9 @@
       "noPageOverflow": true
     },
     {
+      "preservedManualCoordinatesWhenChangingDesign": true
+    },
+    {
       "export": "geojson",
       "saved": true
     },
@@ -41,6 +44,10 @@
       "batch": 3,
       "utf8Accents": true,
       "completed": true
+    },
+    {
+      "designSwitch": true,
+      "preservedBatchAndSelection": true
     },
     {
       "reflowEquivalentTo200PercentAt1440": true,
