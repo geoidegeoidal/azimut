@@ -1,0 +1,52 @@
+{
+  "testedAt": "2026-10-04T05:14:16.245Z",
+  "checks": [
+    {
+      "viewport": 1440,
+      "noPageOverflow": true
+    },
+    {
+      "viewport": 1024,
+      "noPageOverflow": true
+    },
+    {
+      "viewport": 768,
+      "noPageOverflow": true
+    },
+    {
+      "viewport": 390,
+      "noPageOverflow": true
+    },
+    {
+      "viewport": 320,
+      "noPageOverflow": true
+    },
+    {
+      "export": "geojson",
+      "saved": true
+    },
+    {
+      "export": "csv",
+      "saved": true
+    },
+    {
+      "export": "xlsx",
+      "saved": true
+    },
+    {
+      "export": "shp",
+      "saved": true
+    },
+    {
+      "batch": 3,
+      "utf8Accents": true,
+      "completed": true
+    },
+    {
+      "reflowEquivalentTo200PercentAt1440": true,
+      "reducedMotionTransition": "1e-05s"
+    }
+  ],
+  "pageErrors": [],
+  "network": "Remote sources mocked unavailable/empty to verify local fallback. Map tiles real. Public-address benchmark runs separately against live OSM."
+}

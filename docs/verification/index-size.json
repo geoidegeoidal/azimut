@@ -1,0 +1,10 @@
+{
+  "measuredAt": "2026-10-04T04:36:41.632Z",
+  "engine": "PostgreSQL 17 / PostGIS 3.5",
+  "importedRows": 254859,
+  "segments": 254859,
+  "streets": 59947,
+  "applicationTableAndIndexBytes": 85852160,
+  "databaseBytes": 101960851,
+  "limitation": "Isolated local database, not a Supabase project. Cloud total includes platform tables and future OSM imports; measure again after deployment."
+}

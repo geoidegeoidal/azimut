@@ -1,5 +1,15 @@
 # Session handoff
 
+## 2026-10-04 — GIS batch design direction
+
+- Objective: replace the rejected Atlas alternative using official Impeccable, focused on processing and correcting GIS batches.
+- Completed: installed Impeccable 4.5.0 with LICENSE/NOTICE; captured confirmed product context in PRODUCT.md and code-first preference. Prepared a local decision board (key b1488e00, seed ab5ec911): Destino, Registro and Terreno; no direction selected yet.
+- UI checkpoint: functional query/map/evidence/batch workspace; CSV/XLSX mapping, pause/cancel, manual coordinates, four exports, source states. Design switching preserves imported file, selected rows and manual coordinates. Existing 93 Vitest tests plus 3 native checks, lint and production build pass. Browser checks cover five widths, exports and fallback sources; latest copies live in the visualization workspace until final refresh.
+- Decisions: the user confirmed batches for GIS as the opening priority. Table-first is the next design; current Atlas remains an unapproved field-notebook prototype. Git workflow is codex/address-workbench with checkpoints and push.
+- Blockers: waiting for visual direction on the Impeccable decision board. Cloud import, anonymous Auth and Edge deployment remain pending; migrations are already applied. Graph indexing was rejected, use local discovery.
+- Next: build selected direction, bounded desktop/mobile review, fresh finish reviewer and documenter, update verification and push. Keep the Vite preview running for review.
+- Commits: 808a8c1 and 24a3d01 pushed earlier; fa581ef parser/export/identity fixes committed, push included with the UI checkpoint.
+
 ## 2026-10-04 — Backend checkpoint
 
 - Completed: PostGIS migrations execute in isolated PostgreSQL 17; SQL assertions pass for privileges, exact street matching, directed ranges, quotas and cache eviction. Native OSM query checks pass. Edge enrichment validates Auth and limits cache to 20MiB/128 entries.

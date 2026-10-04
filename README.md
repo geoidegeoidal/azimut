@@ -1,264 +1,81 @@
-<div align="center">
+# Azimut
 
-<img src="public/favicon.svg" width="80" alt="Azimut" />
+Panel de búsqueda y revisión de direcciones chilenas. Combina el Maestro de Calles IDE Chile 2022, geometrías y direcciones de OpenStreetMap y proveedores configurables. Ofrece búsqueda individual, lotes CSV/Excel, mapa, candidatos, evidencia, ajuste manual y exportaciones con procedencia.
 
-# 🧭 Azimut
+## Ejecutar
 
-### Geocodificador & Normalizador de Direcciones Chilenas
+Node 22 o superior y pnpm. Instala con `pnpm install --frozen-lockfile` y ejecuta `pnpm dev`. El panel está en `http://localhost:5173/azimut/`. Las interpolaciones oficiales funcionan sin servidor externo.
 
-*Sube un CSV, normaliza, geocodifica y exporta — todo desde el navegador, sin API keys.*
+La propuesta de diseño propia **Atlas** está en `/azimut/?design=atlas`: mapa continuo, cuaderno lateral, papel cálido, verde bosque y tipografía IBM Plex Sans/Instrument Serif. Permite volver al diseño Swiss original para comparar. [Decisiones de diseño](docs/design-atlas.md).
 
-[![Deploy](https://img.shields.io/github/actions/workflow/status/geoidegeoidal/azimut/deploy.yml?branch=main&label=deploy&style=flat-square&color=3b5bff)](https://geoidegeoidal.github.io/azimut/)
-[![Tests](https://img.shields.io/badge/tests-62%20passed-10b981?style=flat-square)](https://github.com/geoidegeoidal/azimut)
-[![Stack](https://img.shields.io/badge/react%2019-vite%207-0c1433?style=flat-square&logo=react)](https://github.com/geoidegeoidal/azimut)
-[![Chile](https://img.shields.io/badge/hecho%20en-chile-ef4444?style=flat-square)](https://github.com/geoidegeoidal/azimut)
+Para enriquecer con OSM en desarrollo, ejecuta en otra terminal:
 
-<p align="center">
-  <a href="https://geoidegeoidal.github.io/azimut/"><strong>🌎 Pruébalo aquí</strong></a>
-  ·
-  <a href="#-flujo">Flujo</a>
-  ·
-  <a href="#-geocodificación-en-3-capas">Geocodificación</a>
-  ·
-  <a href="#-normalizador">Normalizador</a>
-  ·
-  <a href="#-stack">Stack</a>
-  ·
-  <a href="#-tests">Tests</a>
-</p>
-
-</div>
-
----
-
-## 🎯 ¿Qué hace?
-
-<p align="center">
-  <img src="assets/flow.png" width="100%" alt="Pipeline de Geocodificación" />
-</p>
-
-Azimut es una herramienta **100% client-side** para geocodificar direcciones chilenas. No requiere servidor, API keys ni configuración. Incluye el **Callejero Oficial de Chile (IDE Chile 2022)** como primera capa de geocodificación, con interpolación de numeración por segmento y corrección de typos mediante fuzzy matching.
-
----
-
-## 🧭 Flujo
-
-| Paso | Acción                             | Qué pasa                                                                                                          |
-| :--: | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-|  1  | 📂**Sube tu archivo**         | Arrastra un CSV o XLSX — detectamos encoding, delimitador y columnas automáticamente                             |
-|  2  | 🔍**Selecciona las columnas** | Te sugerimos la columna con direcciones y comuna, ves un preview de 10 filas normalizadas                          |
-|  3  | ⚡**Geocodificamos**          | 3 capas: Callejero IDE Chile → Nominatim → Photon. Pausa, reanuda o cancela cuando quieras                         |
-|  4  | 📊**Explora resultados**      | Dashboard con scores, mapa interactivo con marcadores coloreados, tabla filtrable con detalle                      |
-|  5  | 📦**Exporta**                 | 4 formatos: CSV, XLSX (celdas coloreadas), GeoJSON, Shapefile (.zip)                                               |
-
----
-
-## 🗺️ Geocodificación en 3 capas
-
-```mermaid
-graph LR
-    A[Dirección] --> B{¿Callejero IDE Chile?}
-    B -->|Sí: comuna + número| C[Interpolación por segmento]
-    C --> D[Coordenadas exactas]
-    B -->|No: sin comuna/número| E[Nominatim OSM]
-    E -->|Encontrado| D
-    E -->|No encontrado| F[Photon Komoot]
-    F -->|Encontrado| D
-    F -->|No encontrado| G[Sin resultado]
+```powershell
+node server/osm-proxy.mjs
 ```
 
-### Capa 1: Callejero IDE Chile (Maestro de Calles 2022)
+Crea `.env.local` (ignorado por Git) y reinicia Vite:
 
-Primera capa de resolución — **no consume APIs externas**.
-
-| Característica | Detalle |
-| :------------- | :------ |
-| **Fuente** | IDE Chile / SNIT — Maestro de Calles 2022 |
-| **Cobertura** | 127.858 calles únicas en 151 comunas |
-| **Segmentos** | 267.519 segmentos con numeración y geometría |
-| **Resolución** | Interpolación lineal del número dentro del rango del segmento |
-
-**Búsqueda en 3 fases:**
-
-| Fase | Método | Ejemplo |
-| :--: | :----- | :------ |
-| 1 | **Match exacto** | `"avenida providencia"` → encuentra segmento directamente |
-| 2 | **Fuzzy matching** | `"avenida providenciaa"` → Levenshtein corrige a `"avenida providencia"` |
-| 3 | **Interpolación** | Número 1234 dentro de rango [1200–1300] → coordenada proporcional |
-
-**Umbral dinámico de fuzzy matching:**
-
-| Longitud del nombre | Distancia máxima permitida |
-| :------------------ | :------------------------- |
-| ≤ 16 chars | 2 |
-| 17–24 chars | 2–3 |
-| 25–32 chars | 3 |
-| > 32 chars | 4 |
-
-### Capa 2: Nominatim (OpenStreetMap)
-
-Fallback cuando el callejero no puede resolver (sin comuna, sin número, o calle no encontrada).
-
-### Capa 3: Photon (Komoot)
-
-Último recurso si Nominatim falla.
-
----
-
-## 🧹 Normalizador — 8 pasos
-
-```mermaid
-graph LR
-    A[Input] --> B(1. Espacios)
-    B --> C(2. Expandir Vía)
-    C --> D(3. Extraer Número)
-    D --> E(4. Sin tildes)
-    E --> F(5. Limpiar)
-    F --> G(6. Capitalizar)
-    G --> H(7. Callejero)
-    H --> I(8. Reconstruir)
-    I --> J[Dirección Normalizada]
+```dotenv
+VITE_OSM_VECTOR_API=http://127.0.0.1:8787/api/osm
 ```
 
-| Paso | Acción               | Qué resuelve                                                                        |
-| :--: | --------------------- | ------------------------------------------------------------------------------------ |
-|  1  | **Espacios**    | Elimina espacios duplicados al inicio, final e intermedios.                          |
-|  2  | **Expandir**    | `Av.→Avenida`, `Pje→Pasaje`, `Ruta 5 Norte→Ruta 5 Norte`, etc. Soporta prefijos multi-word. |
-|  3  | **Extraer Nº**  | Separa número de calle (`Providencia 1234` → calle + `1234`). Preserva `N°`, `#`, `Depto`. |
-|  4  | **Sin tildes**  | Remueve acentos gráficos para simplificar la búsqueda.                             |
-|  5  | **Limpiar**     | Elimina puntuación innecesaria al final (como comas o puntos sueltos).              |
-|  6  | **Capitalizar** | Ajusta mayúsculas y minúsculas (ej. "Avenida Providencia").                        |
-|  7  | **Callejero**   | Valida y corrige la calle contra el callejero oficial (si se conoce la comuna).     |
-|  8  | **Reconstruir** | Ensambla la dirección final con nombre corregido, número y unidad.                  |
+El proxy sólo escucha en 127.0.0.1, consulta áreas acotadas, espacia las peticiones y conserva hasta 20MiB en caché. Sirve para desarrollo; Supabase proporciona la integración alojada.
 
-### Callejero cross-reference
+## Qué mejora
 
-Si se detecta la comuna, el normalizador:
+- 254.859 polilíneas de 82 comunas, cargadas por comuna. El catálogo de nombres tiene una cobertura distinta; un nombre conocido no garantiza numeración disponible.
+- Se conservan todos los vértices y los rangos inicial/final de cada lado, incluyendo numeración descendente y paridad. No se extrapola ni se fija un número fuera de rango al extremo de una calle.
+- Una calle existente no se reemplaza por otra parecida sólo porque la segunda tenga el número solicitado.
+- OSM distingue números registrados e interpolaciones documentadas, usando cada ancla numerada intermedia. Los proveedores se validan por calle, número, comuna y país; el tipo node/way y la popularidad no indican precisión.
+- Cada punto declara método, fuente, advertencias y alternativas. El score es un indicador de evidencia, no una probabilidad. Una posición de edificio no prueba la puerta; sin tags/límites municipales compatibles se exige revisión.
+- Pausar/cancelar conserva las filas terminadas. CSV UTF-8, Windows-1252 y campos multilínea se leen sin perder los acentos. Los archivos exportados conservan el método y la incertidumbre.
 
-- ✅ Valida que la calle exista en el callejero oficial de esa comuna
-- 🔧 Corrige typos mediante fuzzy matching (Levenshtein ≤ 2 en normalizador, ≤ 2–4 dinámico en segmentos)
-- 🛣️ Corrige tipo de vía (ej. "Pasaje Ossa" → "Calle Ossa" si el callejero dice "Calle")
-- ⚠️ Genera warnings si la calle no se encuentra en la comuna
+CSV/XLSX rechazan encabezados ambiguos para evitar pérdida silenciosa de columnas; CSV también rechaza campos sobrantes. XLSX conserva la numeración con su formato visible. El texto del Shapefile DBF se translitera a ASCII por la limitación del escritor incluido; CSV, XLSX y GeoJSON conservan Unicode.
 
-### Antes → Después
+El índice oficial utiliza coordenadas geográficas SIRGAS 2000. No se inventa un desplazamiento hacia una acera sin información sobre ancho vial. Las interpolaciones son estimaciones sobre el eje y los datos oficiales son de 2022.
 
-| Input                          | Output                              |
-| ------------------------------ | ----------------------------------- |
-| `av. providencia 1234`       | `Avenida Providencia 1234`        |
-| `pje los alerces 567 `       | `Pasaje Los Alerces 567`          |
-| `CAMINO A MELIPILLA 25`      | `Camino A Melipilla 25`           |
-| `AV libertador B. O'higgins` | `Avenida Libertador B. O'higgins` |
-| `av providenciaa 1234`       | `Avenida Providencia 1234` *(corregido por callejero)* |
+## Supabase Free
 
----
+PostGIS sirve las consultas concurrentes y Supabase aporta REST/Auth/Edge Functions. DuckDB puede servir para análisis y preparación offline; cambiar de base no mejora por sí solo la precisión. El conversor actual procesa 899.647 registros mediante lectura por bloques y genera el índice sin cargar el DBF completo en memoria.
 
-## 📊 Score 0–100
+El índice completo medido en PostGIS 17/3.5 local ocupa 85.852.160 bytes (aprox. 82MiB) en tablas/índices de la aplicación; la base aislada completa ocupa unos 97MiB. [Informe de tamaño](docs/verification/index-size.json). Es una medición local: mide nuevamente el total del proyecto alojado, con tablas de plataforma y futuros datos OSM, frente al límite Free de 500MB. [Límites oficiales](https://supabase.com/docs/guides/platform/billing-on-supabase).
 
-<p align="center">
-  <img src="assets/score.png" width="80%" alt="Composición del Score" />
-</p>
+Pasos detallados en [configurar Supabase](docs/supabase-setup.md). Configuración del navegador:
 
-Cada dirección recibe un puntaje compuesto de 4 factores:
-
-```
-SCORE = (MatchType × 0,4) + (Importancia × 0,3) + (Completitud × 0,2) + (Unicidad × 0,1)
+```dotenv
+VITE_SUPABASE_URL=https://TU_PROYECTO.supabase.co
+VITE_SUPABASE_PUBLISHABLE_KEY=TU_CLAVE_PUBLICA
 ```
 
-| Sub-puntaje           | Peso | Ejemplo                                                                 |
-| --------------------- | :--: | ----------------------------------------------------------------------- |
-| **Match Type**  | 40% | `callejero exacto=95` · `callejero fuzzy=85` · `building=100` · `house_number=95` · `street=70` |
-| **Importancia** | 30% | Relevancia OSM del resultado (0–1 × 100)                              |
-| **Completitud** | 20% | % de tokens de tu dirección encontrados en el resultado                |
-| **Unicidad**    | 10% | 1 solo match=100 · varios matches posibles=menos                       |
+Sólo para los scripts de importación, en el mismo archivo local:
 
-| Score |         Badge         | Significado                                |
-| :----: | :-------------------: | ------------------------------------------ |
-| ≥ 85 | 🟢**Excelente** | Calle y número exactos (callejero o OSM)   |
-| 60–84 |   🟡**Bueno**   | Calle correcta, posible desfase en número |
-| 35–59 |  🟠**Regular**  | Solo comuna o barrio identificado          |
-|  < 35  |   🔴**Bajo**   | Match débil, revisar manualmente          |
-|   0   |   ⚫**Nulo**   | Sin resultado                              |
-
----
-
-## 🛠️ Stack
-
-<div align="center">
-
-| Capa                | Tecnología                              |
-| :------------------ | :--------------------------------------- |
-| **Framework** | React 19 · Vite 7 · TypeScript 5.8     |
-| **Estilos**   | Tailwind CSS v4 · Framer Motion         |
-| **Mapa**      | Leaflet · OpenStreetMap tiles           |
-| **Archivos**  | SheetJS · PapaParse                     |
-| **Geocoding** | Callejero IDE Chile · Nominatim · Photon |
-| **Estado**    | Zustand · IndexedDB cache (30d)         |
-| **Export**    | GeoJSON nativo ·`@crmackey/shp-write` |
-| **Testing**   | Vitest · 62 tests                       |
-| **Paquetes**  | pnpm (seguro, sin dependencias fantasma) |
-
-</div>
-
----
-
-## 📦 Datos embebidos
-
-<div align="center">
-
-| Tipo                     | Detalle                                                                                                             |
-| :----------------------- | :------------------------------------------------------------------------------------------------------------------ |
-| 🗺️ Callejero IDE Chile | 127.858 calles en 151 comunas + 267.519 segmentos con numeración (Maestro de Calles 2022) |
-| 🛣️ Abreviaturas viales | Mapeo rápido de prefijos (`Av`→`Avenida`, `Pje`→`Pasaje`, `Cl`→`Calle`, `Cmno`→`Camino`, etc.) |
-| ✍️ Non-capital words   | Exclusión de palabras menores al capitalizar (`de`, `la`, `el`, `los`, `las`, `y`, etc.)               |
-| 🏘️ Comunas             | 346 comunas con aliases y fuzzy matching                                                                             |
-| 🗺️ Regiones            | 16 regiones con aliases y normalización                                                                              |
-
-</div>
-
----
-
-## 🧪 Tests
-
-```bash
-pnpm install         # Instalar dependencias (seguro, sin scripts automáticos)
-pnpm test            # 62 tests (normalizador · scorer · parser · callejero)
-pnpm dev             # Dev en localhost:5173
-pnpm build           # Build producción
-pnpm lint            # ESLint
+```dotenv
+SUPABASE_SERVICE_ROLE_KEY=TU_CLAVE_DE_SERVIDOR
 ```
 
-### Pre-procesar callejero
+Nunca pongas una clave de servicio en una variable `VITE_*`. Las tablas tienen RLS y no se leen directamente con la clave pública. La RPC de consulta devuelve un conjunto acotado; las de importación/caché sólo aceptan el rol de servicio.
 
-Si necesitas regenerar los datos del callejero desde el shapefile original:
+Enriquecimiento: sesión Auth anónima validada por la función, caché con TTL de siete días y máximo lógico 20MiB/128 entradas; 200 consultas no almacenadas por día globales, 40 por usuario, separadas por al menos dos segundos; respuestas limitadas a 1.000/día y 100MiB/día. El presupuesto protege esta integración; no controla todo el consumo del proyecto. Alcanzar un límite conserva las otras fuentes y aparece como indisponibilidad en el panel. Habilita los accesos anónimos para usar esta función.
 
-```bash
-node scripts/process-callejero.mjs
+Photon funciona como fuente de candidatos, sin autocompletar en remoto y con caché por sesión. Para producción configura un proveedor con capacidad y términos adecuados o tu propia instancia mediante `VITE_PHOTON_URL`. Nominatim público está desactivado para este servicio genérico; `VITE_NOMINATIM_URL` acepta una instancia propia o contratada. [Política de Nominatim](https://operations.osmfoundation.org/policies/nominatim/).
+
+## Datos y verificación
+
+`node scripts/process-callejero.mjs` regenera el índice desde los SHP/DBF oficiales presentes en `data/` (datos brutos ignorados por Git). `node scripts/import-supabase.mjs --comuna "Santiago" --dry-run` comprueba un lote sin escribir. La importación real es idempotente y se hace por comuna. Para OSM GeoJSON usa `--osm ruta.geojson`; debe estar recortado al límite municipal y aportar evidencia de comuna, o confirmar ese recorte con `--comuna-scope-verified`.
+
+```powershell
+pnpm test
+pnpm lint
+pnpm build
 ```
 
-Esto lee `data/Maestro_de_Calles_2022.*` y genera:
-- `src/data/callejero-names.json` — diccionario de calles por comuna (bundled, ~2.7 MB)
-- `public/callejero-segments-index.json` — segmentos con numeración y geometría (cargado al iniciar, ~29 MB)
+Las migraciones y `supabase/tests/address_index.sql` se verificaron en una base PostGIS aislada. [Comparación de cinco direcciones públicas](docs/benchmarks/README.md): cuatro números OSM registrados y una interpolación en el ensayo. Es consistencia entre fuentes; no un estudio nacional ni un levantamiento topográfico.
 
----
+El test opcional `node scripts/browser-check.mjs` requiere Playwright instalado o `PLAYWRIGHT_MODULE` apuntando al paquete de un runtime existente. Verifica 320–1440px, búsqueda/fallback, ajuste manual por teclado, un lote y las cuatro exportaciones. [Revisión de las 30 leyes de UX](docs/verification/ux-review.md).
 
-## ☕ Apoya este proyecto
+La compilación avisa de un bundle principal de unos 3,24MB (805kB gzip), debido sobre todo al catálogo de nombres. La geometría oficial se carga por comuna; la optimización del catálogo inicial queda pendiente de medición de uso real.
 
-Si este geocodificador te ha ahorrado horas de trabajo o simplemente te gusta la herramienta, puedes invitarme un café. ¡Toda ayuda es bienvenida para mantener y mejorar el proyecto!
+Ponytail está activo para programación, OpenSpec documenta este cambio y code-reviewer revisó motor, backend y panel. No hay CLI OpenSpec instalada: los artefactos de `openspec/changes/address-workbench` siguen el esquema spec-driven y no se atribuye una validación CLI inexistente.
 
-<a href="https://link.mercadopago.cl/jorgeulloaroa" target="_blank">
-  <img src="https://img.shields.io/badge/Regálame_un_café-%23009EE3?style=for-the-badge&logo=mercadopago&logoColor=white" alt="MercadoPago - Regálame un café" />
-</a>
-
----
-
-## 📄 Licencia
-
-MIT — hecho con 🧭 en Chile.
-
----
-
-<div align="center">
-
-**[🌎 Pruébalo ahora → geoidegeoidal.github.io/azimut](https://geoidegeoidal.github.io/azimut/)**
-
-</div>
+Fuentes: IDE Chile; © [OpenStreetMap contributors](https://www.openstreetmap.org/copyright), ODbL. Los datos y cada proveedor conservan sus licencias y atribuciones.

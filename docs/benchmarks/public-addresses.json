@@ -1,0 +1,339 @@
+{
+  "testedAt": "2026-10-04T04:26:52.216Z",
+  "baseline": "a480f49",
+  "scope": "Five institutional addresses chosen from public primary sources; cross-source consistency only. OSM is not independent survey truth. Null distance means no recorded reference or no valid interpolation.",
+  "results": [
+    {
+      "query": "Matucana 501",
+      "comuna": "Santiago",
+      "institution": "Museo de la Memoria",
+      "addressSource": "https://mmdh.cl/museo",
+      "vectorStatus": "recorded reference",
+      "osmReference": {
+        "id": "osm:way:80216503",
+        "lat": -33.439731,
+        "lon": -70.67948808,
+        "warnings": [
+          "Dato cartografiado por colaboradores; no es un levantamiento certificado",
+          "Posición aproximada del edificio; no identifica una puerta",
+          "comuna no verificada por tags o límite administrativo"
+        ]
+      },
+      "oldOfficial": {
+        "found": true,
+        "errorToOSMMetres": 96,
+        "range": [
+          466,
+          508
+        ]
+      },
+      "newOfficial": {
+        "found": true,
+        "errorToOSMMetres": 94,
+        "range": [
+          467,
+          507
+        ],
+        "side": "right"
+      },
+      "resolution": {
+        "found": true,
+        "method": "address",
+        "source": "OSM vectorial",
+        "score": 69,
+        "needsReview": true,
+        "lat": -33.439731,
+        "lon": -70.67948808,
+        "distanceToOSMReferenceMetres": 0,
+        "warnings": [
+          "Dato cartografiado por colaboradores; no es un levantamiento certificado",
+          "Posición aproximada del edificio; no identifica una puerta",
+          "comuna no verificada por tags o límite administrativo",
+          "Hay candidatos similares a más de 100 m; revisa la ubicación"
+        ],
+        "sources": [
+          {
+            "source": "IDE Chile 2022",
+            "status": "ok",
+            "detail": "2 rangos compatibles"
+          },
+          {
+            "source": "Supabase / PostGIS",
+            "status": "disabled",
+            "detail": "Backend sin configurar"
+          },
+          {
+            "source": "Photon",
+            "status": "empty",
+            "detail": "0 candidatos compatibles"
+          },
+          {
+            "source": "OSM vectorial",
+            "status": "ok",
+            "detail": "2 direcciones o interpolaciones documentadas"
+          }
+        ]
+      },
+      "availableRecordedCandidates": 1
+    },
+    {
+      "query": "José Miguel de la Barra 650",
+      "comuna": "Santiago",
+      "institution": "Museo Nacional de Bellas Artes",
+      "addressSource": "https://www.mnba.gob.cl/sites/www.mnba.gob.cl/files/2025-01/Programa%20actividades%20MNBA%20ene-feb%202025.pdf",
+      "vectorStatus": "recorded reference",
+      "osmReference": {
+        "id": "osm:node:10925461823",
+        "lat": -33.4353388,
+        "lon": -70.643578,
+        "warnings": [
+          "Dato cartografiado por colaboradores; no es un levantamiento certificado",
+          "comuna no verificada por tags o límite administrativo"
+        ]
+      },
+      "oldOfficial": {
+        "found": true,
+        "errorToOSMMetres": 78,
+        "range": [
+          500,
+          552
+        ]
+      },
+      "newOfficial": {
+        "found": false,
+        "errorToOSMMetres": null
+      },
+      "resolution": {
+        "found": true,
+        "method": "address",
+        "source": "OSM vectorial",
+        "score": 79,
+        "needsReview": true,
+        "lat": -33.4353388,
+        "lon": -70.643578,
+        "distanceToOSMReferenceMetres": 0,
+        "warnings": [
+          "Dato cartografiado por colaboradores; no es un levantamiento certificado",
+          "comuna no verificada por tags o límite administrativo"
+        ],
+        "sources": [
+          {
+            "source": "IDE Chile 2022",
+            "status": "empty",
+            "detail": "0 rangos compatibles"
+          },
+          {
+            "source": "Supabase / PostGIS",
+            "status": "disabled",
+            "detail": "Backend sin configurar"
+          },
+          {
+            "source": "Photon",
+            "status": "ok",
+            "detail": "1 candidatos compatibles"
+          },
+          {
+            "source": "OSM vectorial",
+            "status": "ok",
+            "detail": "1 direcciones o interpolaciones documentadas"
+          }
+        ]
+      },
+      "availableRecordedCandidates": 1
+    },
+    {
+      "query": "Maipú 2359",
+      "comuna": "Concepción",
+      "institution": "Museo de Historia Natural",
+      "addressSource": "https://www.mhnconcepcion.gob.cl/espacios/museo-de-historia-natural-de-concepcion-maipu-2359-concepcion",
+      "vectorStatus": "recorded reference",
+      "osmReference": {
+        "id": "osm:way:430569076",
+        "lat": -36.81539831,
+        "lon": -73.03042746999999,
+        "warnings": [
+          "Dato cartografiado por colaboradores; no es un levantamiento certificado",
+          "Posición aproximada del edificio; no identifica una puerta",
+          "comuna no verificada por tags o límite administrativo"
+        ]
+      },
+      "oldOfficial": {
+        "found": true,
+        "errorToOSMMetres": 55,
+        "range": [
+          2370,
+          2394
+        ]
+      },
+      "newOfficial": {
+        "found": false,
+        "errorToOSMMetres": null
+      },
+      "resolution": {
+        "found": true,
+        "method": "address",
+        "source": "OSM vectorial",
+        "score": 79,
+        "needsReview": true,
+        "lat": -36.81539831,
+        "lon": -73.03042746999999,
+        "distanceToOSMReferenceMetres": 0,
+        "warnings": [
+          "Dato cartografiado por colaboradores; no es un levantamiento certificado",
+          "Posición aproximada del edificio; no identifica una puerta",
+          "comuna no verificada por tags o límite administrativo"
+        ],
+        "sources": [
+          {
+            "source": "IDE Chile 2022",
+            "status": "empty",
+            "detail": "0 rangos compatibles"
+          },
+          {
+            "source": "Supabase / PostGIS",
+            "status": "disabled",
+            "detail": "Backend sin configurar"
+          },
+          {
+            "source": "Photon",
+            "status": "ok",
+            "detail": "1 candidatos compatibles"
+          },
+          {
+            "source": "OSM vectorial",
+            "status": "ok",
+            "detail": "1 direcciones o interpolaciones documentadas"
+          }
+        ]
+      },
+      "availableRecordedCandidates": 1
+    },
+    {
+      "query": "Ricardo de Ferrari 692",
+      "comuna": "Valparaíso",
+      "institution": "La Sebastiana",
+      "addressSource": "https://fundacionneruda.org/informaciones/",
+      "vectorStatus": "recorded reference",
+      "osmReference": {
+        "id": "osm:node:3746122024",
+        "lat": -33.0542012,
+        "lon": -71.6227075,
+        "warnings": [
+          "Dato cartografiado por colaboradores; no es un levantamiento certificado",
+          "comuna no verificada por tags o límite administrativo"
+        ]
+      },
+      "oldOfficial": {
+        "found": true,
+        "errorToOSMMetres": 172,
+        "range": [
+          702,
+          793
+        ]
+      },
+      "newOfficial": {
+        "found": false,
+        "errorToOSMMetres": null
+      },
+      "resolution": {
+        "found": true,
+        "method": "address",
+        "source": "OSM vectorial",
+        "score": 79,
+        "needsReview": true,
+        "lat": -33.0542012,
+        "lon": -71.6227075,
+        "distanceToOSMReferenceMetres": 0,
+        "warnings": [
+          "Dato cartografiado por colaboradores; no es un levantamiento certificado",
+          "comuna no verificada por tags o límite administrativo"
+        ],
+        "sources": [
+          {
+            "source": "IDE Chile 2022",
+            "status": "empty",
+            "detail": "0 rangos compatibles"
+          },
+          {
+            "source": "Supabase / PostGIS",
+            "status": "disabled",
+            "detail": "Backend sin configurar"
+          },
+          {
+            "source": "Photon",
+            "status": "ok",
+            "detail": "2 candidatos compatibles"
+          },
+          {
+            "source": "OSM vectorial",
+            "status": "ok",
+            "detail": "2 direcciones o interpolaciones documentadas"
+          }
+        ]
+      },
+      "availableRecordedCandidates": 2
+    },
+    {
+      "query": "Fernando Márquez de la Plata 0192",
+      "comuna": "Providencia",
+      "institution": "La Chascona",
+      "addressSource": "https://fundacionneruda.org/informaciones/",
+      "vectorStatus": "no recorded number",
+      "osmReference": null,
+      "oldOfficial": {
+        "found": true,
+        "errorToOSMMetres": null,
+        "range": [
+          118,
+          194
+        ]
+      },
+      "newOfficial": {
+        "found": true,
+        "errorToOSMMetres": null,
+        "range": [
+          118,
+          194
+        ],
+        "side": "left"
+      },
+      "resolution": {
+        "found": true,
+        "method": "interpolated",
+        "source": "IDE Chile 2022",
+        "score": 78,
+        "needsReview": true,
+        "lat": -33.43122752611742,
+        "lon": -70.63450978628637,
+        "distanceToOSMReferenceMetres": null,
+        "warnings": [
+          "Estimación sobre el eje de la calle; no identifica una puerta",
+          "Fuente oficial publicada en 2022"
+        ],
+        "sources": [
+          {
+            "source": "IDE Chile 2022",
+            "status": "ok",
+            "detail": "1 rangos compatibles"
+          },
+          {
+            "source": "Supabase / PostGIS",
+            "status": "disabled",
+            "detail": "Backend sin configurar"
+          },
+          {
+            "source": "Photon",
+            "status": "ok",
+            "detail": "3 candidatos compatibles"
+          },
+          {
+            "source": "OSM vectorial",
+            "status": "empty",
+            "detail": "0 direcciones o interpolaciones documentadas"
+          }
+        ]
+      },
+      "availableRecordedCandidates": 0
+    }
+  ]
+}

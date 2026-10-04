@@ -2,8 +2,9 @@
 
 - Before work, read this file and HANDOFF.md. Prepend a handoff after project changes.
 - Keep Ponytail active for coding: reuse the stack, native APIs first, no speculative dependencies. Use OpenSpec artifacts for substantial changes; keep tasks and verification evidence current.
+- Impeccable 4.5.0 is installed at .agents/skills/impeccable. Read its SKILL.md for design work. PRODUCT.md records confirmed context; the primary task is processing and correcting address batches for GIS. The user selected code-first with final review; .impeccable/config.json records this preference. Visual direction selection is pending; do not mistake the earlier Atlas prototype for an approved design.
 - Prefer codebase-memory-mcp discovery. The index attempt was rejected by automatic review on 2026-10-04; use local discovery while no approved index exists. Do not retry or export source indirectly.
-- Design follows the user's Swiss International reference: white/black, functional #FF3000 accent, Inter/Helvetica, rectangular controls, visible grid, no shadows or decorative gradients. Prioritize the search, map, candidate evidence and batch review.
+- Design 01 follows the user's original Swiss reference. After rejecting its first alternative as AI Slop, the user authorized a distinct style: Atlas (`?design=atlas`) uses a continuous map/field-notebook layout, warm paper, forest ink, copper, IBM Plex Sans and Instrument Serif. Keep query/evidence functional; omit decorative hero/KPI cards in Atlas. Both views share one motor/state.
 - Precision means evidence, not OSM importance or a probability. Recorded addresses outrank interpolations; street/area locations must never imply a resolved house number.
 - IDE Chile numbering must retain INI_IZQ/TER_IZQ and INI_DER/TER_DER independently, their direction, parity and every polyline vertex. Never clamp or extrapolate an out-of-range number. Legacy combined min/max data is insufficient for interpolation.
 - Load official data by comuna. SIRGAS 2000 coordinates are geographically compatible at this dataset's practical precision; do not invent a metre-level guarantee or a side offset without road width/survey evidence.
@@ -11,6 +12,9 @@
 - DuckDB is an optional offline analysis/preparation tool, not an assumed accuracy improvement. Introduce it only for a measured data processing need.
 - Public Nominatim is disabled by default for this generic address service. Use an explicitly configured own/provider endpoint; respect the provider's usage terms. No remote autocomplete. Communicate source failures and preserve cancellation.
 - Benchmark public addresses with cited reference evidence. OSM-derived references are consistency tests, not independent ground-truth surveys.
+- IDE CODIGO values are not unique: generated segment IDs include the original record ordinal. Preserve stable IDs for candidate keys and imports; never deduplicate separate physical segments by CODIGO alone.
+- CSV/XLSX headers must be distinct after trimming/case folding. Reject extra CSV fields instead of losing locality. Use displayed XLSX values to retain formatted house numbers. Block processing/configuration during file reads.
+- Shapefile's bundled DBF writer has no reliable Unicode encoding declaration: export its text as ASCII/transliteration and document that limitation; CSV/XLSX/GeoJSON preserve Unicode.
 
 ## Session protocol
 
