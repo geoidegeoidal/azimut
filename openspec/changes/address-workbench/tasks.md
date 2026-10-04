@@ -1,0 +1,9 @@
+- [x] Diagnose current geometry, matching, scoring and flow.
+- [x] Specify the change and durable decisions.
+- [x] Regenerate official per-comuna data with full directed geometry.
+- [x] Implement candidate ranking, provider validation and source status.
+- [ ] Implement Supabase schema/RPC/import and cached vector enrichment.
+- [ ] Build Swiss search/map/batch/evidence workbench.
+- [ ] Add regression and public-address benchmark checks.
+- [ ] Run tests, build, lint, browser review and code review; resolve findings.
+- [ ] Update README, UX evidence and handoff.

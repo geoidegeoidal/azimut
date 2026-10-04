@@ -352,11 +352,12 @@ export const COMUNAS: Comuna[] = [
 ];
 
 export function normalizeComunaName(input: string): string | null {
-  const cleaned = input.trim().toLowerCase();
+  const fold = (s: string) => s.trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+  const cleaned = fold(input);
   for (const comuna of COMUNAS) {
-    if (comuna.nombre.toLowerCase() === cleaned) return comuna.nombre;
+    if (fold(comuna.nombre) === cleaned) return comuna.nombre;
     for (const alias of comuna.alias) {
-      if (alias.toLowerCase() === cleaned) return comuna.nombre;
+      if (fold(alias) === cleaned) return comuna.nombre;
     }
   }
   return null;

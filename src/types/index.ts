@@ -15,9 +15,35 @@ export interface NormalizedAddress {
   isIntersection: boolean;
   callejeroMatch?: boolean;
   callejeroCorrected?: string;
+  inputStreet?: string;
 }
 
 export type PrecisionLevel = "excelente" | "bueno" | "regular" | "bajo" | "nulo";
+
+export type LocationMethod = "address" | "interpolated" | "provider" | "street" | "area" | "manual";
+
+export interface GeocodeCandidate {
+  id: string;
+  lat: number;
+  lon: number;
+  score: number;
+  source: string;
+  method: LocationMethod;
+  label: string;
+  evidence: string[];
+  warnings: string[];
+  geometry?: [number, number][];
+  range?: [number, number];
+  side?: "left" | "right";
+  osmId?: number;
+  osmType?: string;
+}
+
+export interface SourceStatus {
+  source: string;
+  status: "ok" | "empty" | "unavailable" | "disabled";
+  detail: string;
+}
 
 export interface GeocodeResult {
   lat: number;
@@ -34,6 +60,15 @@ export interface GeocodeResult {
   completeness: number;
   uniqueness: number;
   timestamp: number;
+  method?: LocationMethod;
+  evidence?: string[];
+  warnings?: string[];
+  candidates?: GeocodeCandidate[];
+  sources?: SourceStatus[];
+  geometry?: [number, number][];
+  range?: [number, number];
+  side?: "left" | "right";
+  needsReview?: boolean;
 }
 
 export type WizardStep = "upload" | "preview" | "processing" | "results";

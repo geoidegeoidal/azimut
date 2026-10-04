@@ -1,4 +1,8 @@
 node_modules
+.pnpm-store/
+.env
+.env.*
+supabase/.temp/
 dist
 *.local
 .DS_Store

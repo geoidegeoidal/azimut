@@ -1,0 +1,6 @@
+schema: spec-driven
+context: |
+  Azimut is a Chilean address search and batch geocoding workbench.
+  React 19, TypeScript, Vite, Leaflet. Ponytail is always active for coding.
+  Swiss International design requested by the user. Supabase/PostGIS optional cloud backend.
+  Prioritize spatial evidence, conservative matching, reproducible accuracy checks.

@@ -1,6 +1,8 @@
 import { VIA_ABBREVIATIONS } from "./normalizer.rules";
 import { lookupStreet, correctViaType } from "./callejero";
 import type { NormalizedAddress } from "@/types";
+import { COMUNAS, normalizeComunaName } from "@/data/comunas";
+import { textKey } from "./geometry";
 
 function removeAccents(text: string): string {
   return text.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -166,7 +168,16 @@ export function normalize(raw: string, comuna?: string): NormalizedAddress {
   }
 
   // Step 1: Normalize whitespace & basic cleanup
-  const text = original.replace(/\s+/g, " ").trim();
+  let text = original.replace(/\s+/g, " ").trim();
+  // Parse a locality only after a comma: "Calle La Florida" is a street, not a comuna.
+  const parts = text.split(",").map(p => p.trim());
+  const embeddedComuna = parts.slice(1).map(p => COMUNAS.find(c => [c.nombre, ...c.alias].some(n => textKey(n) === textKey(p)))).find(Boolean);
+  if (embeddedComuna) {
+    comuna ||= embeddedComuna.nombre;
+    text = parts[0];
+  }
+  if (comuna) comuna = normalizeComunaName(comuna) || COMUNAS.find(c => textKey(c.nombre) === textKey(comuna!))?.nombre || comuna;
+  text = text.replace(/[,.]+$/, "");
 
   // Step 2: Expand via abbreviation (first token)
   const { via, rest } = expandVia(text);
@@ -252,6 +263,7 @@ export function normalize(raw: string, comuna?: string): NormalizedAddress {
     isIntersection: false,
     callejeroMatch,
     callejeroCorrected,
+    inputStreet: streetWithoutNumber,
   };
 }
 

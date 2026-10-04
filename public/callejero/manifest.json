@@ -1,0 +1,337 @@
+{
+  "version": 2,
+  "source": "IDE Chile · Maestro de Calles 2022",
+  "crs": "SIRGAS 2000 (geographic)",
+  "segments": 254859,
+  "skippedMultipart": 0,
+  "comunas": {
+    "iquique": {
+      "count": 2993,
+      "bytes": 582129
+    },
+    "alto hospicio": {
+      "count": 1184,
+      "bytes": 238289
+    },
+    "antofagasta": {
+      "count": 6965,
+      "bytes": 1481932
+    },
+    "copiapo": {
+      "count": 1370,
+      "bytes": 243222
+    },
+    "vallenar": {
+      "count": 800,
+      "bytes": 155113
+    },
+    "la serena": {
+      "count": 4957,
+      "bytes": 1024003
+    },
+    "coquimbo": {
+      "count": 4886,
+      "bytes": 1021831
+    },
+    "ovalle": {
+      "count": 2183,
+      "bytes": 401114
+    },
+    "valparaiso": {
+      "count": 4899,
+      "bytes": 1139417
+    },
+    "concon": {
+      "count": 1079,
+      "bytes": 222620
+    },
+    "vina del mar": {
+      "count": 6999,
+      "bytes": 1528234
+    },
+    "los andes": {
+      "count": 1854,
+      "bytes": 353162
+    },
+    "san felipe": {
+      "count": 1949,
+      "bytes": 360797
+    },
+    "quilpue": {
+      "count": 4279,
+      "bytes": 859956
+    },
+    "limache": {
+      "count": 1018,
+      "bytes": 183383
+    },
+    "villa alemana": {
+      "count": 3228,
+      "bytes": 637618
+    },
+    "machali": {
+      "count": 986,
+      "bytes": 220206
+    },
+    "rengo": {
+      "count": 578,
+      "bytes": 161470
+    },
+    "cauquenes": {
+      "count": 1014,
+      "bytes": 185952
+    },
+    "curico": {
+      "count": 3761,
+      "bytes": 671071
+    },
+    "linares": {
+      "count": 2000,
+      "bytes": 491198
+    },
+    "concepcion": {
+      "count": 4533,
+      "bytes": 871185
+    },
+    "coronel": {
+      "count": 3157,
+      "bytes": 565787
+    },
+    "chiguayante": {
+      "count": 2101,
+      "bytes": 389649
+    },
+    "penco": {
+      "count": 953,
+      "bytes": 183552
+    },
+    "san pedro de la paz": {
+      "count": 2944,
+      "bytes": 571660
+    },
+    "talcahuano": {
+      "count": 3479,
+      "bytes": 647012
+    },
+    "tome": {
+      "count": 1138,
+      "bytes": 290752
+    },
+    "hualpen": {
+      "count": 2519,
+      "bytes": 433909
+    },
+    "los angeles": {
+      "count": 3706,
+      "bytes": 643814
+    },
+    "temuco": {
+      "count": 6963,
+      "bytes": 1351064
+    },
+    "padre las casas": {
+      "count": 980,
+      "bytes": 195691
+    },
+    "angol": {
+      "count": 1762,
+      "bytes": 473283
+    },
+    "puerto montt": {
+      "count": 4641,
+      "bytes": 907506
+    },
+    "osorno": {
+      "count": 4871,
+      "bytes": 1071649
+    },
+    "santiago": {
+      "count": 4062,
+      "bytes": 912784
+    },
+    "cerrillos": {
+      "count": 1928,
+      "bytes": 392455
+    },
+    "conchali": {
+      "count": 3367,
+      "bytes": 636707
+    },
+    "el bosque": {
+      "count": 3888,
+      "bytes": 717209
+    },
+    "estacion central": {
+      "count": 3126,
+      "bytes": 612730
+    },
+    "huechuraba": {
+      "count": 2002,
+      "bytes": 410100
+    },
+    "independencia": {
+      "count": 1527,
+      "bytes": 310700
+    },
+    "la cisterna": {
+      "count": 1791,
+      "bytes": 358915
+    },
+    "la florida": {
+      "count": 10253,
+      "bytes": 1929828
+    },
+    "la granja": {
+      "count": 3291,
+      "bytes": 633389
+    },
+    "la pintana": {
+      "count": 3683,
+      "bytes": 720543
+    },
+    "la reina": {
+      "count": 3062,
+      "bytes": 614411
+    },
+    "las condes": {
+      "count": 6305,
+      "bytes": 1324033
+    },
+    "lo barnechea": {
+      "count": 2115,
+      "bytes": 578474
+    },
+    "lo espejo": {
+      "count": 1980,
+      "bytes": 391112
+    },
+    "lo prado": {
+      "count": 2167,
+      "bytes": 441654
+    },
+    "macul": {
+      "count": 2852,
+      "bytes": 569271
+    },
+    "maipu": {
+      "count": 12136,
+      "bytes": 2163839
+    },
+    "nunoa": {
+      "count": 3822,
+      "bytes": 745660
+    },
+    "pedro aguirre cerda": {
+      "count": 2219,
+      "bytes": 453599
+    },
+    "penalolen": {
+      "count": 5584,
+      "bytes": 1073581
+    },
+    "providencia": {
+      "count": 2314,
+      "bytes": 537260
+    },
+    "pudahuel": {
+      "count": 4873,
+      "bytes": 908117
+    },
+    "quilicura": {
+      "count": 4312,
+      "bytes": 813651
+    },
+    "quinta normal": {
+      "count": 2181,
+      "bytes": 448945
+    },
+    "recoleta": {
+      "count": 3334,
+      "bytes": 747585
+    },
+    "renca": {
+      "count": 3086,
+      "bytes": 574053
+    },
+    "san joaquin": {
+      "count": 2471,
+      "bytes": 473967
+    },
+    "san miguel": {
+      "count": 1655,
+      "bytes": 335044
+    },
+    "san ramon": {
+      "count": 1905,
+      "bytes": 358081
+    },
+    "vitacura": {
+      "count": 2516,
+      "bytes": 626660
+    },
+    "puente alto": {
+      "count": 12168,
+      "bytes": 2277997
+    },
+    "colina": {
+      "count": 881,
+      "bytes": 165597
+    },
+    "lampa": {
+      "count": 847,
+      "bytes": 179696
+    },
+    "tiltil": {
+      "count": 2,
+      "bytes": 365
+    },
+    "san bernardo": {
+      "count": 5805,
+      "bytes": 1109507
+    },
+    "buin": {
+      "count": 1493,
+      "bytes": 260705
+    },
+    "paine": {
+      "count": 523,
+      "bytes": 93566
+    },
+    "melipilla": {
+      "count": 1541,
+      "bytes": 342441
+    },
+    "talagante": {
+      "count": 1311,
+      "bytes": 324140
+    },
+    "el monte": {
+      "count": 489,
+      "bytes": 117248
+    },
+    "isla de maipo": {
+      "count": 286,
+      "bytes": 69234
+    },
+    "padre hurtado": {
+      "count": 663,
+      "bytes": 126159
+    },
+    "penaflor": {
+      "count": 1814,
+      "bytes": 352196
+    },
+    "valdivia": {
+      "count": 4212,
+      "bytes": 945923
+    },
+    "arica": {
+      "count": 5028,
+      "bytes": 869255
+    },
+    "chillan": {
+      "count": 5260,
+      "bytes": 905806
+    }
+  }
+}

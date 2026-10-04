@@ -66,7 +66,7 @@ describe("Normalizer + Callejero Integration", () => {
     const result = normalize("Calle Inventada 999", "santiago");
     expect(result.normalized).toContain("Calle Inventada");
     expect(result.numero).toBe("999");
-    expect(result.comuna).toBe("santiago");
+    expect(result.comuna).toBe("Santiago");
   });
 
   it("preserves comuna in output even with empty address", () => {

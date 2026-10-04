@@ -1,4 +1,6 @@
 import callejeroData from "@/data/callejero-names.json";
+import { interpolateLine, matchesParity, streetSimilarity, streetKey, textKey } from "./geometry";
+import type { Coordinate } from "./geometry";
 
 // ── Known via types (for via-agnostic search) ──────────
 
@@ -29,7 +31,11 @@ export interface CallejeroSegment {
   c: string; // comuna (normalized)
   v: string; // via completa (normalized)
   n: [number, number]; // number range: [min, max]
-  g: [[number, number], [number, number]]; // geometry: [start, end] as [lon, lat]
+  g: Coordinate[];
+  l?: [number, number]; // left: initial/final, never sorted
+  r?: [number, number]; // right: initial/final, never sorted
+  a?: string[];
+  id?: string;
 }
 
 export interface SmartSearchResult {
@@ -48,6 +54,8 @@ export interface SegmentSearchResult {
   matchScore?: number;
   /** True if the number was outside the segment range but close enough */
   numberApproximate?: boolean;
+  range?: [number, number];
+  side?: "left" | "right";
 }
 
 // ── Core indices (built synchronously at import) ────────
@@ -202,6 +210,11 @@ export function streetExistsInComuna(street: string, comuna: string): boolean {
   return set.has(normalizeCalle(street));
 }
 
+export function hasExactStreetIdentity(street: string, comuna: string): boolean {
+  const identity = streetKey(street);
+  return [...(namesByComuna.get(textKey(comuna)) || [])].some(name => streetKey(name) === identity);
+}
+
 export function lookupStreet(
   input: string,
   comuna?: string,
@@ -238,7 +251,9 @@ export function lookupStreet(
   const best = results[0];
   const exactMatch = best.score === 100;
   // Consider found if best match score meets quality threshold (40)
-  const found = best.score >= 40;
+  const similarity = streetSimilarity(input, best.name);
+  const ambiguous = results.some(r => r.name !== best.name && streetSimilarity(input, r.name) >= similarity - 0.02);
+  const found = similarity >= Math.max(0.87, 1 - maxDistance / Math.max(1, input.length)) && !ambiguous;
 
   const suggestions: CallejeroMatch[] = results.map(r => ({
     name: r.name,
@@ -315,21 +330,45 @@ export async function ensureSegmentsLoaded(): Promise<boolean> {
   return count > 0;
 }
 
-function interpolatePoint(
-  start: [number, number],
-  end: [number, number],
-  startNum: number,
-  endNum: number,
-  targetNum: number,
-): [number, number] {
-  const totalNumRange = endNum - startNum;
-  if (totalNumRange === 0) return start;
+const comunaLoads = new Map<string, Promise<boolean>>();
+function waitForLoad(promise: Promise<boolean>, signal?: AbortSignal): Promise<boolean> {
+  if (!signal) return promise;
+  signal.throwIfAborted();
+  return new Promise<boolean>((resolve, reject) => {
+    const onAbort = () => reject(signal.reason);
+    signal.addEventListener("abort", onAbort, { once: true });
+    promise.then(resolve, reject).finally(() => signal.removeEventListener("abort", onAbort));
+  });
+}
+export async function loadComunaSegments(comuna: string, signal?: AbortSignal): Promise<boolean> {
+  const key = textKey(comuna);
+  if (segmentsByComuna.has(key)) return true;
+  if (comunaLoads.has(key)) return waitForLoad(comunaLoads.get(key)!, signal);
+  const promise = (async () => {
+    try {
+      const res = await fetch(`${import.meta.env.BASE_URL}callejero/${encodeURIComponent(key)}.json`, { signal: AbortSignal.timeout(12000) });
+      if (res.status === 404) return false;
+      if (!res.ok) throw new Error(`Callejero HTTP ${res.status}`);
+      const data: CallejeroSegment[] = await res.json();
+      segmentsByComuna.set(key, data);
+      segmentsLoaded = true;
+      return true;
+    } catch {
+      comunaLoads.delete(key);
+      return false;
+    }
+  })();
+  comunaLoads.set(key, promise);
+  return waitForLoad(promise, signal);
+}
 
-  const t = (targetNum - startNum) / totalNumRange;
-  return [
-    start[0] + t * (end[0] - start[0]),
-    start[1] + t * (end[1] - start[1]),
-  ];
+export function getStreetBounds(street: string, comuna: string): [number, number, number, number] | undefined {
+  const points = (segmentsByComuna.get(textKey(comuna)) || [])
+    .filter(s => streetSimilarity(street, s.v) >= 0.9 || s.a?.some(a => streetSimilarity(street, a) >= 0.9))
+    .flatMap(s => s.g);
+  if (!points.length) return undefined;
+  return [Math.min(...points.map(p => p[0])) - 0.002, Math.min(...points.map(p => p[1])) - 0.002,
+    Math.max(...points.map(p => p[0])) + 0.002, Math.max(...points.map(p => p[1])) + 0.002];
 }
 
 /**
@@ -494,110 +533,32 @@ export function smartSearch(
  * IMPORTANT: Segment geometry is stored as [lon, lat].
  * This function returns lat/lon correctly separated.
  */
-export function searchSegment(
-  viaCompleta: string,
-  numero: number,
-  comuna: string,
-): SegmentSearchResult {
-  if (!segmentsLoaded) return { found: false };
-
-  const normComuna = normalizeCalle(comuna);
-  const segs = segmentsByComuna.get(normComuna);
-  if (!segs) return { found: false };
-
-  const normVia = normalizeCalle(viaCompleta);
-
-  // Fast path: exact match on street name + number in range
-  for (const seg of segs) {
-    if (seg.v !== normVia) continue;
-    if (numero >= seg.n[0] && numero <= seg.n[1]) {
-      const [lon, lat] = interpolatePoint(seg.g[0], seg.g[1], seg.n[0], seg.n[1], numero);
-      return { found: true, lat, lon, seg, matchScore: 100 };
-    }
-  }
-
-  // Exact name match but number out of range → find closest segment
-  const exactClosest = findClosestSegment(segs, normVia, numero, 500);
-  if (exactClosest) {
-    const clampedNum = Math.max(exactClosest.seg.n[0], Math.min(exactClosest.seg.n[1], numero));
-    const [lon, lat] = interpolatePoint(
-      exactClosest.seg.g[0], exactClosest.seg.g[1],
-      exactClosest.seg.n[0], exactClosest.seg.n[1], clampedNum,
-    );
-    return {
-      found: true, lat, lon, seg: exactClosest.seg,
-      matchScore: 92, numberApproximate: true,
-    };
-  }
-
-  // Smart search: find best matching street names
-  const candidates = smartSearch(normVia, comuna, 3);
-
-  for (const candidate of candidates) {
-    if (candidate.score < 40) continue;
-
-    // Try exact number match first
-    for (const seg of segs) {
-      if (seg.v !== candidate.name) continue;
-      if (numero >= seg.n[0] && numero <= seg.n[1]) {
-        const [lon, lat] = interpolatePoint(seg.g[0], seg.g[1], seg.n[0], seg.n[1], numero);
-        return {
-          found: true, lat, lon, seg,
-          correctedName: candidate.name,
-          matchScore: candidate.score,
-        };
-      }
-    }
-
-    // Try closest segment within ±500
-    if (candidate.score >= 60) {
-      const closest = findClosestSegment(segs, candidate.name, numero, 500);
-      if (closest) {
-        const clampedNum = Math.max(closest.seg.n[0], Math.min(closest.seg.n[1], numero));
-        const [lon, lat] = interpolatePoint(
-          closest.seg.g[0], closest.seg.g[1],
-          closest.seg.n[0], closest.seg.n[1], clampedNum,
-        );
-        return {
-          found: true, lat, lon, seg: closest.seg,
-          correctedName: candidate.name,
-          matchScore: Math.round(candidate.score * 0.9),
-          numberApproximate: true,
-        };
-      }
-    }
-  }
-
-  return { found: false };
+export function searchSegment(street: string, numero: number, comuna: string): SegmentSearchResult {
+  return searchSegments(street, numero, comuna)[0] || { found: false };
 }
 
-/** Find the closest segment for a street name when the number is out of all ranges */
-function findClosestSegment(
-  segs: CallejeroSegment[],
-  streetName: string,
-  numero: number,
-  maxDistance: number,
-): { seg: CallejeroSegment; distance: number } | null {
-  let bestSeg: CallejeroSegment | null = null;
-  let bestDist = Infinity;
-
+export function matchSegments(segs: CallejeroSegment[], street: string, numero: number, knownNames: Iterable<string> = []): SegmentSearchResult[] {
+  const matches: SegmentSearchResult[] = [];
+  const identity = streetKey(street);
+  const hasExact = [...knownNames].some(name => streetKey(name) === identity) || segs.some(s => [s.v, ...(s.a || [])].some(name => streetKey(name) === identity));
   for (const seg of segs) {
-    if (seg.v !== streetName) continue;
-    const dist = numero < seg.n[0]
-      ? seg.n[0] - numero
-      : numero > seg.n[1]
-        ? numero - seg.n[1]
-        : 0;
-    if (dist < bestDist) {
-      bestDist = dist;
-      bestSeg = seg;
+    if (hasExact && ![seg.v, ...(seg.a || [])].some(name => streetKey(name) === identity)) continue;
+    const similarity = Math.max(streetSimilarity(street, seg.v), ...(seg.a || []).map(a => streetSimilarity(street, a)));
+    if (similarity < 0.87) continue;
+    // Legacy min/max data cannot recover side or direction: never interpolate it.
+    for (const [side, range] of [["left", seg.l], ["right", seg.r]] as const) {
+      if (!range || !matchesParity(numero, range[0], range[1])) continue;
+      const point = interpolateLine(seg.g, range[0], range[1], numero);
+      if (!point) continue;
+      matches.push({ found: true, lon: point[0], lat: point[1], seg, range, side,
+        correctedName: similarity < 1 ? seg.v : undefined, matchScore: Math.round(similarity * 100) });
     }
   }
+  return matches.sort((a, b) => (b.matchScore || 0) - (a.matchScore || 0));
+}
 
-  if (bestSeg && bestDist <= maxDistance) {
-    return { seg: bestSeg, distance: bestDist };
-  }
-  return null;
+export function searchSegments(street: string, numero: number, comuna: string): SegmentSearchResult[] {
+  return matchSegments(segmentsByComuna.get(textKey(comuna)) || [], street, numero, namesByComuna.get(textKey(comuna)) || []);
 }
 
 export function isSegmentsLoaded(): boolean {

@@ -1,5 +1,5 @@
 import type { GeocodeResult, NormalizedAddress } from "@/types";
-import { geocodeWithRetry, RateLimiter } from "./geocoder";
+import { geocodeWithRetry, RateLimiter, notFoundResult } from "./geocoder";
 import { openDB } from "idb";
 
 const CACHE_DB = "azimut-cache";
@@ -80,6 +80,7 @@ export async function geocodeBatch(
   addresses: NormalizedAddress[],
   onProgress: (progress: GeocodingProgress) => void,
   signal: AbortSignal,
+  onResult?: (index: number, result: GeocodeResult) => void,
 ): Promise<GeocodeResult[]> {
   resetFlags();
 
@@ -92,14 +93,16 @@ export async function geocodeBatch(
   for (const addr of addresses) {
     if (cancelFlag || signal.aborted) break;
     await waitIfPaused(signal);
+    if (cancelFlag || signal.aborted) break;
 
     const query = addr.normalized || addr.original;
     const comunaPrefix = (addr.comuna || "").toLowerCase().trim();
-    const cacheKey = comunaPrefix ? `${comunaPrefix}:${query.toLowerCase().trim()}` : query.toLowerCase().trim();
+    const cacheKey = `v2:${comunaPrefix}:${(addr.inputStreet || query).toLowerCase().trim()}:${addr.numero || ""}`;
 
     const cached = await cacheGet(cacheKey);
     if (cached) {
       results.push(cached);
+      onResult?.(current, cached);
       current++;
       onProgress({
         current,
@@ -111,9 +114,17 @@ export async function geocodeBatch(
       continue;
     }
 
-    const result = await geocodeWithRetry(query, signal, rateLimiter, 3, addr);
-    await cacheSet(cacheKey, result);
+    let result: GeocodeResult;
+    try {
+      result = await geocodeWithRetry(query, signal, rateLimiter, 3, addr);
+      signal.throwIfAborted();
+    } catch {
+      if (signal.aborted || cancelFlag) break;
+      result = notFoundResult([{ source: "Motor de búsqueda", status: "unavailable", detail: "No se pudo procesar esta fila" }]);
+    }
+    if (result.found && !result.sources?.some(s => s.status === "unavailable")) await cacheSet(cacheKey, result);
     results.push(result);
+    onResult?.(current, result);
 
     current++;
     onProgress({

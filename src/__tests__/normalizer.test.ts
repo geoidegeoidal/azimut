@@ -132,7 +132,8 @@ describe("Normalizer - Edge cases", () => {
     const result = normalize("Av. Providencia 1234, Las Condes");
     expect(result.via).toBe("Avenida");
     expect(result.normalized).toContain("Providencia");
-    expect(result.normalized).toContain("Condes");
+    expect(result.comuna).toBe("Las Condes");
+    expect(result.numero).toBe("1234");
   });
 
   it("lowercase with dpto", () => {

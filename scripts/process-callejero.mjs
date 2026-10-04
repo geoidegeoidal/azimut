@@ -1,210 +1,75 @@
-import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'fs';
-import { join, dirname } from 'path';
-import { fileURLToPath } from 'url';
+import { readFileSync, writeFileSync, mkdirSync, openSync, readSync, closeSync } from 'node:fs';
+import { join, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const ROOT = join(__dirname, '..');
-const DATA_DIR = join(ROOT, 'data');
+const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
+const DATA = join(ROOT, 'data');
+const key = s => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/['’]/g, '').replace(/\s+/g, ' ').trim();
+const round = n => Math.round(n * 1e6) / 1e6;
+const fd = openSync(join(DATA, 'Maestro_de_Calles_2022.dbf'), 'r');
+const header = Buffer.alloc(32);
+readSync(fd, header, 0, 32, 0);
+const count = header.readUInt32LE(4), headerLen = header.readUInt16LE(8), recordLen = header.readUInt16LE(10);
+const fieldBuffer = Buffer.alloc(headerLen);
+readSync(fd, fieldBuffer, 0, headerLen, 0);
+const fields = [];
+let offset = 1;
+for (let p = 32; p < headerLen - 1; p += 32) {
+  const name = fieldBuffer.toString('ascii', p, p + 11).replace(/\0/g, '');
+  const length = fieldBuffer[p + 16];
+  fields.push({ name, length, offset, type: String.fromCharCode(fieldBuffer[p + 11]) });
+  offset += length;
+}
+const shp = readFileSync(join(DATA, 'Maestro_de_Calles_2022.shp'));
+const shpOffsets = [];
+for (let p = 100; p < shp.length;) { shpOffsets.push(p + 8); p += 8 + shp.readInt32BE(p + 4) * 2; }
 
-// ── DBF Parser ────────────────────────────────────────
-
-function readDBFFields(buf) {
-  const headerLen = buf.readUInt16LE(8);
-  const fields = [];
-  let pos = 32;
-  let fieldOffset = 1;
-  while (pos < headerLen - 1) {
-    const name = buf.toString('ascii', pos, pos + 11).replace(/\0/g, '');
-    const type = String.fromCharCode(buf[pos + 11]);
-    const length = buf[pos + 16];
-    const decimal = buf[pos + 17];
-    fields.push({ name, type, length, decimal, offset: fieldOffset });
-    fieldOffset += length;
-    pos += 32;
-  }
-  return { headerLen, recordCount: buf.readUInt32LE(4), recordLen: buf.readUInt16LE(10), fields };
+function geometry(index) {
+  const p = shpOffsets[index];
+  if (p === undefined || shp.readInt32LE(p) !== 3) return null;
+  const parts = shp.readInt32LE(p + 36), points = shp.readInt32LE(p + 40);
+  // A disconnected multipart record cannot establish one continuous address range.
+  if (parts !== 1 || points < 2) return null;
+  const start = p + 44 + parts * 4;
+  return Array.from({ length: points }, (_, i) => [round(shp.readDoubleLE(start + i * 16)), round(shp.readDoubleLE(start + i * 16 + 8))]);
 }
 
-function readDBFRecord(buf, meta, idx) {
-  const { headerLen, recordLen, fields } = meta;
-  const offset = headerLen + idx * recordLen;
-  const obj = {};
-  fields.forEach(f => {
-    const start = offset + f.offset;
-    const bytes = buf.slice(start, start + f.length);
-    if (f.type === 'C') {
-      obj[f.name] = bytes.toString('utf-8').replace(/\0+$/g, '').trim();
-    } else {
-      const str = bytes.toString('ascii').replace(/\0+$/g, '').trim();
-      obj[f.name] = str ? parseFloat(str) : 0;
+const names = new Map(), byComuna = {}, chunkSize = 4096;
+const chunk = Buffer.alloc(recordLen * chunkSize);
+let skipped = 0, segments = 0;
+for (let base = 0; base < count; base += chunkSize) {
+  const size = Math.min(chunkSize, count - base);
+  readSync(fd, chunk, 0, size * recordLen, headerLen + base * recordLen);
+  for (let i = 0; i < size; i++) {
+    if (chunk[i * recordLen] === 0x2a) continue;
+    const rec = {};
+    for (const f of fields) {
+      const value = chunk.toString(f.type === 'C' ? 'utf8' : 'ascii', i * recordLen + f.offset, i * recordLen + f.offset + f.length).replace(/\0/g, '').trim();
+      rec[f.name] = f.type === 'C' ? value : Number(value) || 0;
     }
-  });
-  return obj;
-}
-
-// ── SHP Index ─────────────────────────────────────────
-
-function indexSHP(filePath) {
-  const buf = readFileSync(filePath);
-  const offsets = [];
-  let pos = 100;
-  while (pos < buf.length) {
-    offsets.push(pos + 8);
-    const recLen = buf.readInt32BE(pos + 4);
-    pos += 8 + recLen * 2;
+    if (!rec.NOMBRE_MAE || !rec.COMUNA) continue;
+    const c = key(rec.COMUNA), v = key(`${rec.TIPO_VIA} ${rec.NOMBRE_MAE}`);
+    const aliases = rec.NOMBRE_AUX ? [key(`${rec.TIPO_VIA} ${rec.NOMBRE_AUX}`)] : [];
+    if (!names.has(c)) names.set(c, new Set());
+    for (const name of [v, ...aliases]) names.get(c).add(name);
+    const l = [rec.INI_IZQ, rec.TER_IZQ], r = [rec.INI_DER, rec.TER_DER];
+    const valid = range => range.every(n => n > 0) && range[0] !== range[1];
+    if (!valid(l) && !valid(r)) continue;
+    const g = geometry(base + i);
+    if (!g) { skipped++; continue; }
+    const nums = [...(valid(l) ? l : []), ...(valid(r) ? r : [])];
+    (byComuna[c] ||= []).push({ id: `${rec.CODIGO || base + i}`, c, v, a: aliases, n: [Math.min(...nums), Math.max(...nums)],
+      ...(valid(l) ? { l } : {}), ...(valid(r) ? { r } : {}), g });
+    segments++;
   }
-  return { buf, offsets };
+  if (base % (chunkSize * 50) === 0) console.log(`${base}/${count}`);
 }
-
-function getPolylineEndpoints(shpIndex, recordIdx) {
-  const { buf, offsets } = shpIndex;
-  if (recordIdx >= offsets.length) return null;
-  const pos = offsets[recordIdx];
-  const shapeType = buf.readInt32LE(pos);
-  if (shapeType !== 3) return null;
-
-  const numParts = buf.readInt32LE(pos + 36);
-  const numPoints = buf.readInt32LE(pos + 40);
-  if (numPoints < 2) return null;
-
-  const pointsOffset = pos + 44 + numParts * 4;
-  return {
-    x1: buf.readDoubleLE(pointsOffset),
-    y1: buf.readDoubleLE(pointsOffset + 8),
-    x2: buf.readDoubleLE(pointsOffset + (numPoints - 1) * 16),
-    y2: buf.readDoubleLE(pointsOffset + (numPoints - 1) * 16 + 8)
-  };
-}
-
-// ── Helpers ───────────────────────────────────────────
-
-function normalizeText(text) {
-  return text
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase()
-    .trim();
-}
-
-function roundCoord(v) {
-  return Math.round(v * 1e6) / 1e6;
-}
-
-// ── Main: single pass for both phases ─────────────────
-
-console.log('Loading DBF...');
-const dbfBuf = readFileSync(join(DATA_DIR, 'Maestro_de_Calles_2022.dbf'));
-const dbfMeta = readDBFFields(dbfBuf);
-console.log(`  ${dbfMeta.recordCount.toLocaleString()} records, ${dbfMeta.fields.length} fields`);
-
-console.log('Loading SHP...');
-const shpIndex = indexSHP(join(DATA_DIR, 'Maestro_de_Calles_2022.shp'));
-console.log(`  ${shpIndex.offsets.length.toLocaleString()} records`);
-
-console.log('\nProcessing records (single pass for both phases)...');
-
-const streetMap = new Map();   // comuna -> Set of via names
-const segments = [];           // geocodable segments
-
-let withName = 0;
-let withNumbering = 0;
-let noGeom = 0;
-
-for (let i = 0; i < dbfMeta.recordCount; i++) {
-  if (i % 100000 === 0) process.stdout.write(`  ${i.toLocaleString()} / ${dbfMeta.recordCount.toLocaleString()}\n`);
-
-  const rec = readDBFRecord(dbfBuf, dbfMeta, i);
-
-  const nombre = rec['NOMBRE_MAE'];
-  const tipo = rec['TIPO_VIA'];
-  const comuna = rec['COMUNA'];
-  const aux = rec['NOMBRE_AUX'];
-
-  if (!nombre) continue;
-  withName++;
-
-  const comunaNorm = normalizeText(comuna);
-  const tipoNorm = normalizeText(tipo);
-  const nombreNorm = normalizeText(nombre);
-  const viaCompleta = tipoNorm + ' ' + nombreNorm;
-
-  // Phase 1: register street name
-  if (!streetMap.has(comunaNorm)) {
-    streetMap.set(comunaNorm, new Set());
-  }
-  streetMap.get(comunaNorm).add(viaCompleta);
-  if (aux) {
-    streetMap.get(comunaNorm).add(tipoNorm + ' ' + normalizeText(aux));
-  }
-
-  // Phase 2: register segment if it has numbering
-  const iniIzq = rec['INI_IZQ'] || 0;
-  const iniDer = rec['INI_DER'] || 0;
-  const terIzq = rec['TER_IZQ'] || 0;
-  const terDer = rec['TER_DER'] || 0;
-  const values = [iniIzq, iniDer, terIzq, terDer].filter(v => v > 0);
-
-  if (values.length === 0) continue;
-  withNumbering++;
-
-  const eps = getPolylineEndpoints(shpIndex, i);
-  if (!eps) { noGeom++; continue; }
-
-  segments.push({
-    c: comunaNorm,
-    v: viaCompleta,
-    n: [Math.min(...values), Math.max(...values)],
-    g: [
-      [roundCoord(eps.x1), roundCoord(eps.y1)],
-      [roundCoord(eps.x2), roundCoord(eps.y2)]
-    ]
-  });
-}
-
-// ── Finalize Phase 1 ──────────────────────────────────
-
-const callejeroNames = {};
-for (const [comuna, streets] of streetMap) {
-  callejeroNames[comuna] = [...streets].sort();
-}
-
-// ── Finalize Phase 2 ──────────────────────────────────
-
-const segmentsByComuna = {};
-for (const seg of segments) {
-  if (!segmentsByComuna[seg.c]) segmentsByComuna[seg.c] = [];
-  segmentsByComuna[seg.c].push(seg);
-}
-
-// ── Write output ──────────────────────────────────────
-
-const SRC_DATA = join(ROOT, 'src', 'data');
-const PUBLIC = join(ROOT, 'public');
-if (!existsSync(SRC_DATA)) mkdirSync(SRC_DATA, { recursive: true });
-if (!existsSync(PUBLIC)) mkdirSync(PUBLIC, { recursive: true });
-
-console.log('\nWriting files...');
-
-const namesPath = join(SRC_DATA, 'callejero-names.json');
-writeFileSync(namesPath, JSON.stringify(callejeroNames));
-console.log(`  callejero-names.json: ${(Buffer.byteLength(JSON.stringify(callejeroNames)) / 1024 / 1024).toFixed(2)} MB`);
-
-const segmentsPath = join(PUBLIC, 'callejero-segments.json');
-writeFileSync(segmentsPath, JSON.stringify(segments));
-console.log(`  callejero-segments.json: ${(Buffer.byteLength(JSON.stringify(segments)) / 1024 / 1024).toFixed(2)} MB`);
-
-const indexPath = join(PUBLIC, 'callejero-segments-index.json');
-writeFileSync(indexPath, JSON.stringify(segmentsByComuna));
-console.log(`  callejero-segments-index.json: ${(Buffer.byteLength(JSON.stringify(segmentsByComuna)) / 1024 / 1024).toFixed(2)} MB`);
-
-// ── Stats ─────────────────────────────────────────────
-
-const totalStreets = Object.values(callejeroNames).reduce((sum, arr) => sum + arr.length, 0);
-console.log(`\n=== Summary ===`);
-console.log(`  Records total:       ${dbfMeta.recordCount.toLocaleString()}`);
-console.log(`  With name:           ${withName.toLocaleString()}`);
-console.log(`  With numbering:      ${withNumbering.toLocaleString()}`);
-console.log(`  Unique streets:      ${totalStreets.toLocaleString()}`);
-console.log(`  Comunas:             ${Object.keys(callejeroNames).length}`);
-console.log(`  Geocodable segments: ${segments.length.toLocaleString()}`);
-console.log(`  Skipped (no geom):   ${noGeom.toLocaleString()}`);
+closeSync(fd);
+const dir = join(ROOT, 'public', 'callejero');
+mkdirSync(dir, { recursive: true });
+const manifest = { version: 2, source: 'IDE Chile · Maestro de Calles 2022', crs: 'SIRGAS 2000 (geographic)', segments, skippedMultipart: skipped,
+  comunas: Object.fromEntries(Object.entries(byComuna).map(([c, rows]) => [c, { count: rows.length, bytes: Buffer.byteLength(JSON.stringify(rows)) }])) };
+for (const [c, rows] of Object.entries(byComuna)) writeFileSync(join(dir, `${c}.json`), JSON.stringify(rows));
+writeFileSync(join(dir, 'manifest.json'), JSON.stringify(manifest, null, 2));
+writeFileSync(join(ROOT, 'src', 'data', 'callejero-names.json'), JSON.stringify(Object.fromEntries([...names].map(([c, set]) => [c, [...set].sort()]))));
+console.log(JSON.stringify({ records: count, segments, comunas: Object.keys(byComuna).length, skipped }, null, 2));
