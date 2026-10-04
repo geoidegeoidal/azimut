@@ -72,8 +72,6 @@ const segViaStrippedIndex = new Map<string, Map<string, string[]>>();
 const segmentNamesByComuna = new Map<string, Set<string>>();
 
 const segmentsByComuna: Map<string, CallejeroSegment[]> = new Map();
-let segmentsLoaded = false;
-let segmentsLoadPromise: Promise<number> | null = null;
 
 // ── Core utilities ──────────────────────────────────────
 
@@ -291,45 +289,6 @@ export function correctViaType(street: string, comuna: string): string {
   return street;
 }
 
-export async function loadSegments(baseUrl?: string): Promise<number> {
-  if (segmentsLoaded) return segmentsByComuna.size;
-  if (segmentsLoadPromise) return segmentsLoadPromise;
-
-  const resolvedBase = baseUrl ?? import.meta.env.BASE_URL ?? "";
-  const cleanBase = resolvedBase.replace(/\/$/, "");
-  const url = `${cleanBase}/callejero-segments-index.json`;
-
-  segmentsLoadPromise = (async () => {
-    try {
-      console.log(`[Callejero] Loading segments from ${url}...`);
-      const res = await fetch(url);
-      if (!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText}`);
-      const data: Record<string, CallejeroSegment[]> = await res.json();
-
-      for (const [comuna, segs] of Object.entries(data)) {
-        segmentsByComuna.set(comuna, segs);
-      }
-      segmentsLoaded = true;
-      const totalSegs = Object.values(data).reduce((sum, arr) => sum + arr.length, 0);
-      const totalNames = [...namesByComuna.values()].reduce((s, set) => s + set.size, 0);
-      console.log(`[Callejero] Loaded ${Object.keys(data).length} comunas, ${totalSegs.toLocaleString()} segments, ${totalNames.toLocaleString()} unique streets.`);
-      return segmentsByComuna.size;
-    } catch (err) {
-      console.error("[Callejero] Failed to load segments:", err);
-      segmentsLoadPromise = null;
-      return 0;
-    }
-  })();
-
-  return segmentsLoadPromise;
-}
-
-export async function ensureSegmentsLoaded(): Promise<boolean> {
-  if (segmentsLoaded) return true;
-  const count = await loadSegments();
-  return count > 0;
-}
-
 const comunaLoads = new Map<string, Promise<boolean>>();
 function waitForLoad(promise: Promise<boolean>, signal?: AbortSignal): Promise<boolean> {
   if (!signal) return promise;
@@ -351,7 +310,6 @@ export async function loadComunaSegments(comuna: string, signal?: AbortSignal): 
       if (!res.ok) throw new Error(`Callejero HTTP ${res.status}`);
       const data: CallejeroSegment[] = await res.json();
       segmentsByComuna.set(key, data);
-      segmentsLoaded = true;
       return true;
     } catch {
       comunaLoads.delete(key);
@@ -562,7 +520,7 @@ export function searchSegments(street: string, numero: number, comuna: string): 
 }
 
 export function isSegmentsLoaded(): boolean {
-  return segmentsLoaded;
+  return segmentsByComuna.size > 0;
 }
 
 export function getSegmentsCount(): number {

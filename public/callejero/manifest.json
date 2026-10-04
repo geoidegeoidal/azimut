@@ -7,331 +7,331 @@
   "comunas": {
     "iquique": {
       "count": 2993,
-      "bytes": 582129
+      "bytes": 596616
     },
     "alto hospicio": {
       "count": 1184,
-      "bytes": 238289
+      "bytes": 244568
     },
     "antofagasta": {
       "count": 6965,
-      "bytes": 1481932
+      "bytes": 1523722
     },
     "copiapo": {
       "count": 1370,
-      "bytes": 243222
+      "bytes": 251442
     },
     "vallenar": {
       "count": 800,
-      "bytes": 155113
+      "bytes": 159913
     },
     "la serena": {
       "count": 4957,
-      "bytes": 1024003
+      "bytes": 1053745
     },
     "coquimbo": {
       "count": 4886,
-      "bytes": 1021831
+      "bytes": 1051819
     },
     "ovalle": {
       "count": 2183,
-      "bytes": 401114
+      "bytes": 416395
     },
     "valparaiso": {
       "count": 4899,
-      "bytes": 1139417
+      "bytes": 1173710
     },
     "concon": {
       "count": 1079,
-      "bytes": 222620
+      "bytes": 230173
     },
     "vina del mar": {
       "count": 6999,
-      "bytes": 1528234
+      "bytes": 1577227
     },
     "los andes": {
       "count": 1854,
-      "bytes": 353162
+      "bytes": 366140
     },
     "san felipe": {
       "count": 1949,
-      "bytes": 360797
+      "bytes": 374440
     },
     "quilpue": {
       "count": 4279,
-      "bytes": 859956
+      "bytes": 889909
     },
     "limache": {
       "count": 1018,
-      "bytes": 183383
+      "bytes": 190509
     },
     "villa alemana": {
       "count": 3228,
-      "bytes": 637618
+      "bytes": 660214
     },
     "machali": {
       "count": 986,
-      "bytes": 220206
+      "bytes": 227108
     },
     "rengo": {
       "count": 578,
-      "bytes": 161470
+      "bytes": 165516
     },
     "cauquenes": {
       "count": 1014,
-      "bytes": 185952
+      "bytes": 193050
     },
     "curico": {
       "count": 3761,
-      "bytes": 671071
+      "bytes": 697398
     },
     "linares": {
       "count": 2000,
-      "bytes": 491198
+      "bytes": 505198
     },
     "concepcion": {
       "count": 4533,
-      "bytes": 871185
+      "bytes": 902916
     },
     "coronel": {
       "count": 3157,
-      "bytes": 565787
+      "bytes": 587886
     },
     "chiguayante": {
       "count": 2101,
-      "bytes": 389649
+      "bytes": 404356
     },
     "penco": {
       "count": 953,
-      "bytes": 183552
+      "bytes": 190223
     },
     "san pedro de la paz": {
       "count": 2944,
-      "bytes": 571660
+      "bytes": 592268
     },
     "talcahuano": {
       "count": 3479,
-      "bytes": 647012
+      "bytes": 671365
     },
     "tome": {
       "count": 1138,
-      "bytes": 290752
+      "bytes": 298718
     },
     "hualpen": {
       "count": 2519,
-      "bytes": 433909
+      "bytes": 451542
     },
     "los angeles": {
       "count": 3706,
-      "bytes": 643814
+      "bytes": 669756
     },
     "temuco": {
       "count": 6963,
-      "bytes": 1351064
+      "bytes": 1399805
     },
     "padre las casas": {
       "count": 980,
-      "bytes": 195691
+      "bytes": 202551
     },
     "angol": {
       "count": 1762,
-      "bytes": 473283
+      "bytes": 485617
     },
     "puerto montt": {
       "count": 4641,
-      "bytes": 907506
+      "bytes": 939993
     },
     "osorno": {
       "count": 4871,
-      "bytes": 1071649
+      "bytes": 1105746
     },
     "santiago": {
       "count": 4062,
-      "bytes": 912784
+      "bytes": 941218
     },
     "cerrillos": {
       "count": 1928,
-      "bytes": 392455
+      "bytes": 405951
     },
     "conchali": {
       "count": 3367,
-      "bytes": 636707
+      "bytes": 660276
     },
     "el bosque": {
       "count": 3888,
-      "bytes": 717209
+      "bytes": 744425
     },
     "estacion central": {
       "count": 3126,
-      "bytes": 612730
+      "bytes": 634612
     },
     "huechuraba": {
       "count": 2002,
-      "bytes": 410100
+      "bytes": 424114
     },
     "independencia": {
       "count": 1527,
-      "bytes": 310700
+      "bytes": 321389
     },
     "la cisterna": {
       "count": 1791,
-      "bytes": 358915
+      "bytes": 371452
     },
     "la florida": {
       "count": 10253,
-      "bytes": 1929828
+      "bytes": 2001599
     },
     "la granja": {
       "count": 3291,
-      "bytes": 633389
+      "bytes": 656426
     },
     "la pintana": {
       "count": 3683,
-      "bytes": 720543
+      "bytes": 746324
     },
     "la reina": {
       "count": 3062,
-      "bytes": 614411
+      "bytes": 635845
     },
     "las condes": {
       "count": 6305,
-      "bytes": 1324033
+      "bytes": 1368168
     },
     "lo barnechea": {
       "count": 2115,
-      "bytes": 578474
+      "bytes": 593279
     },
     "lo espejo": {
       "count": 1980,
-      "bytes": 391112
+      "bytes": 404972
     },
     "lo prado": {
       "count": 2167,
-      "bytes": 441654
+      "bytes": 456823
     },
     "macul": {
       "count": 2852,
-      "bytes": 569271
+      "bytes": 589235
     },
     "maipu": {
       "count": 12136,
-      "bytes": 2163839
+      "bytes": 2248791
     },
     "nunoa": {
       "count": 3822,
-      "bytes": 745660
+      "bytes": 772414
     },
     "pedro aguirre cerda": {
       "count": 2219,
-      "bytes": 453599
+      "bytes": 469132
     },
     "penalolen": {
       "count": 5584,
-      "bytes": 1073581
+      "bytes": 1112669
     },
     "providencia": {
       "count": 2314,
-      "bytes": 537260
+      "bytes": 553458
     },
     "pudahuel": {
       "count": 4873,
-      "bytes": 908117
+      "bytes": 942228
     },
     "quilicura": {
       "count": 4312,
-      "bytes": 813651
+      "bytes": 843835
     },
     "quinta normal": {
       "count": 2181,
-      "bytes": 448945
+      "bytes": 464212
     },
     "recoleta": {
       "count": 3334,
-      "bytes": 747585
+      "bytes": 770923
     },
     "renca": {
       "count": 3086,
-      "bytes": 574053
+      "bytes": 595655
     },
     "san joaquin": {
       "count": 2471,
-      "bytes": 473967
+      "bytes": 491264
     },
     "san miguel": {
       "count": 1655,
-      "bytes": 335044
+      "bytes": 346629
     },
     "san ramon": {
       "count": 1905,
-      "bytes": 358081
+      "bytes": 371416
     },
     "vitacura": {
       "count": 2516,
-      "bytes": 626660
+      "bytes": 644272
     },
     "puente alto": {
       "count": 12168,
-      "bytes": 2277997
+      "bytes": 2363173
     },
     "colina": {
       "count": 881,
-      "bytes": 165597
+      "bytes": 171764
     },
     "lampa": {
       "count": 847,
-      "bytes": 179696
+      "bytes": 185625
     },
     "tiltil": {
       "count": 2,
-      "bytes": 365
+      "bytes": 379
     },
     "san bernardo": {
       "count": 5805,
-      "bytes": 1109507
+      "bytes": 1150142
     },
     "buin": {
       "count": 1493,
-      "bytes": 260705
+      "bytes": 271156
     },
     "paine": {
       "count": 523,
-      "bytes": 93566
+      "bytes": 97227
     },
     "melipilla": {
       "count": 1541,
-      "bytes": 342441
+      "bytes": 353228
     },
     "talagante": {
       "count": 1311,
-      "bytes": 324140
+      "bytes": 333317
     },
     "el monte": {
       "count": 489,
-      "bytes": 117248
+      "bytes": 120671
     },
     "isla de maipo": {
       "count": 286,
-      "bytes": 69234
+      "bytes": 71236
     },
     "padre hurtado": {
       "count": 663,
-      "bytes": 126159
+      "bytes": 130800
     },
     "penaflor": {
       "count": 1814,
-      "bytes": 352196
+      "bytes": 364894
     },
     "valdivia": {
       "count": 4212,
-      "bytes": 945923
+      "bytes": 975407
     },
     "arica": {
       "count": 5028,
-      "bytes": 869255
+      "bytes": 904451
     },
     "chillan": {
       "count": 5260,
-      "bytes": 905806
+      "bytes": 942626
     }
   }
 }

@@ -2,7 +2,7 @@ import type { GeocodeCandidate, GeocodeResult, NormalizedAddress, SourceStatus }
 import { getStreetBounds, hasExactStreetIdentity, loadComunaSegments, matchSegments, searchSegments } from "./callejero";
 import type { SegmentSearchResult } from "./callejero";
 import { distanceMeters, streetKey, streetSimilarity, textKey } from "./geometry";
-import { deduplicateCandidates, osmCandidates } from "./osm";
+import { deduplicateCandidates, localityEvidence, osmCandidates } from "./osm";
 import { hasVectorBackend, isSupabaseConfigured, queryOSMVectors, querySpatialIndex } from "./supabase";
 import { normalize } from "./normalizer";
 
@@ -22,7 +22,7 @@ export function resultFromCandidate(candidate: GeocodeCandidate, candidates: Geo
     osmId: candidate.osmId, osmType: candidate.osmType, timestamp: Date.now(), method: candidate.method, evidence: candidate.evidence,
     warnings: [...candidate.warnings, ...(competing ? ["Hay candidatos similares a más de 100 m; revisa la ubicación"] : [])],
     candidates, sources, geometry: candidate.geometry, range: candidate.range, side: candidate.side,
-    needsReview: competing || candidate.method !== "address" || candidate.warnings.some(w => w.includes("comuna no verificada")) };
+    needsReview: competing || candidate.method !== "address" || candidate.warnings.some(w => /no verificada|aproximad[oa]|confirma/i.test(w)) };
 }
 
 function officialCandidates(matches: SegmentSearchResult[], address: NormalizedAddress): GeocodeCandidate[] {
@@ -43,13 +43,14 @@ interface ProviderData {
 export function validateProviderCandidate(data: ProviderData, address: NormalizedAddress): GeocodeCandidate | null {
   if (![data.lat, data.lon].every(Number.isFinite) || data.lat < -56.6 || data.lat > -17 || data.lon < -110 || data.lon > -66) return null;
   if (data.country && !["cl", "chile"].includes(textKey(data.country))) return null;
-  if (data.comuna && address.comuna && textKey(data.comuna) !== textKey(address.comuna)) return null;
+  const locality = localityEvidence({ "addr:district": data.comuna || "", "addr:city": data.city || "" }, address.comuna);
+  if (locality.rejected) return null;
   const expectedStreet = address.inputStreet || [address.via, address.nombre].filter(Boolean).join(" ");
   const similarity = streetSimilarity(expectedStreet, data.street || "");
   if (address.comuna && data.street && hasExactStreetIdentity(expectedStreet, address.comuna) && streetKey(expectedStreet) !== streetKey(data.street)) return null;
   if (data.street && similarity < 0.87) return null;
   if (!data.street) return null; // locality/POI centroids cannot resolve a street address
-  const comunaVerified = Boolean(address.comuna && [data.comuna, data.city].some(c => c && textKey(c) === textKey(address.comuna!)));
+  const comunaVerified = locality.verified;
   const numberMatches = Boolean(address.numero && data.number && textKey(address.numero) === textKey(data.number));
   const recorded = numberMatches && !["road", "street", "administrative", "city"].includes(data.type || "");
   const score = Math.round((recorded ? comunaVerified ? 82 : 69 : 49) * similarity);
@@ -82,6 +83,7 @@ async function providerSearch(address: NormalizedAddress, signal: AbortSignal, p
     city: p.address?.city || p.address?.town, country: p.address?.country_code, type: p.addresstype || p.type, osmId: p.osm_id, osmType: p.osm_type,
   }));
   const candidates = data.map(p => validateProviderCandidate(p, address)).filter((c): c is GeocodeCandidate => c !== null);
+  if (remoteCache.size >= 500) remoteCache.delete(remoteCache.keys().next().value!);
   remoteCache.set(cacheKey, candidates);
   return candidates;
 }

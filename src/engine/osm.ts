@@ -6,7 +6,8 @@ import { hasExactStreetIdentity } from "./callejero";
 
 export function localityEvidence(tags: Record<string, string>, comuna?: string): { rejected: boolean; verified: boolean } {
   if (!comuna) return { rejected: false, verified: false };
-  const explicit = tags["addr:municipality"] || tags["addr:district"] || tags["addr:suburb"];
+  const district = tags["addr:district"] || tags["addr:suburb"];
+  const explicit = tags["addr:municipality"] || (COMUNAS.some(c => textKey(c.nombre) === textKey(district || "")) ? district : undefined);
   if (explicit) return { rejected: textKey(explicit) !== textKey(comuna), verified: textKey(explicit) === textKey(comuna) };
   const city = tags["addr:city"];
   // Metropolitan city names cannot establish which municipal boundary contains a point.
@@ -52,7 +53,7 @@ export function osmCandidates(elements: OSMElement[], address: NormalizedAddress
       candidates.push({ id: `osm:${element.type}:${element.id}`, lon: point[0], lat: point[1], source: "OSM vectorial", method: "address",
         score: Math.round(similarity * (locality.verified ? element.type === "node" ? 96 : 92 : 79)), label: `${matchedStreet} ${rawNumber}`,
         evidence: ["Calle y número registrados en OSM", element.type === "node" ? "Nodo de dirección" : "Posición aproximada del edificio"],
-        warnings: ["Dato cartografiado por colaboradores; no es un levantamiento certificado", ...(!locality.verified ? ["comuna no verificada por tags o límite administrativo"] : []),
+        warnings: ["Dato cartografiado por colaboradores; no es un levantamiento certificado", ...(element.type !== "node" ? ["Posición aproximada del edificio; no identifica una puerta"] : []), ...(!locality.verified ? ["comuna no verificada por tags o límite administrativo"] : []),
           ...(similarity < 1 ? ["Nombre de calle aproximado; confirma la corrección"] : [])], osmId: element.id, osmType: element.type });
       continue;
     }

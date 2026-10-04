@@ -58,7 +58,7 @@ for (let base = 0; base < count; base += chunkSize) {
     const g = geometry(base + i);
     if (!g) { skipped++; continue; }
     const nums = [...(valid(l) ? l : []), ...(valid(r) ? r : [])];
-    (byComuna[c] ||= []).push({ id: `${rec.CODIGO || base + i}`, c, v, a: aliases, n: [Math.min(...nums), Math.max(...nums)],
+    (byComuna[c] ||= []).push({ id: `${rec.CODIGO || "segment"}:${base + i}`, c, v, a: aliases, n: [Math.min(...nums), Math.max(...nums)],
       ...(valid(l) ? { l } : {}), ...(valid(r) ? { r } : {}), g });
     segments++;
   }
