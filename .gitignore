@@ -8,3 +8,8 @@ dist
 .DS_Store
 /data/
 tsconfig.app.tsbuildinfo
+.impeccable/config.local.json
+.impeccable/review/
+.impeccable/mocks/
+.impeccable/live/
+.impeccable/cache/

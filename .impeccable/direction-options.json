@@ -1,0 +1,387 @@
+{
+  "title": "Una mesa de revisión para Azimut",
+  "question": "La propuesta parte del lote, con tabla y mapa enlazados. Elige qué dirección desarrollar como interfaz funcional.",
+  "options": [
+    {
+      "id": "assigned",
+      "label": "Destino",
+      "kicker": "THE ROLL",
+      "lineage": "Clasificación postal y señales de destino",
+      "thesis": "Cada dirección es una fila de trabajo; al seleccionarla, su número enlaza tabla, mapa y evidencia.",
+      "palette": [
+        "#173c58",
+        "#f3f6f8",
+        "#f4ca56",
+        "#ffffff"
+      ],
+      "materials": [
+        "Rotulación humanista",
+        "Superficies lisas, filas numeradas"
+      ],
+      "viewport": "Importación a la izquierda, tabla dominante al centro y mapa con evidencia a la derecha.",
+      "risk": "El amarillo se reserva para revisión; demasiado color competiría con la cartografía.",
+      "raised": [
+        {
+          "from": "Catálogo de alta densidad",
+          "raise": "La tabla usa el espacio del primer viewport y evita módulos estadísticos gigantes."
+        },
+        {
+          "from": "Espectrograma",
+          "raise": "Cada estado lleva una palabra y una forma además del color."
+        },
+        {
+          "from": "Catálogo de eventos",
+          "raise": "El mismo número de fila identifica el punto y su evidencia."
+        },
+        {
+          "from": "Diagrama de tránsito",
+          "raise": "La selección conserva el contexto mientras el mapa enfoca la dirección."
+        },
+        {
+          "from": "Catálogo Factory",
+          "raise": "El identificador permanece estable y legible durante la revisión."
+        }
+      ],
+      "comp": ".impeccable/mocks/decision/assigned.webp",
+      "wireframe": {
+        "cols": 12,
+        "rows": 10,
+        "regions": [
+          {
+            "label": "Importar / columnas",
+            "x": 0,
+            "y": 1,
+            "w": 2,
+            "h": 9
+          },
+          {
+            "label": "Lote / filtros / exportar",
+            "x": 2,
+            "y": 1,
+            "w": 6,
+            "h": 2
+          },
+          {
+            "label": "Direcciones / revisión",
+            "x": 2,
+            "y": 3,
+            "w": 6,
+            "h": 7,
+            "accent": true
+          },
+          {
+            "label": "Mapa + evidencia",
+            "x": 8,
+            "y": 1,
+            "w": 4,
+            "h": 9
+          },
+          {
+            "label": "Azimut · Lotes / Buscar",
+            "x": 0,
+            "y": 0,
+            "w": 12,
+            "h": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "model-pick",
+      "label": "Registro",
+      "kicker": "IMPECCABLE’S PICK",
+      "lineage": "Expedientes municipales y registro catastral",
+      "thesis": "Un espacio de revisión sobrio, con origen, método y coordenadas junto a cada dirección.",
+      "palette": [
+        "#214e45",
+        "#edf4f0",
+        "#f7d88c",
+        "#ffffff"
+      ],
+      "materials": [
+        "Sans de lectura",
+        "Tablas con divisiones suaves"
+      ],
+      "viewport": "Tabla amplia y panel de inspección lateral; la importación ocupa una franja inicial.",
+      "risk": "Es una composición familiar para herramientas GIS; su personalidad depende de los detalles.",
+      "comp": ".impeccable/mocks/decision/model-pick.webp",
+      "wireframe": {
+        "cols": 12,
+        "rows": 10,
+        "regions": [
+          {
+            "label": "Importar / columnas",
+            "x": 0,
+            "y": 1,
+            "w": 2,
+            "h": 9
+          },
+          {
+            "label": "Lote / filtros / exportar",
+            "x": 2,
+            "y": 1,
+            "w": 6,
+            "h": 2
+          },
+          {
+            "label": "Direcciones / revisión",
+            "x": 2,
+            "y": 3,
+            "w": 6,
+            "h": 7,
+            "accent": true
+          },
+          {
+            "label": "Mapa + evidencia",
+            "x": 8,
+            "y": 1,
+            "w": 4,
+            "h": 9
+          },
+          {
+            "label": "Azimut · Lotes / Buscar",
+            "x": 0,
+            "y": 0,
+            "w": 12,
+            "h": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "notation-diagram-systems-orienteering-map",
+      "label": "Terreno",
+      "verdict": "competitive",
+      "lineage": "Leyendas de mapas de orientación",
+      "thesis": "La fila activa se distingue en violeta y se sigue entre tabla, terreno y descripción.",
+      "palette": [
+        "#443c62",
+        "#ffffff",
+        "#516c43",
+        "#e2c669"
+      ],
+      "materials": [
+        "Leyenda funcional",
+        "Tipografía compacta y símbolos consistentes"
+      ],
+      "viewport": "Tabla de revisión y mapa simultáneos; violeta exclusivo para la fila activa.",
+      "case": "Alta identificación cartográfica; la paleta exige cuidado para no confundir terreno con calidad de evidencia.",
+      "risk": "Más colores aumentan el esfuerzo de aprendizaje.",
+      "comp": ".impeccable/mocks/decision/terrain.webp",
+      "wireframe": {
+        "cols": 12,
+        "rows": 10,
+        "regions": [
+          {
+            "label": "Importar / columnas",
+            "x": 0,
+            "y": 1,
+            "w": 2,
+            "h": 9
+          },
+          {
+            "label": "Lote / filtros / exportar",
+            "x": 2,
+            "y": 1,
+            "w": 6,
+            "h": 2
+          },
+          {
+            "label": "Direcciones / revisión",
+            "x": 2,
+            "y": 3,
+            "w": 6,
+            "h": 7,
+            "accent": true
+          },
+          {
+            "label": "Mapa + evidencia",
+            "x": 8,
+            "y": 1,
+            "w": 4,
+            "h": 9
+          },
+          {
+            "label": "Azimut · Lotes / Buscar",
+            "x": 0,
+            "y": 0,
+            "w": 12,
+            "h": 1
+          }
+        ]
+      },
+      "hero": "https://impeccable.style/worlds/cards/notation-diagram-systems-orienteering-map-hero.webp",
+      "board": "https://impeccable.style/worlds/cards/notation-diagram-systems-orienteering-map.webp"
+    },
+    {
+      "id": "operate-c-emission-line-rail",
+      "label": "Espectrograma",
+      "verdict": "declined",
+      "lineage": "Espectrograma",
+      "thesis": "Traducción de su paleta y densidad a una tabla de direcciones.",
+      "palette": [
+        "#303439",
+        "#e9e5db",
+        "#eec94f"
+      ],
+      "materials": [
+        "Gramática del catálogo"
+      ],
+      "viewport": "Tabla, importación y mapa con controles web habituales.",
+      "case": "La lectura nocturna y los trazos mínimos dificultan revisar lotes de día.",
+      "kept": "Estados reconocibles por forma y texto.",
+      "risk": "Menor claridad para el trabajo confirmado.",
+      "hero": "https://impeccable.style/worlds/cards/operate-c-emission-line-rail-hero.webp"
+    },
+    {
+      "id": "pop-culture-shelf-doujin-event-catalog",
+      "label": "Catálogo de eventos",
+      "verdict": "declined",
+      "lineage": "Catálogo de eventos",
+      "thesis": "Traducción de su paleta y densidad a una tabla de direcciones.",
+      "palette": [
+        "#1b2025",
+        "#f4f4ef",
+        "#426ab0"
+      ],
+      "materials": [
+        "Gramática del catálogo"
+      ],
+      "viewport": "Tabla, importación y mapa con controles web habituales.",
+      "case": "Miniaturas repetidas desplazan el dato de dirección y sus columnas.",
+      "kept": "Un número compartido entre registro y posición.",
+      "risk": "Menor claridad para el trabajo confirmado.",
+      "hero": "https://impeccable.style/worlds/cards/pop-culture-shelf-doujin-event-catalog-hero.webp"
+    },
+    {
+      "id": "wayfinding-cartography-signage-midnight-transit-diagram",
+      "label": "Diagrama de tránsito",
+      "verdict": "declined",
+      "lineage": "Diagrama de tránsito",
+      "thesis": "Traducción de su paleta y densidad a una tabla de direcciones.",
+      "palette": [
+        "#163450",
+        "#ffffff",
+        "#dc5947",
+        "#cda845"
+      ],
+      "materials": [
+        "Gramática del catálogo"
+      ],
+      "viewport": "Tabla, importación y mapa con controles web habituales.",
+      "case": "Las líneas de tránsito no explican numeración, fuente o incertidumbre.",
+      "kept": "Mantener contexto al enfocar una fila.",
+      "risk": "Menor claridad para el trabajo confirmado.",
+      "hero": "https://impeccable.style/worlds/cards/wayfinding-cartography-signage-midnight-transit-diagram-hero.webp"
+    },
+    {
+      "id": "japanese-high-density-web",
+      "label": "Catálogo de alta densidad",
+      "verdict": "declined",
+      "lineage": "Catálogo de alta densidad",
+      "thesis": "Traducción de su paleta y densidad a una tabla de direcciones.",
+      "palette": [
+        "#ffffff",
+        "#202b35",
+        "#bd3f34"
+      ],
+      "materials": [
+        "Gramática del catálogo"
+      ],
+      "viewport": "Tabla, importación y mapa con controles web habituales.",
+      "case": "Módulos y etiquetas pequeñas añaden ruido a la revisión geográfica.",
+      "kept": "Densidad de trabajo sin tarjetas gigantes.",
+      "risk": "Menor claridad para el trabajo confirmado.",
+      "hero": "https://impeccable.style/worlds/cards/japanese-high-density-web-hero.webp"
+    },
+    {
+      "id": "brand-identity-canon-saville-catalog-sleeve",
+      "label": "Catálogo Factory",
+      "verdict": "declined",
+      "lineage": "Catálogo Factory",
+      "thesis": "Traducción de su paleta y densidad a una tabla de direcciones.",
+      "palette": [
+        "#191c22",
+        "#ffffff",
+        "#538b86"
+      ],
+      "materials": [
+        "Gramática del catálogo"
+      ],
+      "viewport": "Tabla, importación y mapa con controles web habituales.",
+      "case": "Los códigos sin palabras esconden método y fuente.",
+      "kept": "Identificadores legibles y estables.",
+      "risk": "Menor claridad para el trabajo confirmado.",
+      "hero": "https://impeccable.style/worlds/cards/brand-identity-canon-saville-catalog-sleeve-hero.webp"
+    }
+  ],
+  "reroll": {
+    "registers": [
+      "safer",
+      "bolder"
+    ]
+  },
+  "buildPath": {
+    "value": "code",
+    "toggle": true
+  },
+  "canon": true,
+  "canonCard": {
+    "label": "Panel GIS convencional",
+    "thesis": "Tabla y mapa con la composición habitual del sector.",
+    "palette": [
+      "#ffffff",
+      "#233240",
+      "#3866a3"
+    ],
+    "materials": [
+      "Controles web estándar"
+    ],
+    "viewport": "Barra superior, tabla y mapa lateral.",
+    "risk": "Menos diferenciación visual.",
+    "comp": ".impeccable/mocks/decision/canon.webp",
+    "wireframe": {
+      "cols": 12,
+      "rows": 10,
+      "regions": [
+        {
+          "label": "Importar / columnas",
+          "x": 0,
+          "y": 1,
+          "w": 2,
+          "h": 9
+        },
+        {
+          "label": "Lote / filtros / exportar",
+          "x": 2,
+          "y": 1,
+          "w": 6,
+          "h": 2
+        },
+        {
+          "label": "Direcciones / revisión",
+          "x": 2,
+          "y": 3,
+          "w": 6,
+          "h": 7,
+          "accent": true
+        },
+        {
+          "label": "Mapa + evidencia",
+          "x": 8,
+          "y": 1,
+          "w": 4,
+          "h": 9
+        },
+        {
+          "label": "Azimut · Lotes / Buscar",
+          "x": 0,
+          "y": 0,
+          "w": 12,
+          "h": 1
+        }
+      ]
+    }
+  },
+  "steer": true
+}
