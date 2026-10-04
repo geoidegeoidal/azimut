@@ -1,5 +1,15 @@
 # Session handoff
 
+## 2026-10-04 — Correct Supabase status without comuna
+
+- Objective: explain and correct «Backend sin configurar» shown for a configured search without comuna.
+- Completed: traced the shared geocoder branch; it conflated missing configuration and missing locality. Configured searches now say «Indica una comuna para consultar el índice espacial»; unconfigured searches retain the original message. No spatial RPC runs without comuna. Running Vite configuration checked by presence booleans without printing keys.
+- Verification: regression reproduced before the one-line correction;95Vitest tests and3native OSM checks, lint and production build pass. Source-status test covers configured and unconfigured missing-comuna searches.
+- Decisions: preserve source disabled status and require explicit locality; configuration presence does not demonstrate backend connectivity or data availability.
+- Blockers: Supabase data ingestion, anonymous Auth and OSM Edge deployment remain pending; this fix only corrects diagnostic feedback.
+- Next: continue separate backend setup when requested; keep working preview available.
+- Commits: follows pushed eec4794 on codex/cartographic-workspace; this entry accompanies the source-status fix checkpoint.
+
 ## 2026-10-04 — Input panel without nested scrolling
 
 - Objective: remove the vertical scrollbar inside Archivo de entrada while preserving the cartographic workshop design and GIS review flow.

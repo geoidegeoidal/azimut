@@ -107,7 +107,7 @@ export async function geocodeWithFallback(raw: string, signal: AbortSignal, norm
       candidates.push(...officialCandidates(matchSegments(data.segments, street, Number(address.numero)), address), ...data.addresses);
       sources.push({ source: "Supabase / PostGIS", status: "ok", detail: `${data.segments.length} segmentos · ${data.addresses.length} direcciones` });
     } catch { signal.throwIfAborted(); sources.push({ source: "Supabase / PostGIS", status: "unavailable", detail: "No se pudo consultar el índice espacial" }); }
-  } else sources.push({ source: "Supabase / PostGIS", status: "disabled", detail: "Backend sin configurar" });
+  } else sources.push({ source: "Supabase / PostGIS", status: "disabled", detail: isSupabaseConfigured ? "Indica una comuna para consultar el índice espacial" : "Backend sin configurar" });
   const providers: ("Photon" | "Nominatim")[] = ["Photon", ...(import.meta.env.VITE_NOMINATIM_URL ? ["Nominatim" as const] : [])];
   for (const provider of providers) {
     try {

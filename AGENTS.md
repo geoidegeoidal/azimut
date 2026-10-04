@@ -17,6 +17,7 @@
 - Supabase/PostGIS is the selected cloud serving option; keep public browser keys separate from service-role import keys. Enable RLS and bound anonymous RPC output. Measure database/index size against Free limits after importing.
 - DuckDB is an optional offline analysis/preparation tool, not an assumed accuracy improvement. Introduce it only for a measured data processing need.
 - Public Nominatim is disabled by default for this generic address service. Use an explicitly configured own/provider endpoint; respect the provider's usage terms. No remote autocomplete. Communicate source failures and preserve cancellation.
+- Supabase source status must distinguish missing configuration from a missing comuna: configured searches without comuna skip the spatial RPC and ask for a comuna. Vite loading public URL/key proves configuration only, not successful queries or imported data.
 - Benchmark public addresses with cited reference evidence. OSM-derived references are consistency tests, not independent ground-truth surveys.
 - IDE CODIGO values are not unique: generated segment IDs include the original record ordinal. Preserve stable IDs for candidate keys and imports; never deduplicate separate physical segments by CODIGO alone.
 - CSV/XLSX headers must be distinct after trimming/case folding. Reject extra CSV fields instead of losing locality. Use displayed XLSX values to retain formatted house numbers. Block processing/configuration during file reads.
