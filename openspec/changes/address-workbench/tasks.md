@@ -9,4 +9,5 @@
 - [x] Update README, UX evidence and handoff for the workspace checkpoint.
 - [x] Install official Impeccable and capture GIS batch priority/code-first preference.
 - [x] Choose replacement direction on the Impeccable board; implement table-first batch UI.
-- [ ] Complete bounded captures, fresh Impeccable finish review and design documentation for the replacement.
+- [x] Complete bounded captures, fresh Impeccable finish review and design documentation for the replacement.
+- [x] Resolve duplicate import, replace typography, establish cartographic identity and verify interactive/reduced motion.

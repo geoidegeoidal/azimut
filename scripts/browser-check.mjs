@@ -48,10 +48,13 @@ try {
     await page.mouse.move(box.x + box.width - 10, box.y + box.height - 15);
     assert.equal(await page.locator('.file-drop').evaluate(el => el.style.getPropertyValue('--bearing')), bearing);
     assert.equal(await page.locator('.title-bearing .bearing-arc').evaluate(el => getComputedStyle(el).animationName), 'none');
+    const headerNeedle = await page.locator('.brand .bearing-needle').evaluate(el => getComputedStyle(el).transform);
+    await page.getByRole('link', { name: 'Azimut, inicio', exact: true }).hover();
+    assert.equal(await page.locator('.brand .bearing-needle').evaluate(el => getComputedStyle(el).transform), headerNeedle, 'Reduced motion must keep the header needle steady on hover');
     await page.emulateMedia({ reducedMotion: 'no-preference' });
     await page.mouse.move(10, 10);
     assert.equal(await page.locator('.file-drop').evaluate(el => el.style.getPropertyValue('--bearing')), '');
-    checks.push({ singleImportAction: true, emptyWorkspaceConsolidated: true, localOutfitFontLoaded: true, pointerBearing: true, reducedMotionStopsBearingAndDraw: true });
+    checks.push({ singleImportAction: true, emptyWorkspaceConsolidated: true, localOutfitFontLoaded: true, pointerBearing: true, reducedMotionStopsBearingAndDraw: true, reducedMotionKeepsHeaderNeedleSteady: true });
   }
   const userWidth = Number(process.env.UI_USER_WIDTH || 649);
   for (const width of [...new Set([1440, 1024, 768, 390, 320, userWidth])]) {

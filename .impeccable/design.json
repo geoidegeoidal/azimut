@@ -1,0 +1,677 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-04T07:26:21.470Z",
+  "title": "Design System: Azimut",
+  "extensions": {
+    "colorMeta": {
+      "destino-yellow": {
+        "role": "primary",
+        "displayName": "Action lime",
+        "tonalRamp": [
+          "oklch(15% 0.1845 125.97)",
+          "oklch(26.43% 0.1845 125.97)",
+          "oklch(37.86% 0.1845 125.97)",
+          "oklch(49.29% 0.1845 125.97)",
+          "oklch(60.71% 0.1845 125.97)",
+          "oklch(72.14% 0.1845 125.97)",
+          "oklch(83.57% 0.1845 125.97)",
+          "oklch(95% 0.1845 125.97)"
+        ],
+        "rampStatus": "Synthesized OKLCH preview only; not an application token scale."
+      },
+      "primary-hover": {
+        "role": "primary",
+        "displayName": "Action hover",
+        "tonalRamp": [
+          "oklch(15% 0.1087 125.40)",
+          "oklch(26.43% 0.1087 125.40)",
+          "oklch(37.86% 0.1087 125.40)",
+          "oklch(49.29% 0.1087 125.40)",
+          "oklch(60.71% 0.1087 125.40)",
+          "oklch(72.14% 0.1087 125.40)",
+          "oklch(83.57% 0.1087 125.40)",
+          "oklch(95% 0.1087 125.40)"
+        ],
+        "rampStatus": "Synthesized OKLCH preview only; not an application token scale."
+      },
+      "tech-cyan": {
+        "role": "secondary",
+        "displayName": "Linked cyan",
+        "tonalRamp": [
+          "oklch(15% 0.1007 204.18)",
+          "oklch(26.43% 0.1007 204.18)",
+          "oklch(37.86% 0.1007 204.18)",
+          "oklch(49.29% 0.1007 204.18)",
+          "oklch(60.71% 0.1007 204.18)",
+          "oklch(72.14% 0.1007 204.18)",
+          "oklch(83.57% 0.1007 204.18)",
+          "oklch(95% 0.1007 204.18)"
+        ],
+        "rampStatus": "Synthesized OKLCH preview only; not an application token scale."
+      },
+      "tech-violet": {
+        "role": "secondary",
+        "displayName": "Source violet",
+        "tonalRamp": [
+          "oklch(15% 0.1200 290.35)",
+          "oklch(26.43% 0.1200 290.35)",
+          "oklch(37.86% 0.1200 290.35)",
+          "oklch(49.29% 0.1200 290.35)",
+          "oklch(60.71% 0.1200 290.35)",
+          "oklch(72.14% 0.1200 290.35)",
+          "oklch(83.57% 0.1200 290.35)",
+          "oklch(95% 0.1200 290.35)"
+        ],
+        "rampStatus": "Synthesized OKLCH preview only; not an application token scale."
+      },
+      "survey-signal": {
+        "role": "tertiary",
+        "displayName": "Review coral",
+        "tonalRamp": [
+          "oklch(15% 0.1226 29.24)",
+          "oklch(26.43% 0.1226 29.24)",
+          "oklch(37.86% 0.1226 29.24)",
+          "oklch(49.29% 0.1226 29.24)",
+          "oklch(60.71% 0.1226 29.24)",
+          "oklch(72.14% 0.1226 29.24)",
+          "oklch(83.57% 0.1226 29.24)",
+          "oklch(95% 0.1226 29.24)"
+        ],
+        "rampStatus": "Synthesized OKLCH preview only; not an application token scale."
+      },
+      "tech-canvas": {
+        "role": "neutral",
+        "displayName": "Graphite canvas",
+        "tonalRamp": [
+          "oklch(15% 0.0175 264.03)",
+          "oklch(26.43% 0.0175 264.03)",
+          "oklch(37.86% 0.0175 264.03)",
+          "oklch(49.29% 0.0175 264.03)",
+          "oklch(60.71% 0.0175 264.03)",
+          "oklch(72.14% 0.0175 264.03)",
+          "oklch(83.57% 0.0175 264.03)",
+          "oklch(95% 0.0175 264.03)"
+        ],
+        "rampStatus": "Synthesized OKLCH preview only; not an application token scale."
+      },
+      "survey-paper": {
+        "role": "neutral",
+        "displayName": "Working graphite",
+        "tonalRamp": [
+          "oklch(15% 0.0210 264.02)",
+          "oklch(26.43% 0.0210 264.02)",
+          "oklch(37.86% 0.0210 264.02)",
+          "oklch(49.29% 0.0210 264.02)",
+          "oklch(60.71% 0.0210 264.02)",
+          "oklch(72.14% 0.0210 264.02)",
+          "oklch(83.57% 0.0210 264.02)",
+          "oklch(95% 0.0210 264.02)"
+        ],
+        "rampStatus": "Synthesized OKLCH preview only; not an application token scale."
+      },
+      "survey-muted": {
+        "role": "neutral",
+        "displayName": "Muted graphite",
+        "tonalRamp": [
+          "oklch(15% 0.0295 256.85)",
+          "oklch(26.43% 0.0295 256.85)",
+          "oklch(37.86% 0.0295 256.85)",
+          "oklch(49.29% 0.0295 256.85)",
+          "oklch(60.71% 0.0295 256.85)",
+          "oklch(72.14% 0.0295 256.85)",
+          "oklch(83.57% 0.0295 256.85)",
+          "oklch(95% 0.0295 256.85)"
+        ],
+        "rampStatus": "Synthesized OKLCH preview only; not an application token scale."
+      },
+      "survey-ink": {
+        "role": "neutral",
+        "displayName": "Pale ink",
+        "tonalRamp": [
+          "oklch(15% 0.0103 247.93)",
+          "oklch(26.43% 0.0103 247.93)",
+          "oklch(37.86% 0.0103 247.93)",
+          "oklch(49.29% 0.0103 247.93)",
+          "oklch(60.71% 0.0103 247.93)",
+          "oklch(72.14% 0.0103 247.93)",
+          "oklch(83.57% 0.0103 247.93)",
+          "oklch(95% 0.0103 247.93)"
+        ],
+        "rampStatus": "Synthesized OKLCH preview only; not an application token scale."
+      },
+      "survey-secondary": {
+        "role": "neutral",
+        "displayName": "Slate text",
+        "tonalRamp": [
+          "oklch(15% 0.0295 256.51)",
+          "oklch(26.43% 0.0295 256.51)",
+          "oklch(37.86% 0.0295 256.51)",
+          "oklch(49.29% 0.0295 256.51)",
+          "oklch(60.71% 0.0295 256.51)",
+          "oklch(72.14% 0.0295 256.51)",
+          "oklch(83.57% 0.0295 256.51)",
+          "oklch(95% 0.0295 256.51)"
+        ],
+        "rampStatus": "Synthesized OKLCH preview only; not an application token scale."
+      },
+      "survey-rule": {
+        "role": "neutral",
+        "displayName": "Slate rule",
+        "tonalRamp": [
+          "oklch(15% 0.0331 252.07)",
+          "oklch(26.43% 0.0331 252.07)",
+          "oklch(37.86% 0.0331 252.07)",
+          "oklch(49.29% 0.0331 252.07)",
+          "oklch(60.71% 0.0331 252.07)",
+          "oklch(72.14% 0.0331 252.07)",
+          "oklch(83.57% 0.0331 252.07)",
+          "oklch(95% 0.0331 252.07)"
+        ],
+        "rampStatus": "Synthesized OKLCH preview only; not an application token scale."
+      },
+      "tech-on-accent": {
+        "role": "neutral",
+        "displayName": "Accent ink",
+        "tonalRamp": [
+          "oklch(15% 0.0175 230.21)",
+          "oklch(26.43% 0.0175 230.21)",
+          "oklch(37.86% 0.0175 230.21)",
+          "oklch(49.29% 0.0175 230.21)",
+          "oklch(60.71% 0.0175 230.21)",
+          "oklch(72.14% 0.0175 230.21)",
+          "oklch(83.57% 0.0175 230.21)",
+          "oklch(95% 0.0175 230.21)"
+        ],
+        "rampStatus": "Synthesized OKLCH preview only; not an application token scale."
+      },
+      "field-border": {
+        "role": "neutral",
+        "displayName": "Field border",
+        "tonalRamp": [
+          "oklch(15% 0.0435 254.43)",
+          "oklch(26.43% 0.0435 254.43)",
+          "oklch(37.86% 0.0435 254.43)",
+          "oklch(49.29% 0.0435 254.43)",
+          "oklch(60.71% 0.0435 254.43)",
+          "oklch(72.14% 0.0435 254.43)",
+          "oklch(83.57% 0.0435 254.43)",
+          "oklch(95% 0.0435 254.43)"
+        ],
+        "rampStatus": "Synthesized OKLCH preview only; not an application token scale."
+      },
+      "white": {
+        "role": "neutral",
+        "displayName": "White",
+        "tonalRamp": [
+          "oklch(15% 0.0000 89.88)",
+          "oklch(26.43% 0.0000 89.88)",
+          "oklch(37.86% 0.0000 89.88)",
+          "oklch(49.29% 0.0000 89.88)",
+          "oklch(60.71% 0.0000 89.88)",
+          "oklch(72.14% 0.0000 89.88)",
+          "oklch(83.57% 0.0000 89.88)",
+          "oklch(95% 0.0000 89.88)"
+        ],
+        "rampStatus": "Synthesized OKLCH preview only; not an application token scale."
+      },
+      "selected-surface": {
+        "role": "secondary",
+        "displayName": "Selected surface",
+        "tonalRamp": [
+          "oklch(15% 0.0359 219.41)",
+          "oklch(26.43% 0.0359 219.41)",
+          "oklch(37.86% 0.0359 219.41)",
+          "oklch(49.29% 0.0359 219.41)",
+          "oklch(60.71% 0.0359 219.41)",
+          "oklch(72.14% 0.0359 219.41)",
+          "oklch(83.57% 0.0359 219.41)",
+          "oklch(95% 0.0359 219.41)"
+        ],
+        "rampStatus": "Synthesized OKLCH preview only; not an application token scale."
+      },
+      "review-surface": {
+        "role": "tertiary",
+        "displayName": "Review surface",
+        "tonalRamp": [
+          "oklch(15% 0.0304 9.12)",
+          "oklch(26.43% 0.0304 9.12)",
+          "oklch(37.86% 0.0304 9.12)",
+          "oklch(49.29% 0.0304 9.12)",
+          "oklch(60.71% 0.0304 9.12)",
+          "oklch(72.14% 0.0304 9.12)",
+          "oklch(83.57% 0.0304 9.12)",
+          "oklch(95% 0.0304 9.12)"
+        ],
+        "rampStatus": "Synthesized OKLCH preview only; not an application token scale."
+      },
+      "review-text": {
+        "role": "tertiary",
+        "displayName": "Review text",
+        "tonalRamp": [
+          "oklch(15% 0.0923 29.02)",
+          "oklch(26.43% 0.0923 29.02)",
+          "oklch(37.86% 0.0923 29.02)",
+          "oklch(49.29% 0.0923 29.02)",
+          "oklch(60.71% 0.0923 29.02)",
+          "oklch(72.14% 0.0923 29.02)",
+          "oklch(83.57% 0.0923 29.02)",
+          "oklch(95% 0.0923 29.02)"
+        ],
+        "rampStatus": "Synthesized OKLCH preview only; not an application token scale."
+      },
+      "error-surface": {
+        "role": "tertiary",
+        "displayName": "Error surface",
+        "tonalRamp": [
+          "oklch(15% 0.0417 357.58)",
+          "oklch(26.43% 0.0417 357.58)",
+          "oklch(37.86% 0.0417 357.58)",
+          "oklch(49.29% 0.0417 357.58)",
+          "oklch(60.71% 0.0417 357.58)",
+          "oklch(72.14% 0.0417 357.58)",
+          "oklch(83.57% 0.0417 357.58)",
+          "oklch(95% 0.0417 357.58)"
+        ],
+        "rampStatus": "Synthesized OKLCH preview only; not an application token scale."
+      },
+      "error-text": {
+        "role": "tertiary",
+        "displayName": "Error text",
+        "tonalRamp": [
+          "oklch(15% 0.0877 14.70)",
+          "oklch(26.43% 0.0877 14.70)",
+          "oklch(37.86% 0.0877 14.70)",
+          "oklch(49.29% 0.0877 14.70)",
+          "oklch(60.71% 0.0877 14.70)",
+          "oklch(72.14% 0.0877 14.70)",
+          "oklch(83.57% 0.0877 14.70)",
+          "oklch(95% 0.0877 14.70)"
+        ],
+        "rampStatus": "Synthesized OKLCH preview only; not an application token scale."
+      },
+      "error-border": {
+        "role": "tertiary",
+        "displayName": "Error border",
+        "tonalRamp": [
+          "oklch(15% 0.1138 8.27)",
+          "oklch(26.43% 0.1138 8.27)",
+          "oklch(37.86% 0.1138 8.27)",
+          "oklch(49.29% 0.1138 8.27)",
+          "oklch(60.71% 0.1138 8.27)",
+          "oklch(72.14% 0.1138 8.27)",
+          "oklch(83.57% 0.1138 8.27)",
+          "oklch(95% 0.1138 8.27)"
+        ],
+        "rampStatus": "Synthesized OKLCH preview only; not an application token scale."
+      },
+      "recorded-surface": {
+        "role": "tertiary",
+        "displayName": "Recorded surface",
+        "tonalRamp": [
+          "oklch(15% 0.0407 172.49)",
+          "oklch(26.43% 0.0407 172.49)",
+          "oklch(37.86% 0.0407 172.49)",
+          "oklch(49.29% 0.0407 172.49)",
+          "oklch(60.71% 0.0407 172.49)",
+          "oklch(72.14% 0.0407 172.49)",
+          "oklch(83.57% 0.0407 172.49)",
+          "oklch(95% 0.0407 172.49)"
+        ],
+        "rampStatus": "Synthesized OKLCH preview only; not an application token scale."
+      },
+      "recorded-text": {
+        "role": "tertiary",
+        "displayName": "Recorded mint",
+        "tonalRamp": [
+          "oklch(15% 0.0835 163.82)",
+          "oklch(26.43% 0.0835 163.82)",
+          "oklch(37.86% 0.0835 163.82)",
+          "oklch(49.29% 0.0835 163.82)",
+          "oklch(60.71% 0.0835 163.82)",
+          "oklch(72.14% 0.0835 163.82)",
+          "oklch(83.57% 0.0835 163.82)",
+          "oklch(95% 0.0835 163.82)"
+        ],
+        "rampStatus": "Synthesized OKLCH preview only; not an application token scale."
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Opening display",
+        "purpose": "Empty workspace two-line heading. The portable token records the implemented fluid rule.",
+        "responsive": {
+          "default": "clamp(40px,4.7vw,68px)",
+          "mobile": "clamp(30px,7.8vw,52px)",
+          "mobileLineHeight": 1.06
+        }
+      },
+      "headline": {
+        "displayName": "Task headline",
+        "purpose": "Populated batch or individual-query title.",
+        "responsive": {
+          "max1040": "28px",
+          "max760": "26px"
+        }
+      },
+      "inspector-title": {
+        "displayName": "Selected address",
+        "purpose": "Inspector address heading; overflow-wrap:anywhere."
+      },
+      "panel-title": {
+        "displayName": "Panel title",
+        "purpose": "Importer header. Ledger locally uses 18px; map header uses 14px."
+      },
+      "body": {
+        "displayName": "Base body",
+        "purpose": "Inherited default size. Numeric figures use font-variant-numeric:tabular-nums."
+      },
+      "supporting": {
+        "displayName": "Supporting paragraph",
+        "purpose": "Importer guidance."
+      },
+      "button": {
+        "displayName": "Standard action",
+        "purpose": "Main action type. Export/filter local text uses 12px."
+      },
+      "label": {
+        "displayName": "Field label",
+        "purpose": "Native labelled controls."
+      },
+      "data": {
+        "displayName": "Ledger data",
+        "purpose": "Table cells and coordinates; row address uses13px weight500."
+      },
+      "table-label": {
+        "displayName": "Table heading",
+        "purpose": "Functional sticky column labels."
+      },
+      "status": {
+        "displayName": "Compact status",
+        "purpose": "Result badge words."
+      }
+    },
+    "shadows": [
+      {
+        "name": "floating-map-zoom",
+        "value": "0 3px 12px #00000040",
+        "purpose": "Leaflet zoom control only; working panels and selected markers have no shadow."
+      }
+    ],
+    "motion": [
+      {
+        "name": "native-control-transition",
+        "value": "color 150ms linear, background-color 150ms linear",
+        "purpose": "Inherited ordinary button/link state response."
+      },
+      {
+        "name": "bearing-response",
+        "value": "transform 500ms cubic-bezier(.16,1,.3,1)",
+        "purpose": "Mouse pointer angle on opening title/importer. Header hover rotation is restricted to prefers-reduced-motion:no-preference."
+      },
+      {
+        "name": "entry-arc",
+        "value": "800ms cubic-bezier(.16,1,.3,1) both",
+        "purpose": "One finite title arc draw; stroke-dashoffset 1 to 0, pathLength 1."
+      },
+      {
+        "name": "action-arrow",
+        "value": "transform 180ms cubic-bezier(.16,1,.3,1)",
+        "purpose": "Existing primary/import arrow translates 4px on enabled hover."
+      },
+      {
+        "name": "row-response",
+        "value": "background-color 180ms cubic-bezier(.16,1,.3,1)",
+        "purpose": "Table row state transition."
+      },
+      {
+        "name": "marker-arrival",
+        "value": "400ms cubic-bezier(.16,1,.3,1) both",
+        "purpose": "Finite selected-point focus: clip-path circle 20% to 80%, scale .82 to 1."
+      },
+      {
+        "name": "street-trace",
+        "value": "600ms cubic-bezier(.16,1,.3,1) both",
+        "purpose": "Finite draw on selected result's actual complete street polyline; pathLength 1."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "transition:none!important; animation:none!important; scroll-behavior:auto",
+        "purpose": "Scoped overrides cover descendants/pseudo-elements. JS pointer handler returns for reduce or nonmouse input; header hover exists only under no-preference. Selection and geometry remain visible."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "compact-desktop",
+        "value": "1240px"
+      },
+      {
+        "name": "two-columns",
+        "value": "1040px"
+      },
+      {
+        "name": "mobile",
+        "value": "760px"
+      }
+    ],
+    "focus": {
+      "workspace": "2px solid #78e4ef; outline-offset:3px",
+      "header": "2px solid #cbff6a; outline-offset:3px",
+      "dragging": "2px solid #78e4ef; outline-offset:4px"
+    },
+    "surface": {
+      "route": "/azimut/",
+      "targets": [
+        "src/components/ControlPanel.tsx",
+        "src/components/WorkspaceMap.tsx",
+        "src/components/destino.css",
+        "index.html"
+      ],
+      "approvalStatus": "Implemented functional proposal. Aesthetic acceptance remains open; finish verdict ship covers its scored correction, not universal approval.",
+      "desktop": {
+        "header": "min-height76px; padding0 24px; gap24px",
+        "populated": {
+          "columns": "288px minmax(0,1fr) 300px",
+          "rows": "76px minmax(280px,.8fr) minmax(420px,1fr)",
+          "height": "calc(100dvh - 76px)",
+          "minHeight": "844px",
+          "padding": "12px 24px 24px",
+          "gap": "16px",
+          "composition": "Title across all columns. Importer left across map/ledger rows. Real map center, evidence right, ledger across center/right beneath."
+        },
+        "empty": {
+          "columns": "320px minmax(0,1fr) 300px",
+          "rows": "200px minmax(460px,1fr)",
+          "minHeight": "756px",
+          "composition": "Opening title, one import surface left and broad real map spanning both right columns. No empty ledger or inspector."
+        }
+      },
+      "responsive": {
+        "max1240": "Columns260px minmax(0,1fr) 280px; outer/header horizontal padding20px; header caption hidden.",
+        "max1040": "Populated260px/flexible grid: auto,340px,auto,auto rows; importer across map/evidence height, map above evidence at right, ledger full width below. Empty288px/flexible grid with minmax(560px,auto) map row. Height auto; table/evidence max-height440px. Backend indicator hidden.",
+        "max760": "Single column with12px outer/gap,24px bottom inset. Header/nav wrap. Entry then ledger then map then evidence; table max-height400px; map min-height340px. Processed importer uses64px-minimum disclosure. Empty importer uses flexible text plus76px bearing in two-column inset composition; title bearing hidden."
+      },
+      "states": {
+        "empty": "Batch is the default; the sample is explicitly labeled public/example and is calculated only after processing.",
+        "fileSelected": "Graphite dashed-border filename surface; mapping preview and process control. Reads/configuration blocked while busy.",
+        "processing": "Counts, native progress, pause/resume/cancel and pending rows remain visible. Cancellation preserves working rows.",
+        "selection": "Active row uses selected surface; reference cell, numbered selected marker and inspector reference use cyan. Click/keyboard row selection and marker selection share row state.",
+        "review": "Manual positions remain review-required; score denotes evidence and manual score is a dash. Closed source disclosure still exposes unavailable/empty counts.",
+        "filtering": "Filter/search can show no matches. Table pages at 100 rows; exported selection retains the entire selected lot. Next review reconciles active reference and moves keyboard focus.",
+        "export": "CSV/XLSX/GeoJSON/Shapefile. Completion by ledger heading. Starting export clears old completion; failures remain outside mobile entry disclosure and preserve selection.",
+        "individualQuery": "Secondary mode with labelled address/comuna inputs; same map, evidence and shared results.",
+        "legacyComparison": "?design=classic retains the shared file/rows/corrections and earlier Swiss view. Its palette and fonts are excluded from this default system."
+      },
+      "map": {
+        "source": "Runtime https://tile.openstreetmap.org/{z}/{x}/{y}.png, with visible copyright attribution.",
+        "darkTileFilter": "invert(1) hue-rotate(180deg) saturate(.45) brightness(1.1) contrast(.8)",
+        "lightTileFilter": "none",
+        "geometry": "Coordinates and complete result street polyline unchanged by presentation. fitBounds uses animate:false; no decorative camera travel.",
+        "candidateStyle": "Actual native candidate circle markers preserve black border/white fill (radius6,weight2); candidates are not cyan-selected evidence.",
+        "editing": "Crosshair cursor; map click or selected-marker drag writes manual coordinates with review semantics."
+      }
+    },
+    "extraction": {
+      "primitiveAuthority": "DESIGN.md frontmatter; no second primitive-token array in this sidecar.",
+      "sourceFiles": [
+        "src/components/destino.css",
+        "src/index.css (shared control behavior only)",
+        "src/components/ControlPanel.tsx",
+        "src/components/WorkspaceMap.tsx",
+        "index.html"
+      ],
+      "snippets": "Literal scoped default-workshop values are used because the existing root survey variables belong to the legacy classic view. All preview classes are prefixed ds-. Components need no React or icon runtime.",
+      "fontAsset": "public/fonts/outfit-variable.ttf",
+      "fontLicense": "public/fonts/OFL-Outfit.txt",
+      "formatSpec": "https://raw.githubusercontent.com/google-labs-code/design.md/main/docs/spec.md",
+      "implementationContext": [
+        "PRODUCT.md",
+        ".impeccable/surfaces/src-components-controlpanel-tsx.md"
+      ],
+      "excluded": "Legacy classic tokens/type, surface mode, speculative future components, provider readiness and accuracy claims."
+    },
+    "evidence": {
+      "report": "docs/verification/atelier-browser-check.json",
+      "testedAt": "2026-10-04T07:16:51.941Z",
+      "captures": [
+        ".impeccable/review/atelier-empty-desktop.png",
+        ".impeccable/review/atelier-empty-mobile.png",
+        ".impeccable/review/atelier-empty-user-1304.png",
+        ".impeccable/review/atelier-desktop.png",
+        ".impeccable/review/atelier-mobile.png",
+        ".impeccable/review/atelier-user-1304.png",
+        ".impeccable/review/atelier-mobile-export-error.png"
+      ],
+      "review": ".impeccable/review/atelier-finish-review.md",
+      "verdict": ".impeccable/review/atelier-finish-verdict.md",
+      "checks": "Recorded browser checks all pass, including 1440/1304/1024/768/390/320 widths, pointer/reduced motion, exports/manual state, mobile failure recovery and 103-row pagination/cancellation. Lint/build passed in the parent workflow.",
+      "limits": "Remote sources mocked unavailable/empty; local IDE and map tiles real. Browser reflow was equivalent to zoom, not a real browser-zoom study. Supabase ingestion/Auth/Edge deployment remain pending.",
+      "assets": "No generated shipping raster. Native geometry and real runtime OSM tiles; font OFL license retained.",
+      "notCanonized": "No unresolved material design defect after the scoped verdict. Inherited catalog size/large-lot marker limits and legacy CSS do not become system rules."
+    }
+  },
+  "components": [
+    {
+      "name": "Primary action",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Processing/search action; export shares the same color and corner with local compact padding.",
+      "html": "<button class=\"ds-btn-primary\">Procesar 3 filas<svg width=\"19\" height=\"19\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M5 12h14\"/><path d=\"m12 5 7 7-7 7\"/></svg></button>",
+      "css": ".ds-btn-primary{font-family:\"Outfit\",sans-serif;display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:12px 16px;border-radius:4px;font-size:13px;font-weight:500;letter-spacing:0;cursor:pointer;transition:color 150ms linear,background-color 150ms linear;justify-content:space-between;background:#cbff6a;color:#111b20;border:0;}.ds-btn-primary:hover:not(:disabled){background:#e0ffae;}.ds-btn-primary:focus-visible{outline:2px solid #78e4ef;outline-offset:3px;}.ds-btn-primary:disabled{background:#202a38;color:#a9b6c8;cursor:not-allowed;}.ds-btn-primary svg{transition:transform 180ms cubic-bezier(.16,1,.3,1);}.ds-btn-primary:hover:not(:disabled) svg{transform:translateX(4px);}@media(prefers-reduced-motion:reduce){.ds-btn-primary,.ds-btn-secondary,.ds-mode-nav button,.ds-importer button,.ds-bearing-needle,.ds-bearing-arc{transition:none!important;animation:none!important;}}"
+    },
+    {
+      "name": "Secondary action",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Review, manual placement and paging controls; muted graphite indicates hover or pressed state.",
+      "html": "<button class=\"ds-btn-secondary\" aria-pressed=\"false\">Ubicar manualmente</button>",
+      "css": ".ds-btn-secondary{font-family:\"Outfit\",sans-serif;display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:12px 16px;border-radius:4px;font-size:13px;font-weight:500;letter-spacing:0;cursor:pointer;transition:color 150ms linear,background-color 150ms linear;background:#171c26;color:#eff5fb;border:1px solid #667991;}.ds-btn-secondary:hover:not(:disabled),.ds-btn-secondary[aria-pressed=true]{background:#202a38;}.ds-btn-secondary:focus-visible{outline:2px solid #78e4ef;outline-offset:3px;}.ds-btn-secondary:disabled{background:#202a38;border-color:#344252;color:#a9b6c8;cursor:not-allowed;}@media(prefers-reduced-motion:reduce){.ds-btn-primary,.ds-btn-secondary,.ds-mode-nav button,.ds-importer button,.ds-bearing-needle,.ds-bearing-arc{transition:none!important;animation:none!important;}}"
+    },
+    {
+      "name": "Address field",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Native labelled field with slate placeholder, pale caret and visible cyan focus.",
+      "html": "<label class=\"ds-field-label\" for=\"ds-address\">Calle y número</label><input class=\"ds-address-input\" id=\"ds-address\" placeholder=\"Ej. Matucana 501\" autocomplete=\"street-address\">",
+      "css": ".ds-field-label{font-family:\"Outfit\",sans-serif;display:block;color:#eff5fb;font-size:12px;font-weight:500;margin:24px 0 8px;}.ds-address-input{font-family:\"Outfit\",sans-serif;height:44px;width:100%;padding:0 12px;border:1px solid #667991;border-radius:4px;background:#171c26;color:#eff5fb;caret-color:#eff5fb;font-size:13px;}.ds-address-input::placeholder{color:#a9b6c8;}.ds-address-input:focus-visible{outline:2px solid #78e4ef;outline-offset:3px;}.ds-address-input:disabled{background:#202a38;color:#a9b6c8;}"
+    },
+    {
+      "name": "Workspace navigation",
+      "kind": "nav",
+      "refersTo": "nav-selected",
+      "description": "Native batch and individual-query tabs, with an explicit current-page state.",
+      "html": "<nav class=\"ds-mode-nav\" aria-label=\"Espacio de trabajo\"><button aria-current=\"page\">Lotes</button><button>Buscar dirección</button></nav>",
+      "css": ".ds-mode-nav{display:flex;gap:4px;}.ds-mode-nav button{font-family:\"Outfit\",sans-serif;min-height:44px;padding:0 18px;border:0;border-radius:4px;font-size:13px;font-weight:500;color:#a9b6c8;background:transparent;cursor:pointer;transition:color 150ms linear,background-color 150ms linear;}.ds-mode-nav button[aria-current=page]{color:#78e4ef;background:#163139;}.ds-mode-nav button:hover:not(:disabled){color:white;background:#202a38;}.ds-mode-nav button:focus-visible{outline:2px solid #cbff6a;outline-offset:3px;}@media(prefers-reduced-motion:reduce){.ds-btn-primary,.ds-btn-secondary,.ds-mode-nav button,.ds-importer button,.ds-bearing-needle,.ds-bearing-arc{transition:none!important;animation:none!important;}}"
+    },
+    {
+      "name": "Result status",
+      "kind": "chip",
+      "refersTo": "status-review",
+      "description": "Status words preserve meaning for pending, missing, manual-review and recorded results.",
+      "html": "<div class=\"ds-status-group\"><span class=\"ds-status ds-review\">Manual · revisar</span><span class=\"ds-status ds-recorded\">Registrada</span><span class=\"ds-status ds-missing\">Sin ubicación</span><span class=\"ds-status ds-pending\">Pendiente</span></div>",
+      "css": ".ds-status-group{display:flex;gap:8px;flex-wrap:wrap;}.ds-status{font-family:\"Outfit\",sans-serif;display:inline-block;border:0;border-radius:4px;padding:5px 8px;font-size:11px;letter-spacing:0;white-space:nowrap;}.ds-review{background:#3c282b;color:#ffb2a6;}.ds-recorded{background:#19382f;color:#aaf0cf;}.ds-missing{background:#3f252e;color:#ffb4b9;}.ds-pending{background:#202a38;color:#a9b6c8;}"
+    },
+    {
+      "name": "Working panel",
+      "kind": "card",
+      "refersTo": "panel",
+      "description": "Tonal working region with a fine boundary; title and content use actual importer spacing.",
+      "html": "<section class=\"ds-panel\"><h2 class=\"ds-panel-title\">Archivo de entrada</h2><p class=\"ds-panel-copy\">Selecciona las columnas de dirección. La comuna ayuda a evitar coincidencias lejanas.</p></section>",
+      "css": ".ds-panel{font-family:\"Outfit\",sans-serif;border:1px solid #344252;border-radius:12px;background:#171c26;color:#eff5fb;}.ds-panel-title{font-size:17px;font-weight:500;letter-spacing:-.01em;margin:0;padding:20px 20px 12px;}.ds-panel-copy{font-size:13px;line-height:1.55;color:#a9b6c8;margin:0;padding:0 20px 24px;}"
+    },
+    {
+      "name": "Single import surface",
+      "kind": "custom",
+      "description": "Empty file state only; selected-file and mobile behavior are recorded in the surface extension.",
+      "html": "<div class=\"ds-importer\"><svg class=\"ds-azimuth-mark\" viewBox=\"0 0 200 200\" aria-hidden=\"true\"><circle class=\"ds-bearing-orbit\" cx=\"100\" cy=\"100\" r=\"86\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1\"/><path class=\"ds-bearing-arc\" pathLength=\"1\" d=\"M100 14A86 86 0 0 1 186 100\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"12\"/><path class=\"ds-bearing-axis\" d=\"M100 0V200M0 100H200\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1\"/><g class=\"ds-bearing-needle\"><path d=\"M100 30L127 127L100 112L73 127Z\" fill=\"currentColor\"/><path d=\"M100 30V112L73 127Z\" fill=\"var(--bearing-counter,#78e4ef)\"/></g><circle cx=\"100\" cy=\"100\" r=\"5\" fill=\"var(--bearing-counter,#78e4ef)\"/></svg><strong>Un archivo.<br>Muchos destinos.</strong><span>Arrastra tu CSV o Excel aquí · hasta 50 MB</span><button>Importar archivo<svg width=\"19\" height=\"19\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M5 12h14\"/><path d=\"m12 5 7 7-7 7\"/></svg></button></div>",
+      "css": ".ds-importer{font-family:\"Outfit\",sans-serif;display:flex;flex-direction:column;align-items:flex-start;gap:12px;padding:24px 20px 20px;border:0;border-radius:12px;background:#cbff6a;color:#111b20;overflow:hidden;}.ds-importer>.ds-azimuth-mark{display:block;width:116px;height:116px;margin-bottom:12px;--bearing-counter:#6b46c1;}.ds-importer .ds-bearing-orbit{opacity:.6;}.ds-importer .ds-bearing-axis{opacity:.4;}.ds-importer .ds-bearing-needle{transform-origin:100px 100px;transform:rotate(var(--bearing,38deg));transition:transform 500ms cubic-bezier(.16,1,.3,1);}.ds-importer strong{font-size:32px;line-height:1.05;font-weight:500;letter-spacing:-.03em;}.ds-importer>span{font-size:12px;}.ds-importer button{font-family:\"Outfit\",sans-serif;display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:12px 16px;border-radius:4px;font-size:13px;font-weight:500;letter-spacing:0;cursor:pointer;transition:color 150ms linear,background-color 150ms linear;width:100%;margin-top:8px;min-height:48px;justify-content:space-between;background:#111b20;color:white;border:1px solid #667991;}.ds-importer button:hover:not(:disabled){background:#2c3c38;}.ds-importer button:focus-visible{outline:2px solid #78e4ef;outline-offset:3px;}.ds-importer button:disabled{background:#202a38;color:#a9b6c8;cursor:not-allowed;}@media(prefers-reduced-motion:reduce){.ds-btn-primary,.ds-btn-secondary,.ds-mode-nav button,.ds-importer button,.ds-bearing-needle,.ds-bearing-arc{transition:none!important;animation:none!important;}}"
+    },
+    {
+      "name": "Azimuth bearing",
+      "kind": "custom",
+      "description": "The shipped native SVG geometry. Preview stays steady; production mouse behavior belongs to the motion extension.",
+      "html": "<div class=\"ds-bearing\"><svg class=\"ds-azimuth-mark\" viewBox=\"0 0 200 200\" aria-hidden=\"true\"><circle class=\"ds-bearing-orbit\" cx=\"100\" cy=\"100\" r=\"86\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1\"/><path class=\"ds-bearing-arc\" pathLength=\"1\" d=\"M100 14A86 86 0 0 1 186 100\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"12\"/><path class=\"ds-bearing-axis\" d=\"M100 0V200M0 100H200\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1\"/><g class=\"ds-bearing-needle\"><path d=\"M100 30L127 127L100 112L73 127Z\" fill=\"currentColor\"/><path d=\"M100 30V112L73 127Z\" fill=\"var(--bearing-counter,#78e4ef)\"/></g><circle cx=\"100\" cy=\"100\" r=\"5\" fill=\"var(--bearing-counter,#78e4ef)\"/></svg></div>",
+      "css": ".ds-bearing{width:172px;height:172px;color:#b7aaff;--bearing-counter:#78e4ef;--bearing:38deg;}.ds-bearing .ds-azimuth-mark{display:block;width:100%;height:100%;}.ds-bearing-orbit{opacity:.6;}.ds-bearing-axis{opacity:.4;}.ds-bearing-needle{transform-origin:100px 100px;transform:rotate(var(--bearing,38deg));transition:transform 500ms cubic-bezier(.16,1,.3,1);}@media(prefers-reduced-motion:reduce){.ds-btn-primary,.ds-btn-secondary,.ds-mode-nav button,.ds-importer button,.ds-bearing-needle,.ds-bearing-arc{transition:none!important;animation:none!important;}}"
+    },
+    {
+      "name": "Linked selected reference",
+      "kind": "custom",
+      "refersTo": "selected-reference",
+      "description": "Row identity uses cyan in the inspector and selected map number, without implying certainty.",
+      "html": "<div class=\"ds-reference-group\"><span class=\"ds-evidence-reference\">Fila 001</span><span class=\"ds-map-marker\">1</span></div>",
+      "css": ".ds-reference-group{display:flex;align-items:center;gap:16px;}.ds-evidence-reference{font-family:\"Outfit\",sans-serif;display:inline-block;background:#78e4ef;color:#111b20;padding:5px 8px;font-size:11px;border-radius:4px;}.ds-map-marker{font-family:\"Outfit\",sans-serif;display:grid;place-items:center;width:32px;height:32px;border:1px solid #111b20;border-radius:4px;background:#78e4ef;color:#111b20;outline:2px solid #10141c;outline-offset:2px;font-size:13px;font-weight:600;}"
+    }
+  ],
+  "narrative": {
+    "northStar": "Cartographic workshop",
+    "overview": "Azimut's current functional proposal is a cartographic workshop: geometric lettering, graphite working surfaces and a repeated azimuth bearing give a GIS tool an expressive identity. The lowercase wordmark and local Outfit face answer the user's rejection of the former typography and anonymous identity. This document records the implemented proposal; aesthetic acceptance by the user remains open.\n\nArt comes from native vector geometry and restrained response to input. Working content retains ordinary buttons, inputs, tables, disclosures and a real map. Bright colors identify actions, selection, review and provenance; the bearing is a brand gesture and conveys no geographic evidence. The earlier Swiss comparison remains available as a legacy view and is outside this default system.",
+    "keyCharacteristics": [
+      "Locally served Outfit with tabular figures and a lowercase wordmark.",
+      "Graphite layers with distinct action, selection, review and provenance colors.",
+      "One repeated native azimuth symbol and finite, optional motion.",
+      "Real cartographic geometry, visible evidence and standard web controls."
+    ],
+    "rules": [
+      {
+        "name": "Linked Reference",
+        "body": "Use cyan to connect the selected row reference, map number and evidence reference. Keep the same row identity visible in all three.",
+        "section": "colors"
+      },
+      {
+        "name": "Evidence Before Certainty",
+        "body": "Keep status words, method and source visible beside their colors. An evidence score must never become a probability or a metric-precision claim.",
+        "section": "colors"
+      },
+      {
+        "name": "One Typeface",
+        "body": "Use Outfit for display, controls, data and captions. Distinguish roles with size, weight and spacing; retain tabular numerals for coordinates and row references.",
+        "section": "typography"
+      },
+      {
+        "name": "Tonal Frames",
+        "body": "Separate working regions with graphite tones and a fine slate boundary. Reserve the observed diffuse shadow for floating map controls.",
+        "section": "elevation"
+      },
+      {
+        "name": "Steady Alternative",
+        "body": "Reduced motion keeps the bearing, selected marker and street geometry visible while disabling decorative pointer rotation, drawing and transitions.",
+        "section": "components"
+      }
+    ],
+    "dos": [
+      "Do use the existing accent roles and keep status text beside color.",
+      "Do reuse the same row reference across table, marker and evidence.",
+      "Do retain the locally served Outfit face, its OFL license and tabular figures.",
+      "Do expose keyboard focus with the observed cyan outline and lime header outline.",
+      "Do keep map attribution visible and restore unfiltered tiles in the light map view.",
+      "Do keep manual locations marked for review and source failures visible."
+    ],
+    "donts": [
+      "Don't present this recorded proposal as a user-approved visual identity.",
+      "Don't add a second import action to the current batch entry state.",
+      "Don't make branded bearing motion imply geographic direction or precision.",
+      "Don't add decorative animation loops or restore pointer rotation under reduced motion.",
+      "Don't replace actual map geometry with decorative cartographic imagery.",
+      "Don't merge the legacy Swiss typography or palette into this default identity."
+    ]
+  }
+}

@@ -1,12 +1,13 @@
 {
-  "testedAt": "2026-10-04T07:09:53.812Z",
+  "testedAt": "2026-10-04T07:16:51.941Z",
   "checks": [
     {
       "singleImportAction": true,
       "emptyWorkspaceConsolidated": true,
       "localOutfitFontLoaded": true,
       "pointerBearing": true,
-      "reducedMotionStopsBearingAndDraw": true
+      "reducedMotionStopsBearingAndDraw": true,
+      "reducedMotionKeepsHeaderNeedleSteady": true
     },
     {
       "viewport": 1440,
