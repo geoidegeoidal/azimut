@@ -21,7 +21,7 @@
   ·
   <a href="#-geocodificación-en-3-capas">Geocodificación</a>
   ·
-  <a href="#-normalizador">Normalizador</a>
+  <a href="#normalizador">Normalizador</a>
   ·
   <a href="#-stack">Stack</a>
   ·
@@ -105,6 +105,8 @@ Fallback cuando el callejero no puede resolver (sin comuna, sin número, o calle
 Último recurso si Nominatim falla.
 
 ---
+
+<a id="normalizador"></a>
 
 ## 🧹 Normalizador — 8 pasos
 
@@ -195,7 +197,7 @@ SCORE = (MatchType × 0,4) + (Importancia × 0,3) + (Completitud × 0,2) + (Unic
 | **Geocoding** | Callejero IDE Chile · Nominatim · Photon |
 | **Estado**    | Zustand · IndexedDB cache (30d)         |
 | **Export**    | GeoJSON nativo ·`@crmackey/shp-write` |
-| **Testing**   | Vitest · 62 tests                       |
+| **Testing**   | Vitest                       |
 | **Paquetes**  | pnpm (seguro, sin dependencias fantasma) |
 
 </div>
