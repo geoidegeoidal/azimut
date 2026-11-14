@@ -9,18 +9,19 @@
 *Sube un CSV, normaliza, geocodifica y exporta — todo desde el navegador, sin API keys.*
 
 [![Deploy](https://img.shields.io/github/actions/workflow/status/geoidegeoidal/azimut/deploy.yml?branch=main&label=deploy&style=flat-square&color=3b5bff)](https://geoidegeoidal.github.io/azimut/)
-[![Tests](https://img.shields.io/badge/tests-62%20passed-10b981?style=flat-square)](https://github.com/geoidegeoidal/azimut)
 [![Stack](https://img.shields.io/badge/react%2019-vite%207-0c1433?style=flat-square&logo=react)](https://github.com/geoidegeoidal/azimut)
 [![Chile](https://img.shields.io/badge/hecho%20en-chile-ef4444?style=flat-square)](https://github.com/geoidegeoidal/azimut)
 
 <p align="center">
   <a href="https://geoidegeoidal.github.io/azimut/"><strong>🌎 Pruébalo aquí</strong></a>
   ·
+  <a href="#inicio-rápido">Inicio rápido</a>
+  ·
   <a href="#-flujo">Flujo</a>
   ·
   <a href="#-geocodificación-en-3-capas">Geocodificación</a>
   ·
-  <a href="#-normalizador">Normalizador</a>
+  <a href="#normalizador">Normalizador</a>
   ·
   <a href="#-stack">Stack</a>
   ·
@@ -104,6 +105,8 @@ Fallback cuando el callejero no puede resolver (sin comuna, sin número, o calle
 Último recurso si Nominatim falla.
 
 ---
+
+<a id="normalizador"></a>
 
 ## 🧹 Normalizador — 8 pasos
 
@@ -194,7 +197,7 @@ SCORE = (MatchType × 0,4) + (Importancia × 0,3) + (Completitud × 0,2) + (Unic
 | **Geocoding** | Callejero IDE Chile · Nominatim · Photon |
 | **Estado**    | Zustand · IndexedDB cache (30d)         |
 | **Export**    | GeoJSON nativo ·`@crmackey/shp-write` |
-| **Testing**   | Vitest · 62 tests                       |
+| **Testing**   | Vitest                       |
 | **Paquetes**  | pnpm (seguro, sin dependencias fantasma) |
 
 </div>
@@ -217,15 +220,32 @@ SCORE = (MatchType × 0,4) + (Importancia × 0,3) + (Completitud × 0,2) + (Unic
 
 ---
 
+## Inicio rápido
+
+Para trabajar en local necesitas Git, Node.js y pnpm. El repositorio incluye `pnpm-lock.yaml`.
+
+```bash
+git clone https://github.com/geoidegeoidal/azimut.git
+cd azimut
+pnpm install
+pnpm dev
+```
+
+Abre la dirección que muestra Vite en la terminal. Para compilar y revisar la versión de producción:
+
+```bash
+pnpm build
+pnpm preview
+```
+
 ## 🧪 Tests
 
 ```bash
-pnpm install         # Instalar dependencias (seguro, sin scripts automáticos)
-pnpm test            # 62 tests (normalizador · scorer · parser · callejero)
-pnpm dev             # Dev en localhost:5173
-pnpm build           # Build producción
+pnpm test            # Ejecuta Vitest una vez
 pnpm lint            # ESLint
 ```
+
+La salida de cada ejecución indica los resultados y el número actual de pruebas; este README no certifica que la suite esté aprobada.
 
 ### Pre-procesar callejero
 
